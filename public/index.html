@@ -1,25 +1,183 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
-  <head>
-    <title>NodeJS Starter Application</title>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="stylesheets/style.css">
-  </head>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+  <title>Customer Lookup</title>
 
-  <body>
-    <table>
-      <tr>
-        <td style= "width:30%;">
-          <img class = "newappIcon" src="images/newapp-icon.png">
-        <td>
-            <h1>Hi there!</h1>
-          <p>Thanks for creating a
-            <span class = "blue">NodeJS Starter Application</span>.
-            To get started see the Start Coding guide under your app in your dashboard.
-    </table>
-  </body>
+  <!-- Bootstrap -->
+  <link rel="stylesheet" href="stylesheets/bootstrap.min.css">
+  <link rel="stylesheet" href="stylesheets/bootstrap-theme.min.css">
+
+  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+  <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+  <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+  <style>
+    #map {
+      width: 100%;
+      height: 400px;
+    }
+  </style>
+
+</head>
+
+<body>
+
+  <nav class="navbar navbar-default navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbarCollapse">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="jumbotron">
+      <h1 id="title"></h1>
+      <p id="about"></p>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="well" id="agent-response"></div>
+    <div class="input-group">
+      <span class="input-group-btn">
+      <button class="btn btn-default" type="button" id="insurance-query-button">
+      </button>
+      </span>
+      <input type="text" class="form-control" id="insurance-query">
+    </div>
+  </div>
+
+  <div class="container">
+    <hr>
+  </div>
+
+
+  <div class="container">
+    <div class="row">
+      <div class="col-sm-8">
+
+        <div class="panel-group" id="accordion">
+
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <h4 class="panel-title">
+                <a id="policy-tab" data-toggle="collapse" data-parent="#accordion" href="#policy"></a>
+              </h4>
+            </div>
+            <div id="policy" class="panel-collapse collapse in">
+              <div class="panel-body">
+                <form>
+                  <div class="form-group">
+                    <label id="family-message" for="family"></label>
+                    <input type="text" class="form-control" id="family" disabled>
+                    <label id="given-message" for="given"></label>
+                    <input type="text" class="form-control" id="given" disabled>
+                    <label id="city-message" for="city"></label>
+                    <input type="text" class="form-control" id="city" disabled>
+                    <label id="state-message" for="state"></label>
+                    <input type="text" class="form-control" id="state" disabled>
+                    <label id="policy-type-message" for="policy-type"></label>
+                    <input type="text" class="form-control" id="policy-type" disabled>
+                    <label id="numbers-message" for="number-of-policies"></label>
+                    <input type="text" class="form-control" id="number-of-policies" disabled>
+                    <label id="coverage-message" for="coverage"></label>
+                    <input type="text" class="form-control" id="coverage" disabled>
+                    <label id="effective-message" for="effective"></label>
+                    <input type="text" class="form-control" id="effective" disabled>
+                    <label id="inception-message" for="policy-months"></label>
+                    <input type="text" class="form-control" id="policy-months" disabled>
+                    <label id="monthly-message" for="monthly-premium"></label>
+                    <input type="text" class="form-control" id="monthly-premium" disabled>
+                    <label id="vehicle-message" for="vehicle"></label>
+                    <input type="text" class="form-control" id="vehicle" disabled>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <h4 class="panel-title">
+                <a id="claims-tab" data-toggle="collapse" data-parent="#accordion" href="#claims"></a>
+              </h4>
+            </div>
+            <div id="claims" class="panel-collapse collapse in">
+              <div class="panel-body">
+                <form>
+                  <div class="form-group">
+                    <label id="claim-message" for="months-since-claim"></label>
+                    <input type="text" class="form-control" id="months-since-claim" disabled>
+                    <label id="claim-reason" for="reason"></label>
+                    <input type="text" class="form-control" id="reason" disabled>
+                    <label id="claim-amount" for="amount"></label>
+                    <input type="text" class="form-control" id="amount" disabled>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <h4 class="panel-title">
+                <a id="offers-tab" data-toggle="collapse" data-parent="#accordion" href="#offers"></a>
+              </h4>
+            </div>
+            <div id="offers" class="panel-collapse collapse in">
+              <div class="panel-body">
+                <form>
+                  <div class="form-group">
+                    <label id="offer-message" for="special-offers"></label>
+                    <input type="text" class="form-control" id="special-offers" disabled>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-4">
+        <div class="form-group">
+          <label id="weather" for="forecast"></label>
+          <textarea class="form-control" rows="5" id="forecast"></textarea>
+        </div>
+        <div id="map"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+  <script src="javascripts/jquery-3.1.0.min.js"></script>
+
+  <!-- Include all compiled plugins (below), or include individual files as needed -->
+  <!-- Latest compiled and minified JavaScript -->
+  <script src="javascripts/bootstrap.min.js"></script>
+
+  <script src="javascripts/policy.js"></script>
+  <script src="javascripts/conversation.js"></script>
+  <script src="javascripts/agent.js"></script>
+
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCD6kbd2fgAga9jL-rhuVBAGRA6I04R73E&callback=initMap" async
+    defer>
+  </script>
+
+
+</body>
 
 </html>
