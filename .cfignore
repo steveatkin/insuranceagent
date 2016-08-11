@@ -1,1 +1,4 @@
 node_modules
+node-red-flow.json
+.env
+local-credentials.json

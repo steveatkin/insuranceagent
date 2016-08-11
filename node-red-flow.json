@@ -1,0 +1,262 @@
+[{
+    "id": "87ee4cd0.7811b",
+    "type": "http in",
+    "z": "eb914b58.146eb8",
+    "name": "claims",
+    "url": "/insurance/claims",
+    "method": "get",
+    "swaggerDoc": "",
+    "x": 92.5,
+    "y": 118.00000762939453,
+    "wires": [
+        ["429601d8.bd6a"]
+    ]
+}, {
+    "id": "429601d8.bd6a",
+    "type": "node-red-contrib-httpauth",
+    "z": "eb914b58.146eb8",
+    "name": "",
+    "file": "",
+    "cred": "",
+    "authType": "Basic",
+    "realm": "",
+    "username": "admin",
+    "password": "admin",
+    "hashed": false,
+    "x": 247.5,
+    "y": 118.35938262939453,
+    "wires": [
+        ["3a33be58.c5cc42"]
+    ]
+}, {
+    "id": "3a33be58.c5cc42",
+    "type": "http request",
+    "z": "eb914b58.146eb8",
+    "name": "cloudant",
+    "method": "GET",
+    "ret": "obj",
+    "url": "https://3eebbd56-fe8b-4000-85e8-d292425f4fab-bluemix.cloudant.com/claims/_design/claimsPaid/_view/claim-reason?limit=100&reduce=true&group=true",
+    "x": 408.5,
+    "y": 117.35938262939453,
+    "wires": [
+        ["30e7744d.cf188c"]
+    ]
+}, {
+    "id": "30e7744d.cf188c",
+    "type": "function",
+    "z": "eb914b58.146eb8",
+    "name": "decorate",
+    "func": "msg.headers = {\"Content-Type\" : \"application/json\"};\n\n    var rows = msg.payload.rows;\n    var index;\n    var claims = [];\n\n\n    for (index = 0; index < rows.length; ++index) {\n        var item = rows[index];\n        var claim = {};\n        claim.claimType = item.key[0];\n        claim.state = item.key[1];\n        claim.coverageType = item.key[2];\n        claim.numberOfClaims = item.value[0];\n        claim.totalClaimsAmount = item.value[1].toFixed(2);\n        claims.push(claim);\n    }\n\n    msg.payload = claims;\n    return msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 567.5155639648438,
+    "y": 116.35938262939453,
+    "wires": [
+        ["17c3df4e.e83c21"]
+    ]
+}, {
+    "id": "17c3df4e.e83c21",
+    "type": "http response",
+    "z": "eb914b58.146eb8",
+    "name": "",
+    "x": 719.5156402587891,
+    "y": 117.35938262939453,
+    "wires": []
+}, {
+    "id": "346516f.fcb9aea",
+    "type": "http in",
+    "z": "eb914b58.146eb8",
+    "name": "policy",
+    "url": "/insurance/policy",
+    "method": "get",
+    "swaggerDoc": "",
+    "x": 90.5,
+    "y": 234,
+    "wires": [
+        ["82044100.7dfbc"]
+    ]
+}, {
+    "id": "82044100.7dfbc",
+    "type": "node-red-contrib-httpauth",
+    "z": "eb914b58.146eb8",
+    "name": "",
+    "file": "",
+    "cred": "",
+    "authType": "Basic",
+    "realm": "",
+    "username": "admin",
+    "password": "admin",
+    "hashed": false,
+    "x": 242.5,
+    "y": 235,
+    "wires": [
+        ["f39a00be.0c66"]
+    ]
+}, {
+    "id": "f39a00be.0c66",
+    "type": "function",
+    "z": "eb914b58.146eb8",
+    "name": "customer id",
+    "func": "var customer = msg.req.query.customer;\nmsg.language = msg.req.query.language;\nmsg.payload = customer;\nreturn msg;\n",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 405.5,
+    "y": 234,
+    "wires": [
+        ["a6f27312.590d9"]
+    ]
+}, {
+    "id": "a6f27312.590d9",
+    "type": "cloudant in",
+    "z": "eb914b58.146eb8",
+    "name": "policy search",
+    "cloudant": "",
+    "database": "claims",
+    "service": "AtkinRed-cloudantNoSQLDB",
+    "search": "_idx_",
+    "design": "policies",
+    "index": "policySearch",
+    "x": 578.5,
+    "y": 233,
+    "wires": [
+        ["787f1f.ff8780e"]
+    ]
+}, {
+    "id": "a6db4c3e.5924b",
+    "type": "http response",
+    "z": "eb914b58.146eb8",
+    "name": "",
+    "x": 912.5,
+    "y": 338,
+    "wires": []
+}, {
+    "id": "787f1f.ff8780e",
+    "type": "function",
+    "z": "eb914b58.146eb8",
+    "name": "cleanup",
+    "func": "// extract out the object from the array\nmsg.payload = msg.payload[0];\n// setup call to weather service\nmsg.location = {};\nmsg.location.lat = msg.payload.latitude;\nmsg.location.lon = msg.payload.longitude;\nreturn msg;",
+    "outputs": "1",
+    "noerr": 0,
+    "x": 261.5,
+    "y": 337,
+    "wires": [
+        ["e40bdbf8.1bf428"]
+    ]
+}, {
+    "id": "e40bdbf8.1bf428",
+    "type": "openwhisk-action",
+    "z": "eb914b58.146eb8",
+    "name": "offer",
+    "namespace": "atkin@us.ibm.com_dev",
+    "action": "offer",
+    "service": "b68b3eb8.4974c",
+    "x": 403.5,
+    "y": 340,
+    "wires": [
+        ["caa535f.f355ac8"]
+    ]
+}, {
+    "id": "caa535f.f355ac8",
+    "type": "weather_insights",
+    "z": "eb914b58.146eb8",
+    "name": "Weather",
+    "service": "/forecast/daily/10day.json",
+    "geocode": "",
+    "units": "e",
+    "language": "en-US",
+    "x": 544.5,
+    "y": 340,
+    "wires": [
+        ["39381a79.c6c7e6"]
+    ]
+}, {
+    "id": "39381a79.c6c7e6",
+    "type": "function",
+    "z": "eb914b58.146eb8",
+    "name": "extract weather object",
+    "func": "// Add the observed weather to the payload\nmsg.payload.weather = msg.forecasts;\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 732.5,
+    "y": 340,
+    "wires": [
+        ["a6db4c3e.5924b"]
+    ]
+}, {
+    "id": "607cd29a.9f832c",
+    "type": "watson-translate",
+    "z": "eb914b58.146eb8",
+    "name": "Translate message",
+    "action": "translate",
+    "basemodel": "ar-en",
+    "domain": "news",
+    "srclang": "en",
+    "destlang": "ar",
+    "password": "",
+    "custom": "88c16715-21e9-4d31-aded-c84bc1923e10",
+    "domainhidden": "news",
+    "srclanghidden": "en",
+    "destlanghidden": "ar",
+    "basemodelhidden": "ar-en",
+    "customhidden": "88c16715-21e9-4d31-aded-c84bc1923e10",
+    "filetype": "forcedglossary",
+    "trainid": "",
+    "x": 438.5,
+    "y": 448,
+    "wires": [
+        ["cb95b6c4.346a48"]
+    ]
+}, {
+    "id": "751292d7.8aed6c",
+    "type": "http in",
+    "z": "eb914b58.146eb8",
+    "name": "translate",
+    "url": "/insurance/translate",
+    "method": "get",
+    "swaggerDoc": "",
+    "x": 86.5,
+    "y": 452,
+    "wires": [
+        ["aa623a44.559dc8"]
+    ]
+}, {
+    "id": "aa623a44.559dc8",
+    "type": "function",
+    "z": "eb914b58.146eb8",
+    "name": "setup",
+    "func": "msg.destlang = msg.req.query.language;\nmsg.srclang = 'en';\nmsg.payload = msg.req.query.message;\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 251.5,
+    "y": 450,
+    "wires": [
+        ["607cd29a.9f832c"]
+    ]
+}, {
+    "id": "fc31a9d8.03ce58",
+    "type": "http response",
+    "z": "eb914b58.146eb8",
+    "name": "",
+    "x": 850.5,
+    "y": 448,
+    "wires": []
+}, {
+    "id": "cb95b6c4.346a48",
+    "type": "function",
+    "z": "eb914b58.146eb8",
+    "name": "get translated string",
+    "func": "try {\n    msg.payload = msg.translation.response.translations[0].translation;\n}\ncatch(err) {\n    msg.statusCode = 400;\n}\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 662.5,
+    "y": 448,
+    "wires": [
+        ["fc31a9d8.03ce58"]
+    ]
+}, {
+    "id": "b68b3eb8.4974c",
+    "type": "openwhisk-service",
+    "z": "eb914b58.146eb8",
+    "name": "Bluemix",
+    "api": "https://openwhisk.ng.bluemix.net/api/v1"
+}]
