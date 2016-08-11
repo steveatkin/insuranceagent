@@ -10,8 +10,8 @@ router.get('/', function(req, res, next) {
                   language: req.query.language,
                   client_id: process.env.API_KEY
     },
-    requestConfig: { timeout: 2000},
-    responseConfig: { timeout: 2000}
+    requestConfig: { timeout: 4000},
+    responseConfig: { timeout: 4000}
   };
 
   var api = client.get(process.env.POLICY_API, args,
