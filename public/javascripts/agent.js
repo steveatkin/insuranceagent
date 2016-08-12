@@ -97,10 +97,11 @@ $(document).ready(function () {
   // Setup the callback that is invoked when a policy is found.
   var policyResponsePayloadSetter = Policy.setResponsePayload;
 
-  Policy.setResponsePayload = function(newPayload) {
-    policyResponsePayloadSetter.call(Policy, newPayload);
-    var data = newPayload;
-
+  Policy.setResponsePayload = function(data) {
+    policyResponsePayloadSetter.call(Policy, data);
+    //var data = newPayload;
+    console.log("Policy Info: " + JSON.stringify(data));
+    
     $("#policy-type").val(data.policyType);
     $("#months-since-claim").val(data.monthsSinceLastClaim);
     $("#number-of-policies").val(data.numberOfPolicies);

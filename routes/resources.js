@@ -1,7 +1,7 @@
 var optional = require('optional');
 var appEnv = require('cfenv').getAppEnv();
 var gpClient = require('g11n-pipeline').getClient(
-  optional('./local-credentials.json')   // if it exists, use local-credentials.json
+  optional('./g11n-credentials.json')   // if it exists, use local-credentials.json
     || {appEnv: appEnv}                  // otherwise, the appEnv
 );
 var express = require('express');

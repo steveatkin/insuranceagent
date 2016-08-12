@@ -10,6 +10,7 @@ var routes = require('./routes/index');
 var policy = require('./routes/policy');
 var resources = require('./routes/resources');
 var dialog = require('./routes/dialog');
+var weather = require('./routes/weather');
 
 var app = express();
 
@@ -23,7 +24,6 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
-//app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(__dirname + '/public'));
 
 
@@ -31,6 +31,7 @@ app.use('/', routes);
 app.use('/policy', policy);
 app.use('/resources', resources);
 app.use('/dialog', dialog);
+app.use('/weather', weather);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
