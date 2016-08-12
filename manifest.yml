@@ -6,3 +6,6 @@ applications:
   name: insuranceagent
   host: insuranceagent
   disk_quota: 1024M
+  services:
+    - "Globalization Pipeline GA"
+    - "Weather Company Data for IBM Bluemix-n7"

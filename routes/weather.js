@@ -3,30 +3,7 @@ var router = express.Router();
 var Client = require('node-rest-client').Client;
 var optional = require('optional');
 var appEnv = require('cfenv').getAppEnv();
-
-
-function getServiceByLabel(appEnv, regex) {
-    var svcs = appEnv.getServices();
-    /* istanbul ignore next */
-    if(!svcs) return null;
-    
-    for(var svc in svcs) {
-        if(regex.test(svcs[svc].label)) {
-            return svcs[svc];
-        }
-    }
-    return null;
-};
-
-
-function getServiceCredsByLabel(appEnv, regex) {
-    var svc = getServiceByLabel(appEnv,regex);
-    if(svc) {
-        return svc.credentials || /* istanbul ignore next */{};
-    } else {
-        return null;
-    }
-};
+var cfEnvUtil = require('./cfenv-credsbylabel');
 
 
 router.get('/', function(req, res, next) {
@@ -40,13 +17,13 @@ router.get('/', function(req, res, next) {
 
     // parse vcap using cfenv if available
     if(options.appEnv && !options.credentials) {
-        options.credentials = getServiceCredsByLabel(options.appEnv, serviceRegex);
+        options.credentials = cfEnvUtil.getServiceCredsByLabel(options.appEnv, serviceRegex);
     }
-
     // try again with name
     else if(options.appEnv && !options.credentials) {
         options.credentials = options.appEnv.getServiceCreds(serviceRegex);
     }
+
 
     res.json(options.credentials);
     /*
