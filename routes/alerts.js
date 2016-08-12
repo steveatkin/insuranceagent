@@ -1,15 +1,14 @@
 var express = require('express');
 var router = express.Router();
-var Client = require('node-rest-client').Client;
 var optional = require('optional');
 var appEnv = require('cfenv').getAppEnv();
 var cfEnvUtil = require('./cfenv-credsbylabel');
-
+var request = require('request');
 
 router.get('/', function(req, res, next) {
-    var client = new Client();
-    //var lat = req.query.lat;
-    //var lon = req.query.lon;
+    var language = req.query.language || 'en-US';
+    var lat = req.query.lat;
+    var lon = req.query.lon;
 
     var serviceRegex = /(weatherinsights).*/;
 
@@ -24,18 +23,24 @@ router.get('/', function(req, res, next) {
         options.credentials = options.appEnv.getServiceCreds(serviceRegex);
     }
 
+    var url = options.credentials.url + '/api/weather/v1/geocode/'
+                +lat+'/'+lon+'/alerts.json?language='+language;
 
-    res.json(options.credentials);
-    /*
-    var args = {
-        parameters: { customer: req.query.lat,
-                  language: req.query.language,
-                  client_id: process.env.API_KEY
-        },
-        requestConfig: { timeout: 4000},
-        responseConfig: { timeout: 4000}
+    var params = {
+        url: url
     };
-    */
+
+
+    request(params, function(error, response, body) {
+        if(!error && response.statusCode == 200) {
+            var result = JSON.parse(body);
+            res.json(result);
+        } 
+        else {
+            res.status(response.statusCode).send('Unable to get alerts.');
+        }
+    });
+
 });
 
 

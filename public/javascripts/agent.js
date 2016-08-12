@@ -117,6 +117,19 @@ $(document).ready(function () {
     $("#state").val(data.state);
     $("#family").val(data.surname);
     $("#given").val(data.givenName);
+
+    // setup the callback to respond to the weather alerts
+    var weatherResponsePayloadSetter = Weather.setResponsePayload;
+
+    Weather.setResponsePayload = function(newPayloadStr) {
+      weatherResponsePayloadSetter.call(Weather, newPayloadStr);
+      $("#forecast").val($("#forecast").val() + newPayloadStr);
+      console.log(newPayloadStr);
+    };
+
+    // Request the weather alerts
+    Weather.getWeather(data.latitude, data.longitude, 'en');
+
     var geo = {lat: parseFloat(data.latitude), lng: parseFloat(data.longitude)};
     var mapDiv = document.getElementById('map');
     var map = new google.maps.Map(mapDiv, {
@@ -124,7 +137,8 @@ $(document).ready(function () {
       zoom: 8
     });
 
-    $("#forecast").val(data.weather[0].narrative);
+    //$("#forecast").val(data.weather[0].narrative);
+
   };
 
   // Setup the conversation callback that gets invoked when a response is received.

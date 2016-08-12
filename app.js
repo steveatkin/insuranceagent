@@ -10,7 +10,8 @@ var routes = require('./routes/index');
 var policy = require('./routes/policy');
 var resources = require('./routes/resources');
 var dialog = require('./routes/dialog');
-var weather = require('./routes/weather');
+var alerts = require('./routes/alerts');
+var details = require('./routes/details');
 
 var app = express();
 
@@ -31,7 +32,8 @@ app.use('/', routes);
 app.use('/policy', policy);
 app.use('/resources', resources);
 app.use('/dialog', dialog);
-app.use('/weather', weather);
+app.use('/alerts', alerts);
+app.use('/details', details);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

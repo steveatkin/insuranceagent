@@ -3,3 +3,4 @@ node-red-flow.json
 .env
 g11n-credentials.json
 weather-credentials.json
+npm-debug.log
