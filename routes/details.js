@@ -35,7 +35,7 @@ router.get('/', function(req, res, next) {
             res.json(result);
         } 
         else {
-            res.status(response.statusCode).send('Unable to get alerts.');
+            res.status(401).send('Unable to get weather alert details.');
         }
     });
 

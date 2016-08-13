@@ -1,11 +1,5 @@
 // Google maps setup
 function initMap() {
-  var map = new google.maps.Map(document.getElementById('map'), {
-    center: {lat: -34.397, lng: 150.644},
-    zoom: 6
-  });
-  var infoWindow = new google.maps.InfoWindow({map: map});
-
   // Try HTML5 geolocation.
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(function(position) {
@@ -14,7 +8,13 @@ function initMap() {
         lng: position.coords.longitude
       };
 
-      infoWindow.setPosition(pos);
+      var map = new google.maps.Map(document.getElementById('map'), {
+        center: {lat: pos.lat, lng: pos.lng},
+        zoom: 6
+      });
+      var infoWindow = new google.maps.InfoWindow({map: map});
+
+      //infoWindow.setPosition(pos);
       infoWindow.setContent('Location found.');
       map.setCenter(pos);
     }, function() {
@@ -34,6 +34,22 @@ function handleLocationError(browserHasGeolocation, infoWindow, pos) {
 }
 
 $(document).ready(function () {
+
+  // Register the enter key to the go button
+  $("input").bind("keydown", function(event) {
+      var keycode = (event.keyCode ? event.keyCode : (event.which ? event.which : event.charCode));
+      if (keycode == 13) { // keycode for enter key
+         // force the 'Enter Key' to implicitly click the Update button
+         $('#insurance-query-button').click();
+         return false;
+      } 
+      else  {
+         return true;
+      }
+   });
+
+
+
   var userLang = (navigator.language ||
                   navigator.userLanguage).substring(0,2).toLowerCase();
 
@@ -91,8 +107,8 @@ $(document).ready(function () {
       $("#weather").text(data.weather);
       $("#actions").text(data.actions);
     },
-    error: function(xhr) {
-        alert(xhr.status);
+    error: function(xhr, message) {
+        alert(message);
     }
   });
 
@@ -104,6 +120,7 @@ $(document).ready(function () {
     policyResponsePayloadSetter.call(Policy, data);
     // Clear the weather alerts box
     $("#forecast").val('');
+    $("#recommendation").val('');
     
     $("#policy-type").val(data.policyType);
     $("#months-since-claim").val(data.monthsSinceLastClaim);
@@ -127,7 +144,10 @@ $(document).ready(function () {
     Weather.setResponsePayload = function(newPayloadStr) {
       weatherResponsePayloadSetter.call(Weather, newPayloadStr);
       if(newPayloadStr) {
-        $("#forecast").val($("#forecast").val() + newPayloadStr);
+        $("#forecast").val($("#forecast").val() + newPayloadStr.description);
+        if(newPayloadStr.instruction) {
+          $("#recommendations").val($("#recommendations").val() + newPayloadStr.instruction);
+        }
       }
       // No weather alerts, display no alerts message
       else {
@@ -138,6 +158,7 @@ $(document).ready(function () {
     // Request the weather alerts
     Weather.getWeather(data.latitude, data.longitude, userLang);
 
+    // Show the policy holder's location on the map
     var geo = {lat: parseFloat(data.latitude), lng: parseFloat(data.longitude)};
     var mapDiv = document.getElementById('map');
     var map = new google.maps.Map(mapDiv, {

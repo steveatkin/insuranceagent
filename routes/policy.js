@@ -23,7 +23,7 @@ router.get('/', function(req, res, next) {
             res.json(result);
         } 
         else {
-            res.status(response.statusCode).send('Unable to get policy.');
+            res.status(401).send('Unable to get policy.');
         }
     });
 

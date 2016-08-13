@@ -47,8 +47,8 @@ var Policy = (function() {
 
         Policy.setResponsePayload(data);
         },
-        error: function(xhr) {
-          alert(xhr.status);
+        error: function(xhr, message) {
+          alert(message);
         }
       });
     }

@@ -31,13 +31,16 @@ var Weather = (function() {
         items.forEach(
           function getText(value) {
             // Trigger the callback when the alert text is extracted
-            Weather.setResponsePayload(value.description);
+            Weather.setResponsePayload({
+                description: value.description,
+                instruction: value.instruction
+            });
           }
         );
 
       },
-      error: function(xhr) {
-          alert(xhr.status);
+      error: function(xhr, message) {
+          alert(message);
       }
     });
   }
@@ -66,8 +69,8 @@ var Weather = (function() {
         }
         
         },
-        error: function(xhr) {
-          alert(xhr.status);
+        error: function(xhr, message) {
+          alert(message);
         }
       });
     }
