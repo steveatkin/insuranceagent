@@ -21,5 +21,8 @@
   "stateMessage": "State:",
   "familyNameMessage": "Policy holder family name:",
   "givenNameMessage": "Policy holder given name:",
-  "weather": "Current weather:"
+  "weather": "Weather alerts:",
+  "actions": "Weather recommendations:",
+  "noAlerts": "No weather alerts at this time",
+  "noActions": "No weather actions to take at this time"
 }

@@ -64,6 +64,8 @@ $(document).ready(function () {
       "language":  userLang
     },
     success: function(data) {
+      Resources.setResources(data);
+
       $("#title").text(data.title);
       $("#about").text(data.about);
       $("#policy-type-message").text(data.policyType);
@@ -87,6 +89,7 @@ $(document).ready(function () {
       $("#family-message").text(data.familyNameMessage);
       $("#given-message").text(data.givenNameMessage);
       $("#weather").text(data.weather);
+      $("#actions").text(data.actions);
     },
     error: function(xhr) {
         alert(xhr.status);
@@ -99,8 +102,8 @@ $(document).ready(function () {
 
   Policy.setResponsePayload = function(data) {
     policyResponsePayloadSetter.call(Policy, data);
-    //var data = newPayload;
-    console.log("Policy Info: " + JSON.stringify(data));
+    // Clear the weather alerts box
+    $("#forecast").val('');
     
     $("#policy-type").val(data.policyType);
     $("#months-since-claim").val(data.monthsSinceLastClaim);
@@ -123,12 +126,17 @@ $(document).ready(function () {
 
     Weather.setResponsePayload = function(newPayloadStr) {
       weatherResponsePayloadSetter.call(Weather, newPayloadStr);
-      $("#forecast").val($("#forecast").val() + newPayloadStr);
-      console.log(newPayloadStr);
+      if(newPayloadStr) {
+        $("#forecast").val($("#forecast").val() + newPayloadStr);
+      }
+      // No weather alerts, display no alerts message
+      else {
+        $("#forecast").val(Resources.getResources().noAlerts);
+      }
     };
 
     // Request the weather alerts
-    Weather.getWeather(data.latitude, data.longitude, 'en');
+    Weather.getWeather(data.latitude, data.longitude, userLang);
 
     var geo = {lat: parseFloat(data.latitude), lng: parseFloat(data.longitude)};
     var mapDiv = document.getElementById('map');
@@ -136,8 +144,6 @@ $(document).ready(function () {
       center: {lat: geo.lat, lng: geo.lng},
       zoom: 8
     });
-
-    //$("#forecast").val(data.weather[0].narrative);
 
   };
 

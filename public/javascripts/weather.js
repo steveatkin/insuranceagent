@@ -56,8 +56,14 @@ var Weather = (function() {
       success: function(data) {
         var alerts = data.alerts || [];
 
-        // for each alert key go and extract the details of the alert        
-        alerts.forEach(getDetails);
+        // for each alert key go and extract the details of the alert
+        if(alerts.length > 0){        
+          alerts.forEach(getDetails);
+        }
+        // there are no alerts, so invoke callback with null
+        else {
+          Weather.setResponsePayload(null);
+        }
         
         },
         error: function(xhr) {
