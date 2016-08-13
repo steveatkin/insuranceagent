@@ -1,40 +1,31 @@
 var express = require('express');
 var router = express.Router();
-var Client = require('node-rest-client').Client;
+var request = require('request');
+
 
 router.get('/', function(req, res, next) {
-  var client = new Client();
-
-  var args = {
-    parameters: { customer: req.query.customer,
-                  language: req.query.language,
-                  client_id: process.env.API_KEY
+  
+  var params = {
+    url: process.env.POLICY_API,
+    qs: { 
+      customer: req.query.customer,
+      language: req.query.language,
+      client_id: process.env.API_KEY
     },
-    requestConfig: { timeout: 4000},
-    responseConfig: { timeout: 4000}
+    method: 'GET',
+    timeout: 4000
   };
 
-  var api = client.get(process.env.POLICY_API, args,
-    function (data, response) {
-        if(response.statusCode == 200) {
-          res.json(data);
-        }
+
+  request(params, function(error, response, body) {
+        if(!error && response.statusCode == 200) {
+            var result = JSON.parse(body);
+            res.json(result);
+        } 
         else {
-          res.status(response.statusCode).send(response.statusMessage);
+            res.status(response.statusCode).send('Unable to get policy.');
         }
-  });
-
-  api.on('error', function (err) {
-    res.send(err);
-  });
-
-  api.on('requestTimeout', function (req) {
-    res.status(404).send("Policy or language code incorrect");
-  });
-
-  api.on('responseTimeout', function (res) {
-    res.status(500).send("response has expired")
-  });
+    });
 
 });
 
