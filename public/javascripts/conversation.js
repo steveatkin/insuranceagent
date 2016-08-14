@@ -3,7 +3,7 @@
 var Conversation = (function() {
   var requestPayload;
   var responsePayload;
-  var messageEndpoint = '/dialog';
+  var messageEndpoint = '/conversation';
 
   // Publicly accessible methods defined
   return {

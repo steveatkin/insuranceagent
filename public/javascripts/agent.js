@@ -97,7 +97,6 @@ $(document).ready(function () {
       $("#claim-amount").text(data.amount);
       $("#policy-tab").text(data.policy);
       $("#claims-tab").text(data.claims);
-      $("#offers-tab").text(data.offers);
       $("#offer-message").text(data.offerMessage);
       $("#vehicle-message").text(data.vehicleMessage);
       $("#city-message").text(data.cityMessage);
@@ -106,6 +105,7 @@ $(document).ready(function () {
       $("#given-message").text(data.givenNameMessage);
       $("#weather").text(data.weather);
       $("#actions").text(data.actions);
+      $("#offers-tab").text(data.offers);
     },
     error: function(xhr, message) {
         alert(message);
@@ -118,7 +118,7 @@ $(document).ready(function () {
 
   Policy.setResponsePayload = function(data) {
     policyResponsePayloadSetter.call(Policy, data);
-    // Clear the weather alerts box
+    // Clear the weather alerts boxes
     $("#forecast").val('');
     $("#recommendation").val('');
     
@@ -131,12 +131,28 @@ $(document).ready(function () {
     $("#policy-months").val(data.monthsSincePolicyInception);
     $("#reason").val(data.claimReason);
     $("#amount").val(data.totalClaimAmount);
-    $("#special-offers").val(data.message);
     $("#vehicle").val(data.vehicle);
     $("#city").val(data.city);
     $("#state").val(data.state);
     $("#family").val(data.surname);
     $("#given").val(data.givenName);
+
+
+    // Translate the offers text
+    $.ajax({
+      type: "GET",
+      url: "/translate",
+      data: {
+        "text": data.message,
+        "language": userLang
+      },
+      success: function(data) {
+        $("#special-offers").val(data);
+      },
+      error: function(xhr, message) {
+        $("#special-offers").val(data.message);
+      }
+    });
 
     // setup the callback to respond to the weather alerts
     var weatherResponsePayloadSetter = Weather.setResponsePayload;

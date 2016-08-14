@@ -9,3 +9,5 @@ applications:
   services:
     - "Globalization Pipeline GA"
     - "Weather Company Data for IBM Bluemix-n7"
+    - "Conversation-y0"
+    - "Language Translation"

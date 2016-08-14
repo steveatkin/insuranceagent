@@ -32,6 +32,7 @@ var Weather = (function() {
           function getText(value) {
             // Trigger the callback when the alert text is extracted
             Weather.setResponsePayload({
+                language: value.language_cd,
                 description: value.description,
                 instruction: value.instruction
             });

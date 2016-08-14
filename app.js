@@ -9,9 +9,10 @@ require('dotenv').config();
 var routes = require('./routes/index');
 var policy = require('./routes/policy');
 var resources = require('./routes/resources');
-var dialog = require('./routes/conversation');
+var conversation = require('./routes/conversation');
 var alerts = require('./routes/alerts');
 var details = require('./routes/details');
+var translate = require('./routes/translate');
 
 var app = express();
 
@@ -31,9 +32,10 @@ app.use(express.static(__dirname + '/public'));
 app.use('/', routes);
 app.use('/policy', policy);
 app.use('/resources', resources);
-app.use('/dialog', dialog);
+app.use('/conversation', conversation);
 app.use('/alerts', alerts);
 app.use('/details', details);
+app.use('/translate', translate);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
