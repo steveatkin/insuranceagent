@@ -2,4 +2,5 @@ node_modules
 .env
 g11n-credentials.json
 weather-credentials.json
+conversation-credentials.json
 npm-debug.log

@@ -9,7 +9,7 @@ require('dotenv').config();
 var routes = require('./routes/index');
 var policy = require('./routes/policy');
 var resources = require('./routes/resources');
-var dialog = require('./routes/dialog');
+var dialog = require('./routes/conversation');
 var alerts = require('./routes/alerts');
 var details = require('./routes/details');
 
