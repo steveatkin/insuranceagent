@@ -1,5 +1,7 @@
 node_modules
-node-red-flow.json
+node_red_flows
+watson_bots
+openwhisk_actions
 .env
 g11n-credentials.json
 weather-credentials.json

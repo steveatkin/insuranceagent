@@ -31,6 +31,9 @@ router.post('/', function(req, res){
   if(req.body.language == 'fr') {
     workspace = process.env.WORKSPACE_FRENCH;
   }
+  else if(req.body.language == 'es') {
+    workspace = process.env.WORKSPACE_SPANISH;
+  }
 
   conversation.message({
     input: req.body.input,
