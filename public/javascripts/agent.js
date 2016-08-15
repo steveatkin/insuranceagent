@@ -139,20 +139,26 @@ $(document).ready(function () {
 
 
     // Translate the offers text
-    $.ajax({
-      type: "GET",
-      url: "/translate",
-      data: {
-        "text": data.message,
-        "language": userLang
-      },
-      success: function(data) {
-        $("#special-offers").val(data);
-      },
-      error: function(xhr, message) {
-        $("#special-offers").val(data.message);
-      }
-    });
+
+    if(userLang != 'en') {
+      $.ajax({
+        type: "GET",
+        url: "/translate",
+        data: {
+          "text": data.message,
+          "language": userLang
+        },
+        success: function(data) {
+          $("#special-offers").val(data);
+        },
+        error: function(xhr, message) {
+          $("#special-offers").val(data.message);
+        }
+      });
+    }
+    else {
+      $("#special-offers").val(data.message);
+    }
 
     // setup the callback to respond to the weather alerts
     var weatherResponsePayloadSetter = Weather.setResponsePayload;
