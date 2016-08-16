@@ -1,0 +1,45 @@
+swagger: '2.0'
+info:
+  version: 1.0.0
+  title: policy
+  x-ibm-name: policy
+host: $(catalog.host)
+basePath: /v1
+paths:
+  /policy:
+    get:
+      responses:
+        '200':
+          description: 200 OK
+      parameters:
+        - name: customer
+          type: string
+          required: true
+          in: query
+          description: policy id
+        - name: language
+          type: string
+          required: true
+          in: query
+          description: language id BCP 47
+securityDefinitions:
+  clientID:
+    description: ''
+    in: query
+    name: client_id
+    type: apiKey
+security:
+  - clientID: []
+x-ibm-configuration:
+  assembly:
+    execute:
+      - invoke:
+          target-url: >-
+            https://atkinred.mybluemix.net/insurance/policy?customer=$(request.parameters.customer)&language=$(request.parameters.language)
+          password: admin
+          username: admin
+  gateway: datapower-gateway
+schemes:
+  - https
+produces:
+  - application/json

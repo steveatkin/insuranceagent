@@ -35,7 +35,10 @@ router.get('/', function(req, res, next) {
         if(!error && response.statusCode == 200) {
             var result = JSON.parse(body);
             res.json(result);
-        } 
+        }
+        else if(!error && response.statusCode == 400) {
+          res.json([]);
+        }
         else {
             res.status(401).send('Unable to get alerts.');
         }

@@ -3,6 +3,7 @@ node_red_flows
 watson_bots
 openwhisk_actions
 mocked_data
+swagger
 .env
 g11n-credentials.json
 weather-credentials.json
