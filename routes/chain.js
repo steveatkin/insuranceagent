@@ -22,7 +22,9 @@ router.init = function() {
         options.credentials = options.appEnv.getServiceCreds(serviceRegex);
     }
 
-    console.log(options);
+    console.log("DUMPING");
+    console.log(options.credentials);
+    console.log("END DUMP");
 
     var peers = options.credentials.peers;
     var users = options.credentials.users;
