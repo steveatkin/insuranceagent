@@ -22,6 +22,8 @@ router.init = function() {
         options.credentials = options.appEnv.getServiceCreds(serviceRegex);
     }
 
+    console.log(options);
+
     var peers = options.credentials.peers;
     var users = options.credentials.users;
 
