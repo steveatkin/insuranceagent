@@ -60,7 +60,7 @@ router.init = function() {
             zip_url: process.env.CHAIN_ZIP_URL,
             unzip_dir: process.env.CHAIN_UNZIP_DIR,
             git_url: process.env.CHAIN_GIT_URL,
-            deployed_name: process.env.CHAIN_NAME
+            deployed_name: null
         }
     };
 
