@@ -60,7 +60,7 @@ router.init = function() {
             zip_url: process.env.CHAIN_ZIP_URL,
             unzip_dir: process.env.CHAIN_UNZIP_DIR,
             git_url: process.env.CHAIN_GIT_URL,
-            deployed_name: null
+            deployed_name: process.env.CHAIN_NAME
         }
     };
 
@@ -70,14 +70,12 @@ router.init = function() {
 	    }
         else {
             chaincode = cc;
-            //if(cc.details.deployed_name === ""){            
+            if(cc.details.deployed_name === ""){            
                 cc.deploy('init', ['99'],null, cb_deployed);
-            //}
-            /*
+            }
             else{
                 console.log('chaincode summary file indicates chaincode has been previously deployed');
             }
-            */
         }
     });
 };
