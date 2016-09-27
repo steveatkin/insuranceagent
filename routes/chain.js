@@ -70,13 +70,14 @@ router.init = function() {
 	    }
         else {
             chaincode = cc;
-            if(cc.details.deployed_name === ""){            
+            //if(cc.details.deployed_name === ""){            
                 cc.deploy('init', ['99'],null, cb_deployed);
-            }
-            
+            //}
+            /*
             else{
                 console.log('chaincode summary file indicates chaincode has been previously deployed');
             }
+            */
         }
     });
 };
