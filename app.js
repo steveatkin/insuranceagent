@@ -17,7 +17,7 @@ var translate = require('./routes/translate');
 var chain = require('./routes/chain');
 
 // Initialize the blockchain service and start our chaincode
-//chain.init();
+chain.init();
 
 var app = express();
 
