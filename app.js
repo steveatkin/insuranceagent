@@ -7,12 +7,17 @@ var bodyParser = require('body-parser');
 require('dotenv').config();
 
 var routes = require('./routes/index');
+var assessor = require('./routes/assessor');
 var policy = require('./routes/policy');
 var resources = require('./routes/resources');
 var conversation = require('./routes/conversation');
 var alerts = require('./routes/alerts');
 var details = require('./routes/details');
 var translate = require('./routes/translate');
+var chain = require('./routes/chain');
+
+// Initialize the blockchain service and start our chaincode
+chain.init();
 
 var app = express();
 
@@ -30,12 +35,14 @@ app.use(express.static(__dirname + '/public'));
 
 
 app.use('/', routes);
+app.use('/assesor', assessor);
 app.use('/policy', policy);
 app.use('/resources', resources);
 app.use('/conversation', conversation);
 app.use('/alerts', alerts);
 app.use('/details', details);
 app.use('/translate', translate);
+app.use('/chain', chain);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

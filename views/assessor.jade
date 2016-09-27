@@ -1,0 +1,101 @@
+doctype html
+head
+  meta(charset='utf-8')
+  meta(http-equiv='X-UA-Compatible', content='IE=edge')
+  meta(name='viewport', content='width=device-width, initial-scale=1')
+  // The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags
+  title Assessor View
+  // Bootstrap
+  link(rel='stylesheet', href='stylesheets/bootstrap.min.css')
+  link(rel='stylesheet', href='stylesheets/bootstrap-theme.min.css')
+  // HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries
+  // WARNING: Respond.js doesn't work if you view the page via file://
+  //if lt IE 9
+    script(src='https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js')
+    script(src='https://oss.maxcdn.com/respond/1.4.2/respond.min.js')
+nav.navbar.navbar-default.navbar-inverse.navbar-fixed-top(role='navigation')
+  .container
+    .navbar-header
+      button.navbar-toggle(type='button', data-toggle='collapse', data-target='#navbarCollapse')
+        span.sr-only Toggle navigation
+        span.icon-bar
+        span.icon-bar
+        span.icon-bar
+.container
+  .jumbotron
+    h1 Adjustor Payment System
+    p This system let's you quickly authorize insurance claim payments to indvidual policy holders and automobile repair facilities using Blockchain 
+.container
+  .row
+    .col-sm-8
+      #accordion.panel-group
+        .panel.panel-default
+          .panel-heading
+            h4.panel-title
+              a#claim-tab(data-toggle='collapse', data-parent='#accordion', href='#claim') Claim Information
+          #claim.panel-collapse.collapse.in
+            .panel-body
+              form
+                .form-group
+                  label#policy-label(for='policy') Policy Number
+                  input#policy.form-control(type='text')
+                  label#claim-reason-label(for='reason') Claim Reason
+                  input#reason.form-control(type='text', disabled='')
+                  label#claim-amount-label(for='amount') Claim Amount
+                  input#amount.form-control(type='text', disabled='')
+                  label#assignment-label(for='assignment') Current Assignment
+                  input#assignment.form-control(type='text', disabled='')
+                button#submit.btn.btn-default(type='submit') Lookup Policy
+        .panel.panel-default
+          .panel-heading
+            h4.panel-title
+              a#adjustor-tab(data-toggle='collapse', data-parent='#accordion', href='#adjustor') Adjustor
+           #adjustor.panel-collapse.collapse.in
+            .panel-body
+              form
+                .form-group
+                  label#adjustor-label(for='adjustor-select') Select Adjustor
+                  select#adjustor-select.form-control
+                    option Steve
+                    option Helena
+                button#submit-adjustor.btn.btn-default(type='submit') Assign Adjustor
+        .panel.panel-default
+          .panel-heading
+            h4.panel-title
+              a#payee-tab(data-toggle='collapse', data-parent='#accordion', href='#payee') Payee
+           #payee.panel-collapse.collapse.in
+            .panel-body
+              form
+                .form-group
+                  div.form.group
+                    label Payee Type
+                    .radio
+                      label
+                        input#optionsRadios1(type="radio", name="optionsRadios", value="policy-holder", checked="")
+                        | Policy Holder
+                    .radio
+                      label
+                        input#optionsRadios2(type="radio", name="optionsRadios", value="bank")
+                        | Bank
+                    .radio
+                      label
+                        input#optionsRadios2(type="radio", name="optionsRadios", value="repair-facility")
+                        | Repair Facility
+                  div.form.group  
+                    label#payee-label(for='payee-select') Select Payee
+                    select#payee-select.form-control
+                        option Bank of America
+                        option Citibank
+                button#submit-payee.btn.btn-default(type='submit') Assign Payee
+    .col-sm-4
+        .panel.panel-default
+          .panel-heading
+            h4.panel-title Instructions
+            .panel-body
+             p Steps
+
+// jQuery (necessary for Bootstrap's JavaScript plugins)
+script(src='javascripts/jquery-3.1.0.min.js')
+// Include all compiled plugins (below), or include individual files as needed
+// Latest compiled and minified JavaScript
+script(src='javascripts/bootstrap.min.js')
