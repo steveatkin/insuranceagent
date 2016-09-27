@@ -1,15 +1,12 @@
 var express = require('express');
 var router = express.Router();
 var optional = require('optional');
-var appEnv = require('cfenv').getAppEnv();
-var cfEnvUtil = require('./cfenv-credsbylabel');
 var Ibc1 = require('ibm-blockchain-js');
 var ibc = new Ibc1();
 var request = require('request');
 var chaincode = null;
 
 router.init = function() {
-    var serviceRegex = /("ibm-blockchain-5-prod).*/;
     var peers = null;
     var users = null;
 
