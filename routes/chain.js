@@ -10,24 +10,41 @@ var chaincode = null;
 
 router.init = function() {
     var serviceRegex = /("ibm-blockchain-5-prod).*/;
+    var peers = null;
+    var users = null;
 
-    var options = optional('./chain-credentials.json') || {appEnv: appEnv};
+    var options = optional('./chain-credentials.json');
 
-    // parse vcap using cfenv if available
-    if(options.appEnv && !options.credentials) {
-        options.credentials = cfEnvUtil.getServiceCredsByLabel(options.appEnv, serviceRegex);
+
+    if(process.env.VCAP_SERVICES){  																	
+	    var servicesObject = JSON.parse(process.env.VCAP_SERVICES);
+	    for(var i in servicesObject){   
+		    if(i.indexOf('ibm-blockchain') >= 0){													
+			    if(servicesObject[i][0].credentials.error){
+				    console.log('!\n!\n! Error from Bluemix: \n', servicesObject[i][0].credentials.error, '!\n!\n');
+				    peers = null;
+				    users = null;
+			    }   
+			    if(servicesObject[i][0].credentials && servicesObject[i][0].credentials.peers){		
+				    console.log('overwritting peers, loading from a vcap service: ', i);
+				    peers = servicesObject[i][0].credentials.peers;
+				    if(servicesObject[i][0].credentials.users){										
+					    console.log('overwritting users, loading from a vcap service: ', i);
+					    users = servicesObject[i][0].credentials.users;
+				    } 
+				    else {
+                        users = null;
+                    }																
+			        break;
+			    }   
+		    }
+	    }
     }
-    // try again with name
-    else if(options.appEnv && !options.credentials) {
-        options.credentials = options.appEnv.getServiceCreds(serviceRegex);
+
+    else if(options.credentials) {
+        peers = options.credentials.peers;
+        users = options.credentials.users;
     }
-
-    console.log("DUMPING");
-    console.log(options.credentials);
-    console.log("END DUMP");
-
-    var peers = options.credentials.peers;
-    var users = options.credentials.users;
 
     var options = {
         network: {
