@@ -43,9 +43,11 @@ nav.navbar.navbar-default.navbar-inverse.navbar-fixed-top(role='navigation')
                   input#reason.form-control(type='text', disabled='')
                   label#claim-amount-label(for='amount') Claim Amount
                   input#amount.form-control(type='text', disabled='')
+                  label#vehicle-label(for='vehicle') Vehicle
+                  input#vehicle.form-control(type='text', disabled='')
                   label#assignment-label(for='assignment') Current Assignment
                   input#assignment.form-control(type='text', disabled='')
-                button#submit.btn.btn-default(type='submit') Lookup Policy
+                button#submit-policy.btn.btn-default(type='button') Lookup Policy
         .panel.panel-default
           .panel-heading
             h4.panel-title
@@ -58,7 +60,7 @@ nav.navbar.navbar-default.navbar-inverse.navbar-fixed-top(role='navigation')
                   select#adjustor-select.form-control
                     option Steve
                     option Helena
-                button#submit-adjustor.btn.btn-default(type='submit') Assign Adjustor
+                button#submit-adjustor.btn.btn-default(type='button') Assign Adjustor
         .panel.panel-default
           .panel-heading
             h4.panel-title
@@ -86,7 +88,7 @@ nav.navbar.navbar-default.navbar-inverse.navbar-fixed-top(role='navigation')
                     select#payee-select.form-control
                         option Bank of America
                         option Citibank
-                button#submit-payee.btn.btn-default(type='submit') Assign Payee
+                button#submit-payee.btn.btn-default(type='button') Assign Payee
     .col-sm-4
         .panel.panel-default
           .panel-heading
@@ -99,3 +101,6 @@ script(src='javascripts/jquery-3.1.0.min.js')
 // Include all compiled plugins (below), or include individual files as needed
 // Latest compiled and minified JavaScript
 script(src='javascripts/bootstrap.min.js')
+script(src='javascripts/policy.js')
+script(src='javascripts/blockchain.js')
+script(src='javascripts/assessor.js')

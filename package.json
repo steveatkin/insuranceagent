@@ -19,7 +19,9 @@
     "g11n-pipeline": "^1.2.0",
     "watson-developer-cloud": "^2.1.0",
     "request": "2.73.0",
-    "ibm-blockchain-js": "1.2.*"
+    "ibm-blockchain-js": "1.2.*",
+    "winston": "^2.2.0",
+    "cloudant": "^1.5.0"
   },
   "repository": {},
 	"engines": {

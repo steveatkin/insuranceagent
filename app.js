@@ -15,6 +15,7 @@ var alerts = require('./routes/alerts');
 var details = require('./routes/details');
 var translate = require('./routes/translate');
 var chain = require('./routes/chain');
+var data = require('./routes/dataservices');
 
 // Initialize the blockchain service and start our chaincode
 chain.init();
@@ -43,6 +44,7 @@ app.use('/alerts', alerts);
 app.use('/details', details);
 app.use('/translate', translate);
 app.use('/chain', chain);
+app.use('/dataservices', data);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

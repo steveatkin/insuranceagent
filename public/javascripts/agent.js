@@ -127,9 +127,20 @@ $(document).ready(function () {
     $("#number-of-policies").val(data.numberOfPolicies);
     $("#coverage").val(data.coverage);
     $("#effective").val(data.effectiveToDate);
-    $("#monthly-premium").val(data.monthlyPremiumAuto);
     $("#policy-months").val(data.monthsSincePolicyInception);
     $("#reason").val(data.claimReason);
+
+    // Localize the display of the currencies
+    if(typeof Intl != "undefined") {
+      var claim = new Number(data.totalClaimAmount);
+      var premium = new Number(data.monthlyPremiumAuto);
+      data.totalClaimAmount = new Intl.NumberFormat('default',
+            { style: 'currency', currency: 'USD' }).format(claim);
+      data.monthlyPremiumAuto = new Intl.NumberFormat('default',
+            { style: 'currency', currency: 'USD' }).format(premium);     
+    }
+
+    $("#monthly-premium").val(data.monthlyPremiumAuto);
     $("#amount").val(data.totalClaimAmount);
     $("#vehicle").val(data.vehicle);
     $("#city").val(data.city);

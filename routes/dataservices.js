@@ -1,0 +1,156 @@
+var express = require('express');
+var router = express.Router();
+var optional = require('optional');
+var appEnv = require('cfenv').getAppEnv();
+var cfEnvUtil = require('./cfenv-credsbylabel');
+var request = require('request');
+var Cloudant = require('cloudant');
+
+// adjustors, banks, repair-facilities
+router.get('/:database', function(req, res, next) {
+    var database = req.params.database;
+
+    var serviceRegex = /(cloudantNoSQLDB).*/;
+
+    var options = optional('./cloudant-credentials.json') || {appEnv: appEnv};
+
+    // parse vcap using cfenv if available
+    if(options.appEnv && !options.credentials) {
+        options.credentials = cfEnvUtil.getServiceCredsByLabel(options.appEnv, serviceRegex);
+    }
+    // try again with name
+    else if(options.appEnv && !options.credentials) {
+        options.credentials = options.appEnv.getServiceCreds(serviceRegex);
+    }
+
+    Cloudant(options.credentials.url, function(err, cloudant) {
+        if (err) {
+            res.status(500).send({status:500, message: 'Cloudant error failed to initialize'});
+        }
+        else {
+            var names = {values: []};
+            var db = cloudant.db.use(database);
+            db.get("_all_docs", {include_docs: true}, function(err, data) {
+                if(!err && data) {
+                    var rows = data.rows;
+                    rows.forEach(function(value){
+                        names.values.push(value.doc.name);
+                    });
+                    res.json(names);
+                }
+                else {
+                    res.status(500).send({status:500, message: 'Cloudant error reading database'});
+                }
+            });
+        }
+    });
+});
+
+// claim-history/DG31826
+router.get('/:database/:customer', function(req, res, next) {
+    var database = req.params.database;
+    var customer = req.params.customer;
+
+    var serviceRegex = /(cloudantNoSQLDB).*/;
+
+    var options = optional('./cloudant-credentials.json') || {appEnv: appEnv};
+
+    // parse vcap using cfenv if available
+    if(options.appEnv && !options.credentials) {
+        options.credentials = cfEnvUtil.getServiceCredsByLabel(options.appEnv, serviceRegex);
+    }
+    // try again with name
+    else if(options.appEnv && !options.credentials) {
+        options.credentials = options.appEnv.getServiceCreds(serviceRegex);
+    }
+
+    Cloudant(options.credentials.url, function(err, cloudant) {
+        if (err) {
+            res.status(500).send({status:500, message: 'Cloudant error failed to initialize'});
+        }
+        else {
+            var history = {values: []};
+            var db = cloudant.db.use(database);
+            db.search('history', 'claims', {q: customer, include_docs: true}, function(err, data) {
+                if(!err && data.rows.length > 0) {
+                    res.json(data.rows[0].doc);
+                }
+                // empty but no error
+                else if (!err){
+                    res.json({});
+                }
+                else {
+                    res.status(500).send({status:500, message: 'Cloudant error reading database index'});
+                }
+            });
+        }
+    });
+});
+
+
+// claim-history 
+router.post('/:database', function(req, res, next) {
+    var database = req.params.database;
+
+    var customer = req.body.customer;
+    var owner = req.body.owner;
+
+    var serviceRegex = /(cloudantNoSQLDB).*/;
+
+    var options = optional('./cloudant-credentials.json') || {appEnv: appEnv};
+
+    // parse vcap using cfenv if available
+    if(options.appEnv && !options.credentials) {
+        options.credentials = cfEnvUtil.getServiceCredsByLabel(options.appEnv, serviceRegex);
+    }
+    // try again with name
+    else if(options.appEnv && !options.credentials) {
+        options.credentials = options.appEnv.getServiceCreds(serviceRegex);
+    }
+
+    Cloudant(options.credentials.url, function(err, cloudant) {
+        if (err) {
+            res.status(500).send({status:500, message: 'Cloudant error failed to initialize'});
+        }
+        else {
+            var history = {values: []};
+            var db = cloudant.db.use(database);
+            db.search('history', 'claims', {q: customer, include_docs: true}, function(err, data) {
+                if(!err && data) {
+                    // create the history record if it does not exist
+                    if(data.rows.length == 0) {
+                        db.insert({customer: customer, owner: owner, history: [owner]}, 
+                            function(err, body){
+                                if(err) {
+                                    res.status(500).send({status:500, message: 'Cloudant error creating claim history'});
+                                }
+                                else {
+                                    res.json({});
+                                }
+                            });
+                    }
+                    // Update the history record there should only be one
+                    else {
+                        var rows = data.rows;
+                        rows.forEach(function(value){
+                            var record = value.doc;
+                            record.owner = owner;
+                            record.history.push(owner);
+                            db.insert(record, function(err, body){
+                                if(err) {
+                                    res.status(500).send({status:500, message: 'Cloudant error updating claim history'});
+                                }
+                            });
+                        });
+                        res.json({});
+                    }
+                }
+                else {
+                    res.status(500).send({status:500, message: 'Cloudant error reading database index'});
+                }
+            });
+        }
+    });
+});
+
+module.exports = router;
