@@ -1,9 +1,88 @@
+function populateList(dataset, controlName) {
+    $('#' + controlName).empty();
+
+    $.ajax({
+      type: "GET",
+      url: "/dataservices/" + dataset,
+      success: function(data) {
+        data.values.forEach(function(value){
+            $('#' + controlName).append($("<option />").val(value).text(value));
+        });
+      },
+      error: function(xhr, message) {
+          alert(message);
+      }
+    });
+}
+
+function enableFormInputs() {
+    // Adjustor form
+    $("#adjustor-select").prop('disabled', false);
+    $("#submit-adjustor").prop('disabled', false);
+
+    // Payee buttons
+    $("#optionsBank").prop('disabled', false);
+    $("#optionsPolicyHolder").prop('disabled', false);
+    $("#optionsRepairFacility").prop('disabled', false);
+}
+
+function disableFormInputs() {
+    // Adjustor form
+    $("#adjustor-select").prop('disabled', true);
+    $("#submit-adjustor").prop('disabled', true);
+
+    // Payee buttons
+    $("#optionsBank").prop('disabled', true);
+    $("#optionsPolicyHolder").prop('disabled', true);
+    $("#optionsRepairFacility").prop('disabled', true);
+
+    // Payee select and button
+    $("#payee-select").prop('disabled', true);
+    $("#submit-payee").prop('disabled', true);
+}
+
+
 $(document).ready(function () {
+    var claim = null;
+
+    // Disable the adjustors and payee inputs until we have looked up a policy
+    $("#policy").keypress(function() {
+        disableFormInputs();
+    });
+
+    // Fill in the list of adjustors
+    populateList('adjustors', 'adjustor-select');
 
 
+    // When the radio button is selected populate the payee list
+    $("input[name=optionsRadios]:radio").change(function () {
+        switch($(this).val()) {
+            case 'bank':
+                // Fill in the list of banks
+                populateList('banks', 'payee-select');
+                $("#payee-select").prop('disabled', false);
+                $("#submit-payee").prop('disabled', false);
+                break;
+            case 'repair-facility':
+                // Fill in the list of repair facilities
+                populateList('repair-facilities', 'payee-select');
+                $("#payee-select").prop('disabled', false);
+                $("#submit-payee").prop('disabled', false);
+                break;
+            case 'policy-holder':
+                $('#payee-select').empty();
+                var name = claim.givenName + ' ' + claim.surname;
+                $("#payee-select").append($("<option />").val(name).text(name));
+                $("#payee-select").prop('disabled', false);
+                $("#submit-payee").prop('disabled', false);
+                break;
+        }
+    })
+
+
+    // Lookup policy button clicked
     $("#submit-policy").click( function(){
         var customer = $("#policy").val();
-        var claim = null;
 
         // Setup the callback that is invoked when a policy is found.
         var policyResponsePayloadSetter = Policy.setResponsePayload;
@@ -42,7 +121,7 @@ $(document).ready(function () {
                     customer: claim.customer,
                     amount: claim.totalClaimAmount,
                     vehicle: claim.vehicle,
-                    owner: 'Unassigned'
+                    owner: 'Insurance Company: ' + 'Acme Insurance'
                 };
                 // Store the claim for this policy in the block chain
                 BlockChain.setPolicy(block);
@@ -51,6 +130,8 @@ $(document).ready(function () {
                 $("#assignment").val(data.owner);
                 console.log("FOUND BLOCK: " + JSON.stringify(data));
             }
+            // We have the claim loaded so now enable the other forms
+            enableFormInputs();
         };
 
         // Get the policy and claim for this customer

@@ -28,7 +28,7 @@ router.get('/:database', function(req, res, next) {
             res.status(500).send({status:500, message: 'Cloudant error failed to initialize'});
         }
         else {
-            var names = {values: []};
+            var names = {values: [], status: 200, message: 'ok'};
             var db = cloudant.db.use(database);
             db.get("_all_docs", {include_docs: true}, function(err, data) {
                 if(!err && data) {
@@ -70,14 +70,19 @@ router.get('/:database/:customer', function(req, res, next) {
         }
         else {
             var history = {values: []};
+            var response = {status: 200, claim: {}, message: 'ok'};
             var db = cloudant.db.use(database);
             db.search('history', 'claims', {q: customer, include_docs: true}, function(err, data) {
                 if(!err && data.rows.length > 0) {
-                    res.json(data.rows[0].doc);
+                    response.claim.customer = data.rows[0].doc.customer;
+                    response.claim.owner = data.rows[0].doc.owner;
+                    response.claim.history = data.rows[0].doc.history;
+                    response.claim.lastUpdate = data.rows[0].doc.lastUpdate;
+                    res.json(response);
                 }
                 // empty but no error
                 else if (!err){
-                    res.json({});
+                    res.json(response);
                 }
                 else {
                     res.status(500).send({status:500, message: 'Cloudant error reading database index'});
@@ -113,19 +118,19 @@ router.post('/:database', function(req, res, next) {
             res.status(500).send({status:500, message: 'Cloudant error failed to initialize'});
         }
         else {
-            var history = {values: []};
             var db = cloudant.db.use(database);
             db.search('history', 'claims', {q: customer, include_docs: true}, function(err, data) {
                 if(!err && data) {
                     // create the history record if it does not exist
                     if(data.rows.length == 0) {
-                        db.insert({customer: customer, owner: owner, history: [owner]}, 
+                        var time = Date.now();
+                        db.insert({customer: customer, owner: owner, history: [owner], lastUpdate: time}, 
                             function(err, body){
                                 if(err) {
                                     res.status(500).send({status:500, message: 'Cloudant error creating claim history'});
                                 }
                                 else {
-                                    res.json({});
+                                    res.json({status: 200});
                                 }
                             });
                     }
@@ -136,13 +141,14 @@ router.post('/:database', function(req, res, next) {
                             var record = value.doc;
                             record.owner = owner;
                             record.history.push(owner);
+                            record.lastUpdate = Date.now();
                             db.insert(record, function(err, body){
                                 if(err) {
                                     res.status(500).send({status:500, message: 'Cloudant error updating claim history'});
                                 }
                             });
                         });
-                        res.json({});
+                        res.json({status: 200});
                     }
                 }
                 else {

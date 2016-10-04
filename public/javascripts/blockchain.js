@@ -8,6 +8,8 @@ var BlockChain = (function() {
 
     setPolicy: setPolicy,
 
+    setOwner: setOwner,
+
     getResponsePayload: function() {
       return responsePayload;
     },
@@ -21,18 +23,33 @@ var BlockChain = (function() {
   function getPolicy(policy) {
     $.ajax({
       type: "GET",
-      url: "/chain",
-      data: {
-        "customer":  policy
-      },
+      url: "/chain/" + policy,
       success: function(data) {
-        BlockChain.setResponsePayload(data);
+        BlockChain.setResponsePayload(data.claim);
       },
       error: function(xhr, message) {
           alert(message);
       }
     });
   }
+
+
+  function setOwner(customer, owner) {
+    $.ajax({
+      type: "POST",
+      url: "/chain/" + customer,
+      data: {
+        "owner": owner
+      },
+      success: function(data) {
+        console.log("Updated owner BlockChain: " + JSON.stringify(data));
+      },
+      error: function(xhr, message) {
+          alert(message);
+      }
+    });
+  }
+
 
   function setPolicy(claim) {
     $.ajax({
@@ -51,7 +68,7 @@ var BlockChain = (function() {
           alert(message);
       }
     });
-
   }
 
 }());
+

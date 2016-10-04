@@ -97,7 +97,7 @@ router.post('/', function(req, res) {
 				res.status(500).send({status:500, message: 'BlockChain error creating block'});
 			}
             else {
-				res.json({});
+				res.json({status: 200, message: 'ok'});
 			}
     });
     
@@ -115,7 +115,7 @@ router.post('/:customer', function(req, res, next){
 				res.status(500).send({status:500, message: 'BlockChain error setting block owner'});
 			}
 			else {
-				res.json({});
+				res.json({status: 200, message: 'ok'});
 			}
 		}
 	);
@@ -123,13 +123,13 @@ router.post('/:customer', function(req, res, next){
 
 
 // Get the block for the claim payment
-router.get('/', function(req, res, next) {
-    var customer = req.query.customer;
+router.get('/:customer', function(req, res, next) {
+    var customer = req.params.customer;
 
     chaincode.query.read([customer], function(err, data) {
         if(!err && data) {
             var claim = JSON.parse(data);
-            res.json(claim);
+            res.json({status:200, message: 'ok', claim: claim});
         }
 		// Block for claim payment not found
         else {

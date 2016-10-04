@@ -36,7 +36,7 @@ app.use(express.static(__dirname + '/public'));
 
 
 app.use('/', routes);
-app.use('/assesor', assessor);
+app.use('/assessor', assessor);
 app.use('/policy', policy);
 app.use('/resources', resources);
 app.use('/conversation', conversation);

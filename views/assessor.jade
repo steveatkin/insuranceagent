@@ -52,20 +52,18 @@ nav.navbar.navbar-default.navbar-inverse.navbar-fixed-top(role='navigation')
           .panel-heading
             h4.panel-title
               a#adjustor-tab(data-toggle='collapse', data-parent='#accordion', href='#adjustor') Adjustor
-           #adjustor.panel-collapse.collapse.in
+           #adjustor.panel-collapse.collapse
             .panel-body
               form
                 .form-group
                   label#adjustor-label(for='adjustor-select') Select Adjustor
-                  select#adjustor-select.form-control
-                    option Steve
-                    option Helena
-                button#submit-adjustor.btn.btn-default(type='button') Assign Adjustor
+                  select#adjustor-select.form-control(disabled)
+                button#submit-adjustor.btn.btn-default(type='button', disabled) Assign Adjustor
         .panel.panel-default
           .panel-heading
             h4.panel-title
               a#payee-tab(data-toggle='collapse', data-parent='#accordion', href='#payee') Payee
-           #payee.panel-collapse.collapse.in
+           #payee.panel-collapse.collapse
             .panel-body
               form
                 .form-group
@@ -73,22 +71,20 @@ nav.navbar.navbar-default.navbar-inverse.navbar-fixed-top(role='navigation')
                     label Payee Type
                     .radio
                       label
-                        input#optionsRadios1(type="radio", name="optionsRadios", value="policy-holder", checked="")
-                        | Policy Holder
-                    .radio
-                      label
-                        input#optionsRadios2(type="radio", name="optionsRadios", value="bank")
+                        input#optionsBank(type="radio", name="optionsRadios", value="bank", disabled)
                         | Bank
                     .radio
                       label
-                        input#optionsRadios2(type="radio", name="optionsRadios", value="repair-facility")
+                        input#optionsPolicyHolder(type="radio", name="optionsRadios", value="policy-holder", disabled)
+                        | Policy Holder
+                    .radio
+                      label
+                        input#optionsRepairFacility(type="radio", name="optionsRadios", value="repair-facility", disabled)
                         | Repair Facility
                   div.form.group  
                     label#payee-label(for='payee-select') Select Payee
-                    select#payee-select.form-control
-                        option Bank of America
-                        option Citibank
-                button#submit-payee.btn.btn-default(type='button') Assign Payee
+                    select#payee-select.form-control(disabled)
+                button#submit-payee.btn.btn-default(type='button', disabled) Assign Payee
     .col-sm-4
         .panel.panel-default
           .panel-heading
