@@ -77,7 +77,6 @@ router.get('/:database/:customer', function(req, res, next) {
                     response.claim.customer = data.rows[0].doc.customer;
                     response.claim.owner = data.rows[0].doc.owner;
                     response.claim.history = data.rows[0].doc.history;
-                    response.claim.lastUpdate = data.rows[0].doc.lastUpdate;
                     res.json(response);
                 }
                 // empty but no error
@@ -123,8 +122,7 @@ router.post('/:database', function(req, res, next) {
                 if(!err && data) {
                     // create the history record if it does not exist
                     if(data.rows.length == 0) {
-                        var time = Date.now();
-                        db.insert({customer: customer, owner: owner, history: [owner], lastUpdate: time}, 
+                        db.insert({customer: customer, owner: owner, history: [{owner: owner, date: Date.now()}]}, 
                             function(err, body){
                                 if(err) {
                                     res.status(500).send({status:500, message: 'Cloudant error creating claim history'});
@@ -140,8 +138,7 @@ router.post('/:database', function(req, res, next) {
                         rows.forEach(function(value){
                             var record = value.doc;
                             record.owner = owner;
-                            record.history.push(owner);
-                            record.lastUpdate = Date.now();
+                            record.history.push({owner: owner, date: Date.now()});
                             db.insert(record, function(err, body){
                                 if(err) {
                                     res.status(500).send({status:500, message: 'Cloudant error updating claim history'});

@@ -80,6 +80,34 @@ $(document).ready(function () {
     })
 
 
+    $("#submit-payee").click( function(){
+        var customer = $("#policy").val();
+        var payee = $('#payee-select :selected').text();
+        var type = $("input[name=optionsRadios]:checked").val();
+        var owner = '';
+
+        switch(type) {
+            case 'bank':
+                owner = "Bank: " + payee;
+                break;
+            case 'repair-facility':
+                owner = "Repair Facility: " + payee;
+                break;
+            case 'policy-holder':
+                owner = "Policy Holder: " + payee;
+                break;
+        };
+
+        BlockChain.setOwner(customer, owner);
+    });
+
+    $("#submit-adjustor").click( function(){
+        var customer = $("#policy").val();
+        var adjustor = $('#adjustor-select :selected').text();
+        BlockChain.setOwner(customer, "Adjustor: " + adjustor);
+    });
+
+
     // Lookup policy button clicked
     $("#submit-policy").click( function(){
         var customer = $("#policy").val();
@@ -123,8 +151,9 @@ $(document).ready(function () {
                     vehicle: claim.vehicle,
                     owner: 'Insurance Company: ' + 'Acme Insurance'
                 };
-                // Store the claim for this policy in the block chain
+                // Store the claim for this policy in the blockchain
                 BlockChain.setPolicy(block);
+                $("#assignment").val(block.owner);
             }
             else {
                 $("#assignment").val(data.owner);

@@ -43,9 +43,10 @@ var BlockChain = (function() {
       },
       success: function(data) {
         console.log("Updated owner BlockChain: " + JSON.stringify(data));
+        updateHistory(customer, owner);
       },
       error: function(xhr, message) {
-          alert(message);
+        alert(message);
       }
     });
   }
@@ -63,6 +64,24 @@ var BlockChain = (function() {
       },
       success: function(data) {
         console.log("Added to BlockChain: " + JSON.stringify(data));
+        updateHistory(claim.customer, claim.owner);
+      },
+      error: function(xhr, message) {
+          alert(message);
+      }
+    });
+  }
+
+  function updateHistory(customer, owner) {
+    $.ajax({
+      type: "POST",
+      url: "/dataservices/claim-history",
+      data: {
+        "customer": customer,
+        "owner": owner
+      },
+      success: function(data) {
+        console.log("Added to history: " + JSON.stringify(data));
       },
       error: function(xhr, message) {
           alert(message);
