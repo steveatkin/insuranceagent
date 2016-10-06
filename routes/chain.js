@@ -63,7 +63,7 @@ router.init = function() {
             zip_url: process.env.CHAIN_ZIP_URL,
             unzip_dir: process.env.CHAIN_UNZIP_DIR,
             git_url: process.env.CHAIN_GIT_URL,
-           	deployed_name: process.env.CHAIN_NAME
+            deployed_name: process.env.CHAIN_NAME
         }
     };
 
@@ -91,7 +91,7 @@ router.init = function() {
 router.post('/', function(req, res) {
     var claim = req.body;
 
-    chaincode.invoke.init_claim_payment([claim.id, claim.value, claim.vehicle, claim.owner], 
+    chaincode.invoke.init_claim_payment([claim.id, claim.value, claim.vehicle, claim.owner, claim.role, claim.state], 
         function(err, data) {
 			if(err) {
 				res.status(500).send({status:500, message: 'BlockChain error creating block'});
@@ -107,9 +107,11 @@ router.post('/', function(req, res) {
 // Update the owner of the claim payment in the block e.g., policy holder, bank, or repair facility
 router.post('/:customer', function(req, res, next){
 	var owner = req.body.owner;
+	var role = req.body.role;
+	var state = req.body.state;
 	var customer = req.params.customer;
 
-	chaincode.invoke.set_owner([customer, owner],
+	chaincode.invoke.set_owner([customer, owner, role, state],
 		function(err, data) {
 			if(err) {
 				res.status(500).send({status:500, message: 'BlockChain error setting block owner'});

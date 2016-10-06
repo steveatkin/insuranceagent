@@ -60,18 +60,21 @@ $(document).ready(function () {
             case 'bank':
                 // Fill in the list of banks
                 populateList('banks', 'payee-select');
+                // Enable buttons and select list
                 $("#payee-select").prop('disabled', false);
                 $("#submit-payee").prop('disabled', false);
                 break;
             case 'repair-facility':
                 // Fill in the list of repair facilities
                 populateList('repair-facilities', 'payee-select');
+                // Enable buttons and select list
                 $("#payee-select").prop('disabled', false);
                 $("#submit-payee").prop('disabled', false);
                 break;
             case 'policy-holder':
                 $('#payee-select').empty();
                 var name = claim.givenName + ' ' + claim.surname;
+                // Add policy holder to list and enable buttons and select list
                 $("#payee-select").append($("<option />").val(name).text(name));
                 $("#payee-select").prop('disabled', false);
                 $("#submit-payee").prop('disabled', false);
@@ -84,27 +87,28 @@ $(document).ready(function () {
         var customer = $("#policy").val();
         var payee = $('#payee-select :selected').text();
         var type = $("input[name=optionsRadios]:checked").val();
-        var owner = '';
+        var role = 'Unknown';
+        var state = "Paid";
 
         switch(type) {
             case 'bank':
-                owner = "Bank: " + payee;
+                role = "Financial Institution";
                 break;
             case 'repair-facility':
-                owner = "Repair Facility: " + payee;
+                role = "Repair Facility";
                 break;
             case 'policy-holder':
-                owner = "Policy Holder: " + payee;
+                role = "Policy Holder";
                 break;
         };
 
-        BlockChain.setOwner(customer, owner);
+        BlockChain.setOwner(customer, payee, role, state);
     });
 
     $("#submit-adjustor").click( function(){
         var customer = $("#policy").val();
         var adjustor = $('#adjustor-select :selected').text();
-        BlockChain.setOwner(customer, "Adjustor: " + adjustor);
+        BlockChain.setOwner(customer, adjustor, "Adjustor", "In Process");
     });
 
 
@@ -132,11 +136,23 @@ $(document).ready(function () {
                 $("#amount").val(data.totalClaimAmount);
             }
 
-            console.log("CLAIM: " + JSON.stringify(claim));
             // Get the block chain entry for this claim
-            BlockChain.getPolicy(customer);
+            BlockChain.getClaim(customer);
         };
 
+
+        // Listen for when the history data for the claim has been loaded
+        var historyBlockChainPayloadSetter = BlockChain.setHistoryPayload;
+
+        BlockChain.setHistoryPayload = function(data) {
+            historyBlockChainPayloadSetter.call(BlockChain, data);
+            console.log("HISTORY: " + JSON.stringify(data));
+            // show the history
+            //$('#history-table > tbody:last').append('<tr><td>column 1 value</td><td>column 2 value</td></tr>');
+        };
+
+
+        // Listen for when the Block Chain is available for the claim
         var policyBlockChainPayloadSetter = BlockChain.setResponsePayload;
 
         BlockChain.setResponsePayload = function(data) {
@@ -149,16 +165,21 @@ $(document).ready(function () {
                     customer: claim.customer,
                     amount: claim.totalClaimAmount,
                     vehicle: claim.vehicle,
-                    owner: 'Insurance Company: ' + 'Acme Insurance'
+                    owner: 'Acme Insurance',
+                    role: 'Claim Recipient',
+                    state: "Received"
                 };
                 // Store the claim for this policy in the blockchain
-                BlockChain.setPolicy(block);
+                BlockChain.setClaim(block);
                 $("#assignment").val(block.owner);
             }
             else {
                 $("#assignment").val(data.owner);
-                console.log("FOUND BLOCK: " + JSON.stringify(data));
             }
+
+            // Get the history of this claim
+            BlockChain.getHistory(claim.customer);
+
             // We have the claim loaded so now enable the other forms
             enableFormInputs();
         };

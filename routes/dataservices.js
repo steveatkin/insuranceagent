@@ -75,7 +75,7 @@ router.get('/:database/:customer', function(req, res, next) {
             db.search('history', 'claims', {q: customer, include_docs: true}, function(err, data) {
                 if(!err && data.rows.length > 0) {
                     response.claim.customer = data.rows[0].doc.customer;
-                    response.claim.owner = data.rows[0].doc.owner;
+                    response.claim.state = data.rows[0].doc.state;
                     response.claim.history = data.rows[0].doc.history;
                     res.json(response);
                 }
@@ -98,6 +98,8 @@ router.post('/:database', function(req, res, next) {
 
     var customer = req.body.customer;
     var owner = req.body.owner;
+    var role = req.body.role;
+    var state = req.body.state;
 
     var serviceRegex = /(cloudantNoSQLDB).*/;
 
@@ -122,7 +124,7 @@ router.post('/:database', function(req, res, next) {
                 if(!err && data) {
                     // create the history record if it does not exist
                     if(data.rows.length == 0) {
-                        db.insert({customer: customer, owner: owner, history: [{owner: owner, date: Date.now()}]}, 
+                        db.insert({customer: customer, state: state, history: [{owner: owner, role: role, date: Date.now()}]}, 
                             function(err, body){
                                 if(err) {
                                     res.status(500).send({status:500, message: 'Cloudant error creating claim history'});
@@ -137,8 +139,8 @@ router.post('/:database', function(req, res, next) {
                         var rows = data.rows;
                         rows.forEach(function(value){
                             var record = value.doc;
-                            record.owner = owner;
-                            record.history.push({owner: owner, date: Date.now()});
+                            record.state = state;
+                            record.history.push({owner: owner, role: role, date: Date.now()});
                             db.insert(record, function(err, body){
                                 if(err) {
                                     res.status(500).send({status:500, message: 'Cloudant error updating claim history'});

@@ -2,13 +2,17 @@ var BlockChain = (function() {
 
   var responsePayload;
 
+  var responseHistory;
+
   // Publicly accessible methods defined
   return {
-    getPolicy: getPolicy,
+    getClaim: getClaim,
 
-    setPolicy: setPolicy,
+    setClaim: setClaim,
 
     setOwner: setOwner,
+
+    getHistory: getHistory,
 
     getResponsePayload: function() {
       return responsePayload;
@@ -16,16 +20,38 @@ var BlockChain = (function() {
 
     setResponsePayload: function(newPayloadStr) {
       responsePayload = newPayloadStr;
+    },
+
+    getHistoryPayload: function() {
+      return responseHistory;
+    },
+
+    setHistoryPayload: function(newPayloadStr) {
+      responseHistory = newPayloadStr;
     }
+
   };
 
 
-  function getPolicy(policy) {
+  function getClaim(policy) {
     $.ajax({
       type: "GET",
       url: "/chain/" + policy,
       success: function(data) {
-        BlockChain.setResponsePayload(data.claim);
+          BlockChain.setResponsePayload(data.claim);
+      },
+      error: function(xhr, message) {
+          alert(message);
+      }
+    });
+  }
+
+  function getHistory(policy) {
+    $.ajax({
+      type: "GET",
+      url: "/dataservices/claim-history/" + policy,
+      success: function(data) {
+          BlockChain.setHistoryPayload(data.claim.history);
       },
       error: function(xhr, message) {
           alert(message);
@@ -34,16 +60,18 @@ var BlockChain = (function() {
   }
 
 
-  function setOwner(customer, owner) {
+  function setOwner(customer, owner, role, state) {
     $.ajax({
       type: "POST",
       url: "/chain/" + customer,
       data: {
-        "owner": owner
+        "owner": owner,
+        "role": role,
+        "state": state
       },
       success: function(data) {
         console.log("Updated owner BlockChain: " + JSON.stringify(data));
-        updateHistory(customer, owner);
+        updateHistory(customer, owner, role, state);
       },
       error: function(xhr, message) {
         alert(message);
@@ -52,7 +80,7 @@ var BlockChain = (function() {
   }
 
 
-  function setPolicy(claim) {
+  function setClaim(claim) {
     $.ajax({
       type: "POST",
       url: "/chain",
@@ -60,11 +88,13 @@ var BlockChain = (function() {
         "id": claim.customer,
         "value": claim.amount,
         "vehicle": claim.vehicle,
-        "owner": claim.owner
+        "owner": claim.owner,
+        "role": claim.role,
+        "state": claim.state
       },
       success: function(data) {
         console.log("Added to BlockChain: " + JSON.stringify(data));
-        updateHistory(claim.customer, claim.owner);
+        updateHistory(claim.customer, claim.owner, claim.role, claim.state);
       },
       error: function(xhr, message) {
           alert(message);
@@ -72,13 +102,15 @@ var BlockChain = (function() {
     });
   }
 
-  function updateHistory(customer, owner) {
+  function updateHistory(customer, owner, role, state) {
     $.ajax({
       type: "POST",
       url: "/dataservices/claim-history",
       data: {
         "customer": customer,
-        "owner": owner
+        "owner": owner,
+        "role": role,
+        "state": state
       },
       success: function(data) {
         console.log("Added to history: " + JSON.stringify(data));
