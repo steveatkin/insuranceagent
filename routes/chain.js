@@ -94,6 +94,7 @@ router.post('/', function(req, res) {
     chaincode.invoke.init_claim_payment([claim.id, claim.value, claim.vehicle, claim.owner, claim.role, claim.state], 
         function(err, data) {
 			if(err) {
+				console.log("BlockChain error: " + JSON.stringify(err))
 				res.status(500).send({status:500, message: 'BlockChain error creating block'});
 			}
             else {
@@ -101,6 +102,23 @@ router.post('/', function(req, res) {
 			}
     });
     
+});
+
+
+// Delete this claim payment
+router.delete('/:customer', function(req, res) {
+    var customer = req.params.customer;
+
+    chaincode.invoke.delete([customer], 
+        function(err, data) {
+			if(err) {
+				console.log("BlockChain error: " + JSON.stringify(err))
+				res.status(500).send({status:500, message: 'BlockChain error deleting block'});
+			}
+            else {
+				res.json({status: 200, message: 'ok'});
+			}
+    }); 
 });
 
 
@@ -137,8 +155,7 @@ router.get('/:customer', function(req, res, next) {
         else {
             res.json({});
         }
-    });
-    
+    }); 
 });
 
 

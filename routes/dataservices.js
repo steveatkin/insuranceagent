@@ -137,17 +137,20 @@ router.post('/:database', function(req, res, next) {
                     // Update the history record there should only be one
                     else {
                         var rows = data.rows;
-                        rows.forEach(function(value){
-                            var record = value.doc;
+
+                        if(rows.length > 0) {
+                            var record = rows[0].doc;
                             record.state = state;
                             record.history.push({owner: owner, role: role, date: Date.now()});
                             db.insert(record, function(err, body){
                                 if(err) {
                                     res.status(500).send({status:500, message: 'Cloudant error updating claim history'});
                                 }
+                                else {
+                                    res.json({status: 200});
+                                }
                             });
-                        });
-                        res.json({status: 200});
+                        }
                     }
                 }
                 else {

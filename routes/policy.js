@@ -23,6 +23,7 @@ router.get('/', function(req, res, next) {
             res.json(result);
         } 
         else {
+            console.log('Unable to get policy: ' + JSON.stringify(error));
             res.status(401).send('Unable to get policy.');
         }
     });

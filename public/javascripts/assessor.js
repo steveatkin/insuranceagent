@@ -41,6 +41,11 @@ function disableFormInputs() {
     $("#submit-payee").prop('disabled', true);
 }
 
+function resetHistory() {
+    //$("#history-table > tbody").html("");
+    //$("#history-table tbody").empty();
+}
+
 
 $(document).ready(function () {
     var claim = null;
@@ -48,6 +53,8 @@ $(document).ready(function () {
     // Disable the adjustors and payee inputs until we have looked up a policy
     $("#policy").keypress(function() {
         disableFormInputs();
+        resetHistory();
+        claim = null;
     });
 
     // Fill in the list of adjustors
@@ -148,7 +155,37 @@ $(document).ready(function () {
             historyBlockChainPayloadSetter.call(BlockChain, data);
             console.log("HISTORY: " + JSON.stringify(data));
             // show the history
-            //$('#history-table > tbody:last').append('<tr><td>column 1 value</td><td>column 2 value</td></tr>');
+
+            var nodes = [];
+            var edges = [];
+
+            for(i = 0; i < data.length; i++) {
+                nodes.push({id: i, "label": data[i].owner});
+                
+                // Check of an edge should be created
+                if((data.length - i) > 1) {
+                    edges.push({"from":i, "to": i+1, arrows:'to'});
+                }
+            }
+
+            var container = document.getElementById('history-graph');
+            var data = {
+                nodes: nodes,
+                edges: edges
+            };
+
+            var options = {
+                autoResize: true, 
+                nodes: {
+                    shape:'dot',
+                    size: 20
+                },
+                interaction: {
+                    zoomView: false
+                }
+            };
+
+            var network = new vis.Network(container, data, options);
         };
 
 
@@ -160,7 +197,7 @@ $(document).ready(function () {
 
             // There is no block chain entry for this claim so create a new one
             if ($.isEmptyObject(data)) {
-                console.log("No block chain entry for this claim: " + claim.customer);
+                console.log("Creating block chain entry for this claim: " + claim.customer);
                 var block = {
                     customer: claim.customer,
                     amount: claim.totalClaimAmount,
@@ -169,11 +206,13 @@ $(document).ready(function () {
                     role: 'Claim Recipient',
                     state: "Received"
                 };
+
+                $("#assignment").val(block.owner);
                 // Store the claim for this policy in the blockchain
                 BlockChain.setClaim(block);
-                $("#assignment").val(block.owner);
             }
             else {
+                // Display the current owner of the claim
                 $("#assignment").val(data.owner);
             }
 
