@@ -75,7 +75,7 @@ function getHistory(policy) {
               $("#history-table").bootstrapTable('append', [{
                     role: value.role,
                     owner: value.owner,
-                    date: value.date
+                    date: (new Date(value.date)).toUTCString()
               }]);
           });
       },

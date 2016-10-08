@@ -34,25 +34,24 @@ function disableFormInputs() {
 function setupTable() {
     $.extend($.fn.bootstrapTable.defaults, {
         formatNoMatches: function () {
-            return 'No History';
+            return Resources.getResources().noHistory;
         }
     });
 
     $("#history-table").bootstrapTable({
         columns: [{
             field: "role",
-            title: "Role"
+            title: Resources.getResources().role
         }, {
             field: "owner",
-            title: "Owner"
+            title: Resources.getResources().owner
         }, {
             field: "date",
-            title: "Date"
+            title: Resources.getResources().date
         }]
     });
 
     $("#history-table").bootstrapTable('load', []);
-
 }
 
 
@@ -67,7 +66,51 @@ $(document).ready(function () {
         blockLoaded = false;
     });
 
-    setupTable();
+    var userLang = (navigator.language ||
+                  navigator.userLanguage).substring(0,2).toLowerCase();
+
+    // Get all the UI strings
+  $.ajax({
+    type: "GET",
+    url: "/resources",
+    data: {
+      "resource":  "agent",
+      "language":  userLang
+    },
+    success: function(data) {
+      Resources.setResources(data);
+
+      $("#titleAssessor").text(data.titleAssessor);
+      $("#aboutAssessor").text(data.aboutAssessor);
+      $("#policy-label").text(data.policyNumber);
+      $("#claim-reason-label").text(data.reason);
+      $("#claim-amount-label").text(data.amount);
+      $("#vehicle-label").text(data.vehicleMessage);
+      $("#last-action-label").text(data.lastAction);
+      $("#submit-policy").text(data.lookup);
+      $("#claim-tab").text(data.claims);
+      $("#adjustor-tab").text(data.adjustor);
+      $("#adjustor-label").text(data.adjustorLabel);
+      $("#submit-adjustor").text(data.adjustorSelect);
+      $("#payee-tab").text(data.payee);
+      $("#payee-type").text(data.payeeType);
+      $("#payee-label").text(data.payeeLabel);
+      $("#submit-payee").text(data.payeeSelect);
+      $("#optionsBank").after("<label for='optionsBank'>" + data.bank + "</label>");
+      $("#optionsPolicyHolder").after("<label for='optionsPolicyHolder'>" + data.policyHolder + "</label>");
+      $("#optionsRepairFacility").after("<label for='optionsRepairFacility'>" + data.repair + "</label>");
+      $("#history-tab").text(data.history);
+
+      // Create the history table after we know our resources are loaded
+      setupTable();
+      
+    },
+    error: function(xhr, message) {
+        alert(message);
+    }
+  });
+
+
 
     // Listen for accordion events
     $('#accordion').on('show.bs.collapse', function (e) {
@@ -187,7 +230,7 @@ $(document).ready(function () {
                 $("#history-table").bootstrapTable('append', [{
                     role: value.role,
                     owner: value.owner,
-                    date: value.date
+                    date: (new Date(value.date)).toUTCString()
                 }]);
             });
         };

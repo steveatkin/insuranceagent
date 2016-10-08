@@ -25,8 +25,8 @@ nav.navbar.navbar-default.navbar-inverse.navbar-fixed-top(role='navigation')
         span.icon-bar
 .container
   .jumbotron
-    h1 Claim Payment System
-    p This system let's you quickly authorize insurance claim payments to indvidual policy holders, financial institutions, and automobile repair facilities using IBM BlockChain 
+    h1#titleAssessor
+    p#aboutAssessor 
 .container
   .row
     .col-sm-12
@@ -34,63 +34,60 @@ nav.navbar.navbar-default.navbar-inverse.navbar-fixed-top(role='navigation')
         .panel.panel-default
           .panel-heading
             h4.panel-title
-              a#claim-tab(data-toggle='collapse', data-parent='#accordion', href='#claim') Claim Information
+              a#claim-tab(data-toggle='collapse', data-parent='#accordion', href='#claim')
           #claim.panel-collapse.collapse.in
             .panel-body
               form
                 .form-group
-                  label#policy-label(for='policy') Policy Number
+                  label#policy-label(for='policy')
                   input#policy.form-control(type='text')
-                  label#claim-reason-label(for='reason') Claim Reason
+                  label#claim-reason-label(for='reason')
                   input#reason.form-control(type='text', disabled='')
-                  label#claim-amount-label(for='amount') Claim Amount
+                  label#claim-amount-label(for='amount')
                   input#amount.form-control(type='text', disabled='')
-                  label#vehicle-label(for='vehicle') Vehicle
+                  label#vehicle-label(for='vehicle')
                   input#vehicle.form-control(type='text', disabled='')
-                  label#assignment-label(for='assignment') Current Assignment
+                  label#last-action-label(for='assignment')
                   input#assignment.form-control(type='text', disabled='')
-                button#submit-policy.btn.btn-default(type='button') Lookup Policy
+                button#submit-policy.btn.btn-default(type='button')
         .panel.panel-default
           .panel-heading
             h4.panel-title
-              a#adjustor-tab(data-toggle='collapse', data-parent='#accordion', href='#adjustor') Adjustor
+              a#adjustor-tab(data-toggle='collapse', data-parent='#accordion', href='#adjustor')
            #adjustor.panel-collapse.collapse
             .panel-body
               form
                 .form-group
-                  label#adjustor-label(for='adjustor-select') Select Adjustor
+                  label#adjustor-label(for='adjustor-select')
                   select#adjustor-select.form-control(disabled)
-                button#submit-adjustor.btn.btn-default(type='button', disabled) Assign Adjustor
+                button#submit-adjustor.btn.btn-default(type='button', disabled)
         .panel.panel-default
           .panel-heading
             h4.panel-title
-              a#payee-tab(data-toggle='collapse', data-parent='#accordion', href='#payee') Payee
+              a#payee-tab(data-toggle='collapse', data-parent='#accordion', href='#payee')
            #payee.panel-collapse.collapse
             .panel-body
               form
                 .form-group
                   div.form.group
-                    label Payee Type
+                    label#payee-type Payee Type
                     .radio
                       label
                         input#optionsBank(type="radio", name="optionsRadios", value="bank", disabled)
-                        | Bank
                     .radio
                       label
                         input#optionsPolicyHolder(type="radio", name="optionsRadios", value="policy-holder", disabled)
-                        | Policy Holder
                     .radio
                       label
                         input#optionsRepairFacility(type="radio", name="optionsRadios", value="repair-facility", disabled)
-                        | Repair Facility
-                  div.form.group  
-                    label#payee-label(for='payee-select') Select Payee
+                  div.form.group
+                    label#payee-label(for='payee-select') 
                     select#payee-select.form-control(disabled)
-                button#submit-payee.btn.btn-default(type='button', disabled) Assign Payee
+                button#submit-payee.btn.btn-default(type='button', disabled)
         .panel.panel-default
           .panel-heading
             h4.panel-title
-              a#history-tab(data-toggle='collapse', data-parent='#accordion', href='#history') History
+              a#history-tab(data-toggle='collapse', data-parent='#accordion', href='#history')
            #history.panel-collapse.collapse
             .panel-body
               table#history-table
@@ -103,6 +100,7 @@ script(src='javascripts/jquery-3.1.0.min.js')
 script(src='javascripts/bootstrap.min.js')
 script(src='javascripts/bootstrap-table.min.js')
 script(src='javascripts/bootstrap-table-locale-all.min.js')
+script(src='javascripts/resources.js')
 script(src='javascripts/policy.js')
 script(src='javascripts/blockchain.js')
 script(src='javascripts/assessor.js')
