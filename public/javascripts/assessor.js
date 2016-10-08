@@ -15,16 +15,6 @@ function populateList(dataset, controlName) {
     });
 }
 
-function enableFormInputs() {
-    // Adjustor form
-    $("#adjustor-select").prop('disabled', false);
-    $("#submit-adjustor").prop('disabled', false);
-
-    // Payee buttons
-    $("#optionsBank").prop('disabled', false);
-    $("#optionsPolicyHolder").prop('disabled', false);
-    $("#optionsRepairFacility").prop('disabled', false);
-}
 
 function disableFormInputs() {
     // Adjustor form
@@ -41,29 +31,74 @@ function disableFormInputs() {
     $("#submit-payee").prop('disabled', true);
 }
 
+function setupTable() {
+    $.extend($.fn.bootstrapTable.defaults, {
+  	formatNoMatches: function() {
+            return 'No History';
+        }
+    });
+
+    $("#history-table").bootstrapTable({
+        columns: [
+      	    {
+      			field: "role",
+      			title: "Role"
+      		},
+      		{
+      			field: "owner",
+      			title: "Owner"
+      		},
+            {
+                field: "date",
+                title: "Date"
+            }
+      	]
+    });
+
+    $("#history-table").bootstrapTable('load', []);
+
+}
+
 function resetHistory() {
-    //$("#history-table > tbody").html("");
-    //$("#history-table tbody").empty();
+    $("#history-table").bootstrapTable('load', []);
 }
 
 
 $(document).ready(function () {
     var claim = null;
+    var blockLoaded = false;
 
     // Disable the adjustors and payee inputs until we have looked up a policy
     $("#policy").keypress(function() {
         disableFormInputs();
-        resetHistory();
         claim = null;
+        blockLoaded = false;
     });
 
-    // Fill in the list of adjustors
-    populateList('adjustors', 'adjustor-select');
+    setupTable();
 
+    // Listen for accordion events
+    $('#accordion').on('show.bs.collapse', function(e) {
+        if(e.target.id === 'history' && blockLoaded) {
+            resetHistory();
+            BlockChain.getHistory(claim.customer);
+        }
+        else if (e.target.id === 'adjustor' && blockLoaded){
+            // Adjustor form
+            $("#adjustor-select").prop('disabled', false);
+            $("#submit-adjustor").prop('disabled', false);
+            // Fill in the list of adjustors
+            populateList('adjustors', 'adjustor-select');
+        }
+        else if(e.target.id === 'payee' && blockLoaded) {
+            // Payee buttons
+            $("#optionsBank").prop('disabled', false);
+            $("#optionsPolicyHolder").prop('disabled', false);
+            $("#optionsRepairFacility").prop('disabled', false);
 
-    // When the radio button is selected populate the payee list
-    $("input[name=optionsRadios]:radio").change(function () {
-        switch($(this).val()) {
+            // When the radio button is selected populate the payee list
+            $("input[name=optionsRadios]:radio").change(function () {
+            switch($(this).val()) {
             case 'bank':
                 // Fill in the list of banks
                 populateList('banks', 'payee-select');
@@ -86,9 +121,10 @@ $(document).ready(function () {
                 $("#payee-select").prop('disabled', false);
                 $("#submit-payee").prop('disabled', false);
                 break;
+            }
+            });
         }
-    })
-
+    });
 
     $("#submit-payee").click( function(){
         var customer = $("#policy").val();
@@ -156,36 +192,12 @@ $(document).ready(function () {
             console.log("HISTORY: " + JSON.stringify(data));
             // show the history
 
-            var nodes = [];
-            var edges = [];
-
-            for(i = 0; i < data.length; i++) {
-                nodes.push({id: i, "label": data[i].owner});
-                
-                // Check of an edge should be created
-                if((data.length - i) > 1) {
-                    edges.push({"from":i, "to": i+1, arrows:'to'});
-                }
-            }
-
-            var container = document.getElementById('history-graph');
-            var data = {
-                nodes: nodes,
-                edges: edges
-            };
-
-            var options = {
-                autoResize: true, 
-                nodes: {
-                    shape:'dot',
-                    size: 20
-                },
-                interaction: {
-                    zoomView: false
-                }
-            };
-
-            var network = new vis.Network(container, data, options);
+            data.forEach(function (value) {
+                $("#history-table").bootstrapTable('append', [{
+        		    role: value.role,
+        		    owner: value.owner,
+                    date: value.date}]);
+            });   
         };
 
 
@@ -210,17 +222,13 @@ $(document).ready(function () {
                 $("#assignment").val(block.owner);
                 // Store the claim for this policy in the blockchain
                 BlockChain.setClaim(block);
+                blockLoaded = true;
             }
             else {
                 // Display the current owner of the claim
                 $("#assignment").val(data.owner);
+                blockLoaded = true;
             }
-
-            // Get the history of this claim
-            BlockChain.getHistory(claim.customer);
-
-            // We have the claim loaded so now enable the other forms
-            enableFormInputs();
         };
 
         // Get the policy and claim for this customer
