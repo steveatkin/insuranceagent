@@ -71,7 +71,7 @@ var BlockChain = (function() {
       },
       success: function(data) {
         console.log("Updated owner BlockChain: " + JSON.stringify(data));
-        updateHistory(customer, owner, role, state);
+        updateHistory(customer, owner, role, state, false);
       },
       error: function(xhr, message) {
         alert(message);
@@ -94,7 +94,7 @@ var BlockChain = (function() {
       },
       success: function(data) {
         console.log("Added to BlockChain: " + JSON.stringify(data));
-        updateHistory(claim.customer, claim.owner, claim.role, claim.state);
+        updateHistory(claim.customer, claim.owner, claim.role, claim.state, true);
       },
       error: function(xhr, message) {
           alert(message);
@@ -102,7 +102,9 @@ var BlockChain = (function() {
     });
   }
 
-  function updateHistory(customer, owner, role, state) {
+  function updateHistory(customer, owner, role, state, reset) {
+    // The reset attribute forces the history to be erased in the event
+    // that there is a leftover record sitting in the database
     $.ajax({
       type: "POST",
       url: "/dataservices/claim-history",
@@ -110,7 +112,8 @@ var BlockChain = (function() {
         "customer": customer,
         "owner": owner,
         "role": role,
-        "state": state
+        "state": state,
+        "reset": reset
       },
       success: function(data) {
         console.log("Added to history: " + JSON.stringify(data));

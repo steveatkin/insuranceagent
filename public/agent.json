@@ -24,5 +24,11 @@
   "weather": "Weather alerts:",
   "actions": "More weather information:",
   "noAlerts": "No weather alerts at this time",
-  "noActions": "No weather actions to take at this time"
+  "noActions": "No weather actions to take at this time",
+  "currentState": "Current State:",
+  "role": "Role",
+  "owner": "Owner",
+  "date": "Date",
+  "received": "Received",
+  "noHistory": "No History"
 }

@@ -33,7 +33,60 @@ function handleLocationError(browserHasGeolocation, infoWindow, pos) {
                         'Error: Your browser doesn\'t support geolocation.');
 }
 
+function setupTable() {
+    $.extend($.fn.bootstrapTable.defaults, {
+        formatNoMatches: function () {
+            return Resources.getResources().noHistory;
+        }
+    });
+
+    $("#history-table").bootstrapTable({
+        columns: [{
+            field: "role",
+            title: Resources.getResources().role
+        }, {
+            field: "owner",
+            title: Resources.getResources().owner
+        }, {
+            field: "date",
+            title: Resources.getResources().date
+        }]
+    });
+
+    $("#history-table").bootstrapTable('load', []);
+}
+
+function getHistory(policy) {
+  $.ajax({
+      type: "GET",
+      url: "/dataservices/claim-history/" + policy,
+      success: function(data) {
+          // reset the history table
+          $("#history-table").bootstrapTable('load', []);
+
+          if(data.claim.state) {
+            $("#current-state").val(data.claim.state);
+          }
+          else {
+            $("#current-state").val(Resources.getResources().received);
+          }
+
+          data.claim.history.forEach(function (value) {
+              $("#history-table").bootstrapTable('append', [{
+                    role: value.role,
+                    owner: value.owner,
+                    date: value.date
+              }]);
+          });
+      },
+      error: function(xhr, message) {
+          alert(message);
+      }
+    });  
+}
+
 $(document).ready(function () {
+  var policyInformation = null;
 
   // Register the enter key to the go button
   $("input").bind("keydown", function(event) {
@@ -48,6 +101,12 @@ $(document).ready(function () {
       }
    });
 
+  // Listen for accordion events
+  $('#accordion').on('show.bs.collapse', function (e) {
+    if (e.target.id === 'claims' && policyInformation) {
+      getHistory(policyInformation.customer);
+    }
+  });
 
 
   var userLang = (navigator.language ||
@@ -64,6 +123,12 @@ $(document).ready(function () {
     Conversation.sendRequest($("#insurance-query").val(), context, userLang);
     // erase the text in the entry field
     $("#insurance-query").val('');
+
+    // Collapse the panels
+    $('.collapse').collapse("hide");
+
+    // reset policy information
+    policyInformation = null;
   });
 
   // Start with the accordion in the eclapsed state
@@ -106,6 +171,12 @@ $(document).ready(function () {
       $("#weather").text(data.weather);
       $("#actions").text(data.actions);
       $("#offers-tab").text(data.offers);
+      $("#claim-state").text(data.currentState);
+
+
+      // Create the history table after we know our resources are loaded
+      setupTable();
+      
     },
     error: function(xhr, message) {
         alert(message);
@@ -118,6 +189,9 @@ $(document).ready(function () {
 
   Policy.setResponsePayload = function(data) {
     policyResponsePayloadSetter.call(Policy, data);
+
+    policyInformation = data;
+
     // Clear the weather alerts boxes
     $("#forecast").val('');
     $("#recommendation").val('');

@@ -101,6 +101,8 @@ router.post('/:database', function(req, res, next) {
     var role = req.body.role;
     var state = req.body.state;
 
+    var reset = req.body.reset;
+
     var serviceRegex = /(cloudantNoSQLDB).*/;
 
     var options = optional('./cloudant-credentials.json') || {appEnv: appEnv};
@@ -141,7 +143,16 @@ router.post('/:database', function(req, res, next) {
                         if(rows.length > 0) {
                             var record = rows[0].doc;
                             record.state = state;
-                            record.history.push({owner: owner, role: role, date: Date.now()});
+
+                            // erase the old history and start the history over
+                            if(reset === true) {
+                                record.history = [{owner: owner, role: role, date: Date.now()}];
+                            }
+                            // append to the existing history
+                            else {
+                                record.history.push({owner: owner, role: role, date: Date.now()});
+                            }
+
                             db.insert(record, function(err, body){
                                 if(err) {
                                     res.status(500).send({status:500, message: 'Cloudant error updating claim history'});
