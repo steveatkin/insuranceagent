@@ -9,7 +9,7 @@ router.post('/:customer', function(req, res){
     var owner = req.body.owner;
 	var role = req.body.role;
 	var state = req.body.state;
-    var phone = req.state.phone;
+    var phone = req.body.phone;
 	var customer = req.params.customer;
 
     var serviceRegex = /(user-provided).*/;
