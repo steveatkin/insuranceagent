@@ -60,7 +60,7 @@ var BlockChain = (function() {
   }
 
 
-  function setOwner(customer, owner, role, state) {
+  function setOwner(customer, owner, role, state, cb) {
     $.ajax({
       type: "POST",
       url: "/chain/" + customer,
@@ -72,9 +72,10 @@ var BlockChain = (function() {
       success: function(data) {
         console.log("Updated owner BlockChain: " + JSON.stringify(data));
         updateHistory(customer, owner, role, state, false);
+        cb(null, data);
       },
       error: function(xhr, message) {
-        alert(message);
+        cb(true, message);
       }
     });
   }

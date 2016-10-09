@@ -59,6 +59,9 @@ $(document).ready(function () {
     var claim = null;
     var blockLoaded = false;
 
+    var target = document.getElementById('accordion');
+    var spinner = new Spinner();
+
     // Disable the adjustors and payee inputs until we have looked up a policy
     $("#policy").keypress(function () {
         disableFormInputs();
@@ -115,6 +118,7 @@ $(document).ready(function () {
     // Listen for accordion events
     $('#accordion').on('show.bs.collapse', function (e) {
         if (e.target.id === 'history' && blockLoaded) {
+            spinner.spin(target);
             BlockChain.getHistory(claim.customer);
         } else if (e.target.id === 'adjustor' && blockLoaded) {
             // Adjustor form
@@ -177,13 +181,25 @@ $(document).ready(function () {
                 break;
         };
 
-        BlockChain.setOwner(customer, payee, role, state);
+        spinner.spin(target);
+        BlockChain.setOwner(customer, payee, role, state, function (err, message) {
+            spinner.stop();
+            if(err) {
+                alert(message);
+            }
+        });
     });
 
     $("#submit-adjustor").click(function () {
         var customer = $("#policy").val();
         var adjustor = $('#adjustor-select :selected').text();
-        BlockChain.setOwner(customer, adjustor, "Adjustor", "In Process");
+        spinner.spin(target);
+        BlockChain.setOwner(customer, adjustor, "Adjustor", "In Process", function(err, message) {
+            spinner.stop();
+            if(err) {
+                alert(message);
+            }
+        });
     });
 
 
@@ -213,6 +229,7 @@ $(document).ready(function () {
             }
 
             // Get the block chain entry for this claim
+            spinner.spin(target);
             BlockChain.getClaim(customer);
         };
 
@@ -223,6 +240,7 @@ $(document).ready(function () {
         BlockChain.setHistoryPayload = function (data) {
             historyBlockChainPayloadSetter.call(BlockChain, data);
             console.log("HISTORY: " + JSON.stringify(data));
+            spinner.stop();
             // reset the history table
             $("#history-table").bootstrapTable('load', []);
 
@@ -263,6 +281,7 @@ $(document).ready(function () {
                 $("#assignment").val(data.owner);
                 blockLoaded = true;
             }
+            spinner.stop();
         };
 
         // Get the policy and claim for this customer

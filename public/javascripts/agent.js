@@ -57,6 +57,10 @@ function setupTable() {
 }
 
 function getHistory(policy) {
+
+  var target = document.getElementById('accordion');
+  var spinner = new Spinner().spin(target);
+
   $.ajax({
       type: "GET",
       url: "/dataservices/claim-history/" + policy,
@@ -78,6 +82,8 @@ function getHistory(policy) {
                     date: (new Date(value.date)).toUTCString()
               }]);
           });
+
+          spinner.stop();
       },
       error: function(xhr, message) {
           alert(message);
@@ -286,17 +292,7 @@ $(document).ready(function () {
 
     if(data.context.policy && data.context.verified === true) {
       Policy.getPolicy(data.context.policy, userLang);
-
-      // see which accordion panel we should display
-      if(data.context.claims) {
-        $("#claims.collapse").collapse('show');
-      }
-      else if(data.context.offers){
-        $("#offers.collapse").collapse('show');
-      }
-      else {
-        $("#policy.collapse").collapse('show');
-      }
+      $("#policy.collapse").collapse('show');
     }
   };
 
