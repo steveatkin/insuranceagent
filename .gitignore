@@ -6,4 +6,5 @@ conversation-credentials.json
 translation-credentials.json
 chain-credentials.json
 cloudant-credentials.json
+twilio-credentials.json
 npm-debug.log

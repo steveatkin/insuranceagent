@@ -118,6 +118,27 @@ var BlockChain = (function() {
       },
       success: function(data) {
         console.log("Added to history: " + JSON.stringify(data));
+        // send an SMS message to the customer
+        sendNotification(customer, owner, role, state);
+      },
+      error: function(xhr, message) {
+          alert(message);
+      }
+    });
+  }
+
+
+  function sendNotification(customer, owner, role, state) {
+    $.ajax({
+      type: "POST",
+      url: "/twilio/" + customer,
+      data: {
+        "owner": owner,
+        "role": role,
+        "state": state,
+      },
+      success: function(data) {
+        console.log("Notification sent: " + JSON.stringify(data));
       },
       error: function(xhr, message) {
           alert(message);
