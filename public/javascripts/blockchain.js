@@ -119,7 +119,8 @@ var BlockChain = (function() {
       success: function(data) {
         console.log("Added to history: " + JSON.stringify(data));
         // send an SMS message to the customer
-        sendNotification(customer, owner, role, state);
+        // For demo puproses I have hardcoded the number to my cell
+        sendNotification(customer, '+18134104511', owner, role, state);
       },
       error: function(xhr, message) {
           alert(message);
@@ -128,7 +129,7 @@ var BlockChain = (function() {
   }
 
 
-  function sendNotification(customer, owner, role, state) {
+  function sendNotification(customer, phone, owner, role, state) {
     $.ajax({
       type: "POST",
       url: "/twilio/" + customer,
@@ -136,6 +137,7 @@ var BlockChain = (function() {
         "owner": owner,
         "role": role,
         "state": state,
+        "phone": phone
       },
       success: function(data) {
         console.log("Notification sent: " + JSON.stringify(data));

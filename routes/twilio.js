@@ -9,6 +9,7 @@ router.post('/:customer', function(req, res){
     var owner = req.body.owner;
 	var role = req.body.role;
 	var state = req.body.state;
+    var phone = req.state.phone;
 	var customer = req.params.customer;
 
     var serviceRegex = /(user-provided).*/;
@@ -26,11 +27,9 @@ router.post('/:customer', function(req, res){
 
     var client = new twilio.RestClient(options.credentials.accountSID, options.credentials.authToken);
 
-    // For demo puproses I have hardcoded the number to my cell
-
     client.messages.create({
-        body: 'Claim: ' + customer + ' State: ',
-        to: '+18134104511',  // Text this number
+        body: 'Claim: ' + customer + ' State: ' + state,
+        to: phone,  // Text this number
         from: '+13057833210' // From a valid Twilio number
     }, function(err, message) {
         if(err) {
