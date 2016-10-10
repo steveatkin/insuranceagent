@@ -26,7 +26,7 @@ var optionsRedis = optional('./redis-credentials.json') || {
 
 // parse vcap using cfenv if available
 if (optionsSSO.appEnv && !optionsSSO.credentials) {
-  optionsSSO.credentials = cfEnvUtil.getServiceCredsByLabel(options.appEnv, serviceSSORegex);
+  optionsSSO.credentials = cfEnvUtil.getServiceCredsByLabel(optionsSSO.appEnv, serviceSSORegex);
 }
 // try again with name
 else if (optionsSSO.appEnv && !optionsSSO.credentials) {
@@ -35,7 +35,7 @@ else if (optionsSSO.appEnv && !optionsSSO.credentials) {
 
 // parse vcap using cfenv if available
 if (optionsRedis.appEnv && !optionsRedis.credentials) {
-  optionsRedis.credentials = cfEnvUtil.getServiceCredsByLabel(options.appEnv, serviceRedisRegex);
+  optionsRedis.credentials = cfEnvUtil.getServiceCredsByLabel(optionsRedis.appEnv, serviceRedisRegex);
 }
 // try again with name
 else if (optionsRedis.appEnv && !optionsRedis.credentials) {
