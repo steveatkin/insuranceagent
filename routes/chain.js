@@ -94,10 +94,11 @@ router.post('/', function(req, res) {
     chaincode.invoke.init_claim_payment([claim.id, claim.value, claim.vehicle, claim.owner, claim.role, claim.state], 
         function(err, data) {
 			if(err) {
-				console.log("BlockChain error: " + JSON.stringify(err))
+				console.log("BLOCKCHAIN ERROR: " + JSON.stringify(err));
 				res.status(500).send({status:500, message: 'BlockChain error creating block'});
 			}
             else {
+				console.log("TRANSACTION INFO: " + JSON.stringify(data));
 				res.json({status: 200, message: 'ok'});
 			}
     });
@@ -112,10 +113,11 @@ router.delete('/:customer', function(req, res) {
     chaincode.invoke.delete([customer], 
         function(err, data) {
 			if(err) {
-				console.log("BlockChain error: " + JSON.stringify(err))
+				console.log("BLOCKCHAIN ERROR: " + JSON.stringify(err));
 				res.status(500).send({status:500, message: 'BlockChain error deleting block'});
 			}
             else {
+				console.log("TRANSACTION INFO: " + JSON.stringify(data));
 				res.json({status: 200, message: 'ok'});
 			}
     }); 
@@ -132,9 +134,11 @@ router.post('/:customer', function(req, res, next){
 	chaincode.invoke.set_owner([customer, owner, role, state],
 		function(err, data) {
 			if(err) {
+				console.log("BLOCKCHAIN ERROR: " + JSON.stringify(err));
 				res.status(500).send({status:500, message: 'BlockChain error setting block owner'});
 			}
 			else {
+				console.log("TRANSACTION INFO: " + JSON.stringify(data));
 				res.json({status: 200, message: 'ok'});
 			}
 		}

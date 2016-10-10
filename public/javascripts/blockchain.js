@@ -130,6 +130,9 @@ var BlockChain = (function() {
 
 
   function sendNotification(customer, phone, owner, role, state) {
+    var userLang = (navigator.language ||
+                  navigator.userLanguage).substring(0,2).toLowerCase();
+
     $.ajax({
       type: "POST",
       url: "/twilio/" + customer,
@@ -137,7 +140,8 @@ var BlockChain = (function() {
         "owner": owner,
         "role": role,
         "state": state,
-        "phone": phone
+        "phone": phone,
+        "language": userLang
       },
       success: function(data) {
         console.log("Notification sent: " + JSON.stringify(data));
