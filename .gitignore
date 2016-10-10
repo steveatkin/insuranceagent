@@ -8,4 +8,5 @@ chain-credentials.json
 cloudant-credentials.json
 twilio-credentials.json
 sso-credentials.json
+redis-credentials.json
 npm-debug.log

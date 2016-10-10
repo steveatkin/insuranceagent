@@ -25,7 +25,9 @@
     "cloudant": "^1.5.0",
     "twilio": "^2.11.0",
     "passport": "0.3.2",
-		"passport-idaas-openidconnect": "2.0.0"
+		"passport-idaas-openidconnect": "2.0.0",
+    "connect-redis" : "3.1.x",
+    "redis" : "2.6.x"
   },
   "repository": {},
 	"engines": {
