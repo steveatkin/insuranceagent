@@ -39,7 +39,7 @@ if (optionsRedis.appEnv && !optionsRedis.credentials) {
 }
 // try again with name
 else if (optionsRedis.appEnv && !optionsRedis.credentials) {
-  optionsRedus.credentials = optionsRedis.appEnv.getServiceCreds(serviceRedisRegex);
+  optionsRedis.credentials = optionsRedis.appEnv.getServiceCreds(serviceRedisRegex);
 }
 
 var client_id = optionsSSO.credentials.clientId;
