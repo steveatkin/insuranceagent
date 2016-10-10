@@ -7,4 +7,5 @@ translation-credentials.json
 chain-credentials.json
 cloudant-credentials.json
 twilio-credentials.json
+sso-credentials.json
 npm-debug.log
