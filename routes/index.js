@@ -76,6 +76,10 @@ passport.use(Strategy);
 
 router.get('/login', passport.authenticate('openidconnect', {}));
 
+router.get('/failure', function (req, res) {
+  res.send('login failed');
+});
+
 function ensureAuthenticated(req, res, next) {
   if (!req.isAuthenticated()) {
     req.session.originalUrl = req.originalUrl;
@@ -88,24 +92,13 @@ function ensureAuthenticated(req, res, next) {
 router.get('/auth/sso/callback', function (req, res, next) {
   var redirect_url = req.session.originalUrl;
   passport.authenticate('openidconnect', {
-    successRedirect: '/hello',
+    successRedirect: redirect_url,
     failureRedirect: '/failure',
   })(req, res, next);
 });
 
-
-router.get('/hello', ensureAuthenticated, function (req, res) {
-  res.send('Hello, ' + req.user['id'] + '!');
-});
-
-router.get('/failure', function (req, res) {
-  res.send('login failed');
-});
-
-
-
 /* GET home page. */
-router.get('/', function (req, res, next) {
+router.get('/', ensureAuthenticated, function (req, res, next) {
   res.render('index');
 });
 
