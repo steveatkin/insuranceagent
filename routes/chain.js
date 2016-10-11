@@ -37,6 +37,15 @@ var users = null;
 
 var options = optional('./chain-credentials.json');
 
+function ensureAuthenticated(req, res, next) {
+  if (!req.isAuthenticated()) {
+    req.session.originalUrl = req.originalUrl;
+    res.redirect('/login');
+  } else {
+    return next();
+  }
+}
+
 
 if (process.env.VCAP_SERVICES) {
 	var servicesObject = JSON.parse(process.env.VCAP_SERVICES);
@@ -103,7 +112,7 @@ ibc.load(options, function (err, cc) {
 
 
 // Create a new block for this claim payment
-router.post('/', function (req, res) {
+router.post('/', ensureAuthenticated, function (req, res) {
 	var claim = req.body;
 
 	chaincode.invoke.init_claim_payment([claim.id, claim.value, claim.vehicle, claim.owner, claim.role, claim.state],
@@ -127,7 +136,7 @@ router.post('/', function (req, res) {
 
 
 // Delete this claim payment
-router.delete('/:customer', function (req, res) {
+router.delete('/:customer', ensureAuthenticated, function (req, res) {
 	var customer = req.params.customer;
 
 	chaincode.invoke.delete([customer],
@@ -149,7 +158,7 @@ router.delete('/:customer', function (req, res) {
 });
 
 // Delete the chain code for this block chain
-router.delete('/', function (req, res) {
+router.delete('/', ensureAuthenticated, function (req, res) {
 	ibc.clear(function (err, data) {
 		if (err) {
 			console.log("BLOCKCHAIN ERROR: " + JSON.stringify(err));
@@ -169,7 +178,7 @@ router.delete('/', function (req, res) {
 
 
 // Update the owner of the claim payment in the block e.g., policy holder, bank, or repair facility
-router.post('/:customer', function (req, res, next) {
+router.post('/:customer', ensureAuthenticated, function (req, res, next) {
 	var owner = req.body.owner;
 	var role = req.body.role;
 	var state = req.body.state;
@@ -196,7 +205,7 @@ router.post('/:customer', function (req, res, next) {
 
 
 // Get the block for the claim payment
-router.get('/:customer', function (req, res, next) {
+router.get('/:customer', ensureAuthenticated, function (req, res, next) {
 	var customer = req.params.customer;
 
 	chaincode.query.read([customer], function (err, data) {

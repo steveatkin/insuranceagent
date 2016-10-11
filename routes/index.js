@@ -121,13 +121,6 @@ var Strategy = new OpenIDConnectStrategy({
 
 passport.use(Strategy);
 
-
-router.get('/login', passport.authenticate('openidconnect', {}));
-
-router.get('/failure', function (req, res) {
-  res.send('login failed');
-});
-
 function ensureAuthenticated(req, res, next) {
   if (!req.isAuthenticated()) {
     req.session.originalUrl = req.originalUrl;
@@ -136,6 +129,13 @@ function ensureAuthenticated(req, res, next) {
     return next();
   }
 }
+
+router.get('/login', passport.authenticate('openidconnect', {}));
+
+router.get('/failure', function (req, res) {
+  res.send('login failed');
+});
+
 
 router.get('/auth/sso/callback', function (req, res, next) {
   var redirect_url = req.session.originalUrl;

@@ -47,7 +47,16 @@ var conversation = new ConversationV1({
   version_date: '2016-07-01'
 });
 
-router.post('/', function (req, res) {
+function ensureAuthenticated(req, res, next) {
+  if (!req.isAuthenticated()) {
+    req.session.originalUrl = req.originalUrl;
+    res.redirect('/login');
+  } else {
+    return next();
+  }
+}
+
+router.post('/', ensureAuthenticated, function (req, res) {
 
   var workspace = process.env.WORKSPACE_ENGLISH;
 

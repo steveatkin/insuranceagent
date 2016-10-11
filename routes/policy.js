@@ -23,8 +23,17 @@ var express = require('express');
 var router = express.Router();
 var request = require('request');
 
+function ensureAuthenticated(req, res, next) {
+  if (!req.isAuthenticated()) {
+    req.session.originalUrl = req.originalUrl;
+    res.redirect('/login');
+  } else {
+    return next();
+  }
+}
 
-router.get('/', function(req, res, next) {
+
+router.get('/', ensureAuthenticated, function(req, res, next) {
   
   var params = {
     url: process.env.POLICY_API,

@@ -41,7 +41,16 @@ else if (options.appEnv && !options.credentials) {
     options.credentials = options.appEnv.getServiceCreds(serviceRegex);
 }
 
-router.get('/', function (req, res, next) {
+function ensureAuthenticated(req, res, next) {
+  if (!req.isAuthenticated()) {
+    req.session.originalUrl = req.originalUrl;
+    res.redirect('/login');
+  } else {
+    return next();
+  }
+}
+
+router.get('/', ensureAuthenticated, function (req, res, next) {
     var language = req.query.language || 'en-US';
     var key = req.query.key;
 

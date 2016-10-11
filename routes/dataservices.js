@@ -42,8 +42,17 @@ else if (options.appEnv && !options.credentials) {
     options.credentials = options.appEnv.getServiceCreds(serviceRegex);
 }
 
+function ensureAuthenticated(req, res, next) {
+  if (!req.isAuthenticated()) {
+    req.session.originalUrl = req.originalUrl;
+    res.redirect('/login');
+  } else {
+    return next();
+  }
+}
+
 // adjustors, banks, repair-facilities
-router.get('/:database', function (req, res, next) {
+router.get('/:database', ensureAuthenticated, function (req, res, next) {
     var database = req.params.database;
 
     Cloudant(options.credentials.url, function (err, cloudant) {
@@ -80,7 +89,7 @@ router.get('/:database', function (req, res, next) {
 });
 
 // claim-history/DG31826
-router.get('/:database/:customer', function (req, res, next) {
+router.get('/:database/:customer', ensureAuthenticated, function (req, res, next) {
     var database = req.params.database;
     var customer = req.params.customer;
 
@@ -141,7 +150,7 @@ router.get('/:database/:customer', function (req, res, next) {
 
 
 // claim-history 
-router.post('/:database', function (req, res, next) {
+router.post('/:database', ensureAuthenticated, function (req, res, next) {
     var database = req.params.database;
 
     var customer = req.body.customer;

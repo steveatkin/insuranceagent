@@ -46,7 +46,16 @@ var language_translator = new LanguageTranslatorV2({
   password: options.credentials.password
 });
 
-router.get('/', function (req, res) {
+function ensureAuthenticated(req, res, next) {
+  if (!req.isAuthenticated()) {
+    req.session.originalUrl = req.originalUrl;
+    res.redirect('/login');
+  } else {
+    return next();
+  }
+}
+
+router.get('/', ensureAuthenticated, function (req, res) {
 
   language_translator.translate({
       text: req.query.text,

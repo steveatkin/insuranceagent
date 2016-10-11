@@ -27,6 +27,7 @@ var gpClient = require('g11n-pipeline').getClient(
 var express = require('express');
 var router = express.Router();
 
+// No need to authenticate getting the resources for the app
 router.get('/', function(req, res, next) {
   var myResources = gpClient.bundle(req.query.resource);
 

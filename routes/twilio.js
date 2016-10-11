@@ -47,7 +47,16 @@ else if (options.appEnv && !options.credentials) {
 
 var client = new twilio.RestClient(options.credentials.accountSID, options.credentials.authToken);
 
-router.post('/:customer', function (req, res) {
+function ensureAuthenticated(req, res, next) {
+  if (!req.isAuthenticated()) {
+    req.session.originalUrl = req.originalUrl;
+    res.redirect('/login');
+  } else {
+    return next();
+  }
+}
+
+router.post('/:customer', ensureAuthenticated, function (req, res) {
     var owner = req.body.owner;
     var role = req.body.role;
     var state = req.body.state;
