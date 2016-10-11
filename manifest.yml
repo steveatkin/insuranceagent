@@ -1,6 +1,6 @@
 applications:
 - path: .
-  memory: 256M
+  memory: 512M
   instances: 1
   domain: mybluemix.net
   name: insuranceagent
@@ -11,3 +11,8 @@ applications:
     - "Weather Company Data for IBM Bluemix-n7"
     - "Conversation-y0"
     - "Language Translation"
+    - "AtkinRed-cloudantNoSQLDB"
+    - "Blockchain-fo"
+    - "Twilio-0w"
+    - "Single Sign On-n8"
+    - "Compose for Redis-6o"
