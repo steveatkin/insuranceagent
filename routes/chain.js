@@ -191,12 +191,8 @@ router.post('/:customer', ensureAuthenticated, function (req, res, next) {
 	var state = req.body.state;
 	var customer = req.params.customer;
 
-	console.log("Passed authentication in create customer block");
-
 	chaincode.invoke.set_owner([customer, owner, role, state],
 		function (err, data) {
-			console.log("Error in get customer block", err, data);
-
 			if (err) {
 				console.log("BLOCKCHAIN ERROR: " + JSON.stringify(err));
 				res.status(500).send({
@@ -219,11 +215,8 @@ router.post('/:customer', ensureAuthenticated, function (req, res, next) {
 router.get('/:customer', ensureAuthenticated, function (req, res, next) {
 	var customer = req.params.customer;
 
-	console.log("Passed authentication in get customer block");
-
 	chaincode.query.read([customer], function (err, data) {
 		if (!err && data) {
-			console.log("Error in get customer block");
 			var claim = JSON.parse(data);
 			res.json({
 				status: 200,
