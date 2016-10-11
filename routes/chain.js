@@ -74,6 +74,13 @@ if (process.env.VCAP_SERVICES) {
 	users = options.credentials.users;
 }
 
+// This is a special check to see if we should only use the first validating peer and user
+// At some point we can remove the need for this check once BlockChain is stable
+if(process.env.SINGLE_PEER == 'true') {
+	peers = [peers[0]];
+	users = [users[0]];
+}
+
 var options = {
 	network: {
 		peers: peers,
