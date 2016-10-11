@@ -5,10 +5,7 @@ var optional = require('optional');
 var appEnv = require('cfenv').getAppEnv();
 var cfEnvUtil = require('./cfenv-credsbylabel');
 var OpenIDConnectStrategy = require('passport-idaas-openidconnect').IDaaSOIDCStrategy;
-
 var expressSession = require('express-session');
-//var sessionStore = new expressSession.MemoryStore;
-
 var redis = require('redis');
 var RedisStore = require('connect-redis')(expressSession);
 
@@ -60,7 +57,7 @@ redisClient.on('connect', function() {
 });
 
 router.use(expressSession({
-  secret: 'somesecretmagicword',
+  secret: process.env.SESSION_SECRET,
   resave: 'true',
   saveUninitialized: 'true',
   store: new RedisStore({ client: redisClient })
@@ -78,11 +75,8 @@ passport.deserializeUser(function (obj, done) {
 });
 
 
-
-
-
 // you MUST change the host route to match your application name
-var callback_url = 'https://insuranceagent.mybluemix.net/auth/sso/callback';
+var callback_url = process.env.CALLBACK_URL;
 
 var OpenIDConnectStrategy = require('passport-idaas-openidconnect').IDaaSOIDCStrategy;
 var Strategy = new OpenIDConnectStrategy({
