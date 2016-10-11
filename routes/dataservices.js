@@ -43,7 +43,7 @@ else if (options.appEnv && !options.credentials) {
 }
 
 function ensureAuthenticated(req, res, next) {
-  if (!req.isAuthenticated()) {
+  if (!req.isAuthenticated() && process.env.NODE_ENV == 'production') {
     req.session.originalUrl = req.originalUrl;
     res.redirect('/login');
   } else {
