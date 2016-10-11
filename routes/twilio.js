@@ -1,3 +1,23 @@
+/*	
+ * Copyright IBM Corp. 2016
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * @author Steven Atkin
+ */
+
 var express = require('express');
 var router = express.Router();
 var optional = require('optional');
@@ -5,11 +25,27 @@ var appEnv = require('cfenv').getAppEnv();
 var cfEnvUtil = require('./cfenv-credsbylabel');
 var twilio = require('twilio');
 var gpClient = require('g11n-pipeline').getClient(
-    optional('./g11n-credentials.json') ||
-    {
+    optional('./g11n-credentials.json') || {
         appEnv: appEnv
     }
 );
+
+var serviceRegex = /(user-provided).*/;
+
+var options = optional('./twilio-credentials.json') || {
+    appEnv: appEnv
+};
+
+// parse vcap using cfenv if available
+if (options.appEnv && !options.credentials) {
+    options.credentials = cfEnvUtil.getServiceCredsByLabel(options.appEnv, serviceRegex);
+}
+// try again with name
+else if (options.appEnv && !options.credentials) {
+    options.credentials = options.appEnv.getServiceCreds(serviceRegex);
+}
+
+var client = new twilio.RestClient(options.credentials.accountSID, options.credentials.authToken);
 
 router.post('/:customer', function (req, res) {
     var owner = req.body.owner;
@@ -17,24 +53,6 @@ router.post('/:customer', function (req, res) {
     var state = req.body.state;
     var phone = req.body.phone;
     var customer = req.params.customer;
-
-    var serviceRegex = /(user-provided).*/;
-
-    var options = optional('./twilio-credentials.json') || {
-        appEnv: appEnv
-    };
-
-    // parse vcap using cfenv if available
-    if (options.appEnv && !options.credentials) {
-        options.credentials = cfEnvUtil.getServiceCredsByLabel(options.appEnv, serviceRegex);
-    }
-    // try again with name
-    else if (options.appEnv && !options.credentials) {
-        options.credentials = options.appEnv.getServiceCreds(serviceRegex);
-    }
-
-    var client = new twilio.RestClient(options.credentials.accountSID, options.credentials.authToken);
-
 
     var myResources = gpClient.bundle('agent');
 
@@ -74,7 +92,6 @@ router.post('/:customer', function (req, res) {
 
 
 });
-
 
 
 module.exports = router;
