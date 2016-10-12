@@ -19,51 +19,50 @@
  */
 
 
-var Policy = (function() {
+var Policy = (function () {
 
-  var responsePayload;
+  var policyData;
 
   // Publicly accessible methods defined
   return {
     getPolicy: getPolicy,
 
-    getResponsePayload: function() {
-      return responsePayload;
+    getPolicyData: function () {
+      return policyData;
     },
 
-    setResponsePayload: function(newPayloadStr) {
-      responsePayload = newPayloadStr;
+    setPolicyData: function (data) {
+      policyData = data;
     }
   };
 
 
   function getPolicy(policy, language) {
-    
+
     $.ajax({
       type: "GET",
       url: "/policy",
       data: {
-        "customer":  policy,
-        "language":  language
+        "customer": policy,
+        "language": language
       },
-      success: function(data) {
+      success: function (data) {
         // If there is no Intl object then use non localized forms
         var effectiveToDate = new Date(data.effectiveToDate);
 
         // localize date
-        if(typeof Intl != "undefined") {
+        if (typeof Intl != "undefined") {
           data.effectiveToDate = new Intl.DateTimeFormat().format(effectiveToDate);
-        }
-        else {
+        } else {
           data.effectiveToDate = effectiveToDate.toString();
         }
 
-        Policy.setResponsePayload(data);
-        },
-        error: function(xhr, message) {
-          alert(message);
-        }
-      });
-    }
+        Policy.setPolicyData(data);
+      },
+      error: function (xhr, message) {
+        alert(message);
+      }
+    });
+  }
 
 }());

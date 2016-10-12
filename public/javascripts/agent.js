@@ -40,7 +40,6 @@ function initMap() {
         map: map
       });
 
-      //infoWindow.setPosition(pos);
       infoWindow.setContent('Location found.');
       map.setCenter(pos);
     }, function () {
@@ -59,30 +58,30 @@ function handleLocationError(browserHasGeolocation, infoWindow, pos) {
     'Error: Your browser doesn\'t support geolocation.');
 }
 
-function setupTable() {
+function createHistoryTable() {
   $.extend($.fn.bootstrapTable.defaults, {
     formatNoMatches: function () {
-      return Resources.getResources().noHistory;
+      return Resources.getResourcesData().noHistory;
     }
   });
 
   $("#history-table").bootstrapTable({
     columns: [{
       field: "role",
-      title: Resources.getResources().role
+      title: Resources.getResourcesData().role
     }, {
       field: "owner",
-      title: Resources.getResources().owner
+      title: Resources.getResourcesData().owner
     }, {
       field: "date",
-      title: Resources.getResources().date
+      title: Resources.getResourcesData().date
     }]
   });
 
   $("#history-table").bootstrapTable('load', []);
 }
 
-function getHistory(policy) {
+function populateHistoryTable(policy) {
 
   var target = document.getElementById('accordion');
   var spinner = new Spinner().spin(target);
@@ -97,7 +96,7 @@ function getHistory(policy) {
       if (data.claim.state) {
         $("#current-state").val(data.claim.state);
       } else {
-        $("#current-state").val(Resources.getResources().received);
+        $("#current-state").val(Resources.getResourcesData().received);
       }
 
       if (data.claim.history) {
@@ -120,6 +119,8 @@ function getHistory(policy) {
 
 $(document).ready(function () {
   var policyInformation = null;
+  var userLang = (navigator.language ||
+    navigator.userLanguage).substring(0, 2).toLowerCase();
 
   // Register the enter key to the go button
   $("input").bind("keydown", function (event) {
@@ -136,18 +137,14 @@ $(document).ready(function () {
   // Listen for accordion events
   $('#accordion').on('show.bs.collapse', function (e) {
     if (e.target.id === 'claims' && policyInformation) {
-      getHistory(policyInformation.customer);
+      populateHistoryTable(policyInformation.customer);
     }
   });
-
-
-  var userLang = (navigator.language ||
-    navigator.userLanguage).substring(0, 2).toLowerCase();
 
   // listen for the click of the ask question button
   $('#insurance-query-button').click(function () {
     var context = {};
-    var latestResponse = Conversation.getResponsePayload();
+    var latestResponse = Conversation.getConversationData();
     if (latestResponse) {
       context = latestResponse.context;
     }
@@ -169,58 +166,49 @@ $(document).ready(function () {
   $("#offers.collapse").collapse();
 
   // Get all the UI strings
-  $.ajax({
-    type: "GET",
-    url: "/resources",
-    data: {
-      "resource": "agent",
-      "language": userLang
-    },
-    success: function (data) {
-      Resources.setResources(data);
+  // Setup the callback that is invoked when the resources are found.
+  var resourcesDataSetter = Resources.setResourcesData;
 
-      $("#title").text(data.title);
-      $("#about").text(data.about);
-      $("#policy-type-message").text(data.policyType);
-      $("#numbers-message").text(data.numberPolicies);
-      $("#monthly-message").text(data.monthlyPremium);
-      $("#claim-message").text(data.monthsSinceClaim);
-      $("#coverage-message").text(data.coverage);
-      $("#effective-message").text(data.effective);
-      $("#inception-message").text(data.inception);
-      $("#insurance-agent").text(data.insuranceAgent);
-      $("#insurance-query-button").text(data.go);
-      $("#claim-reason").text(data.reason);
-      $("#claim-amount").text(data.amount);
-      $("#policy-tab").text(data.policy);
-      $("#claims-tab").text(data.claims);
-      $("#offer-message").text(data.offerMessage);
-      $("#vehicle-message").text(data.vehicleMessage);
-      $("#city-message").text(data.cityMessage);
-      $("#state-message").text(data.stateMessage);
-      $("#family-message").text(data.familyNameMessage);
-      $("#given-message").text(data.givenNameMessage);
-      $("#weather").text(data.weather);
-      $("#actions").text(data.actions);
-      $("#offers-tab").text(data.offers);
-      $("#claim-state").text(data.currentState);
+  Resources.setResourcesData = function (data) {
+    resourcesDataSetter.call(Resources, data);
 
+    $("#title").text(data.title);
+    $("#about").text(data.about);
+    $("#policy-type-message").text(data.policyType);
+    $("#numbers-message").text(data.numberPolicies);
+    $("#monthly-message").text(data.monthlyPremium);
+    $("#claim-message").text(data.monthsSinceClaim);
+    $("#coverage-message").text(data.coverage);
+    $("#effective-message").text(data.effective);
+    $("#inception-message").text(data.inception);
+    $("#insurance-agent").text(data.insuranceAgent);
+    $("#insurance-query-button").text(data.go);
+    $("#claim-reason").text(data.reason);
+    $("#claim-amount").text(data.amount);
+    $("#policy-tab").text(data.policy);
+    $("#claims-tab").text(data.claims);
+    $("#offer-message").text(data.offerMessage);
+    $("#vehicle-message").text(data.vehicleMessage);
+    $("#city-message").text(data.cityMessage);
+    $("#state-message").text(data.stateMessage);
+    $("#family-message").text(data.familyNameMessage);
+    $("#given-message").text(data.givenNameMessage);
+    $("#weather").text(data.weather);
+    $("#actions").text(data.actions);
+    $("#offers-tab").text(data.offers);
+    $("#claim-state").text(data.currentState);
 
-      // Create the history table after we know our resources are loaded
-      setupTable();
+    // Create the history table after we know our resources are loaded
+    createHistoryTable();
+  };
 
-    },
-    error: function (xhr, message) {
-      alert(message);
-    }
-  });
-
+  Resources.getResources("agent", userLang);
 
   // Setup the callback that is invoked when a policy is found.
-  var policyResponsePayloadSetter = Policy.setResponsePayload;
+  var policyDataSetter = Policy.setPolicyData;
 
-  Policy.setResponsePayload = function (data) {
-    policyResponsePayloadSetter.call(Policy, data);
+  Policy.setPolicyData = function (data) {
+    policyDataSetter.call(Policy, data);
 
     policyInformation = data;
 
@@ -260,7 +248,6 @@ $(document).ready(function () {
 
 
     // Translate the offers text
-
     if (userLang != 'en') {
       $.ajax({
         type: "GET",
@@ -281,10 +268,10 @@ $(document).ready(function () {
     }
 
     // setup the callback to respond to the weather alerts
-    var weatherResponsePayloadSetter = Weather.setResponsePayload;
+    var weatherDataSetter = Weather.setWeatherData;
 
-    Weather.setResponsePayload = function (newPayloadStr) {
-      weatherResponsePayloadSetter.call(Weather, newPayloadStr);
+    Weather.setWeatherData = function (newPayloadStr) {
+      weatherDataSetter.call(Weather, newPayloadStr);
       if (newPayloadStr) {
         $("#forecast").val($("#forecast").val() + newPayloadStr.description);
         if (newPayloadStr.instruction) {
@@ -293,7 +280,7 @@ $(document).ready(function () {
       }
       // No weather alerts, display no alerts message
       else {
-        $("#forecast").val(Resources.getResources().noAlerts);
+        $("#forecast").val(Resources.getResourcesData().noAlerts);
       }
     };
 
@@ -317,11 +304,10 @@ $(document).ready(function () {
   };
 
   // Setup the conversation callback that gets invoked when a response is received.
-  var conversationResponsePayloadSetter = Conversation.setResponsePayload;
+  var conversationDataSetter = Conversation.setConversationData;
 
-  Conversation.setResponsePayload = function (newPayloadStr) {
-    conversationResponsePayloadSetter.call(Conversation, newPayloadStr);
-    console.log("Received: " + newPayloadStr);
+  Conversation.setConversationData = function (newPayloadStr) {
+    conversationDataSetter.call(Conversation, newPayloadStr);
     var data = JSON.parse(newPayloadStr);
     $("#agent-response").text(data.output.text);
 

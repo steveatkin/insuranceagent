@@ -23,26 +23,18 @@
 
 var Conversation = (function() {
   var requestPayload;
-  var responsePayload;
+  var conversationData;
   var messageEndpoint = '/conversation';
 
   // Publicly accessible methods defined
   return {
     sendRequest: sendRequest,
 
-    // The request/response getters/setters are defined here to prevent internal methods
-    // from calling the methods without any of the callbacks that are added elsewhere.
-    getRequestPayload: function() {
-      return requestPayload;
+    getConversationData: function() {
+      return conversationData;
     },
-    setRequestPayload: function(newPayloadStr) {
-      requestPayload = JSON.parse(newPayloadStr);
-    },
-    getResponsePayload: function() {
-      return responsePayload;
-    },
-    setResponsePayload: function(newPayloadStr) {
-      responsePayload = JSON.parse(newPayloadStr);
+    setConversationData: function(data) {
+      conversationData = JSON.parse(data);
     }
   };
 
@@ -69,17 +61,12 @@ var Conversation = (function() {
     http.setRequestHeader('Content-type', 'application/json');
     http.onreadystatechange = function() {
       if (http.readyState === 4 && http.status === 200 && http.responseText) {
-        Conversation.setResponsePayload(http.responseText);
+        Conversation.setConversationData(http.responseText);
       }
     };
 
     var params = JSON.stringify(payloadToWatson);
-    // Stored in variable (publicly visible through Conversation.getRequestPayload)
-    // to be used throughout the application
-    if (Object.getOwnPropertyNames(payloadToWatson).length !== 0) {
-      Conversation.setRequestPayload(params);
-    }
-
+  
     // Send request
     http.send(params);
   }

@@ -21,19 +21,19 @@
 
 var Weather = (function() {
 
-  var responsePayload;
+  var weatherData;
   var language = 'en';
 
   // Publicly accessible methods defined
   return {
     getWeather: getWeather,
 
-    getResponsePayload: function() {
-      return responsePayload;
+    getWeatherData: function() {
+      return weatherData;
     },
 
-    setResponsePayload: function(newPayloadStr) {
-      responsePayload = newPayloadStr;
+    setWeatherData: function(data) {
+      weatherData = data;
     }
   };
 
@@ -52,7 +52,7 @@ var Weather = (function() {
         items.forEach(
           function getText(value) {
             // Trigger the callback when the alert text is extracted
-            Weather.setResponsePayload({
+            Weather.setWeatherData({
                 language: value.language_cd,
                 description: value.description,
                 instruction: value.instruction
@@ -87,7 +87,7 @@ var Weather = (function() {
         }
         // there are no alerts, so invoke callback with null
         else {
-          Weather.setResponsePayload(null);
+          Weather.setWeatherData(null);
         }
 
         },

@@ -34,7 +34,6 @@ var request = require('request');
 var chaincode = null;
 var peers = null;
 var users = null;
-
 var options = optional('./chain-credentials.json');
 
 function ensureAuthenticated(req, res, next) {
@@ -72,13 +71,6 @@ if (process.env.VCAP_SERVICES) {
 } else if (options.credentials) {
 	peers = options.credentials.peers;
 	users = options.credentials.users;
-}
-
-// This is a special check to see if we should only use the first validating peer and user
-// At some point we can remove the need for this check once BlockChain is stable
-if(process.env.SINGLE_PEER == 'true') {
-	peers = [peers[0]];
-	users = [users[0]];
 }
 
 var options = {
@@ -276,7 +268,7 @@ function check_if_deployed(e, attempt) {
 
 function cb_deployed(e) {
 	if (e != null) {
-		console.log('! looks like a deploy error, holding off on the starting the socket\n', e);
+		console.log('! There is a deployment error', e);
 		if (!process.error) process.error = {
 			type: 'deploy',
 			msg: e.details
@@ -288,20 +280,17 @@ function cb_deployed(e) {
 		// ========================================================
 		ibc.monitor_blockheight(function (chain_stats) { //there is a new block, lets refresh everything that has a state
 			if (chain_stats && chain_stats.height) {
-				console.log('hey new block, lets refresh and broadcast to all', chain_stats.height - 1);
+				console.log('There is a new block and height is now: ', chain_stats.height - 1);
 				ibc.block_stats(chain_stats.height - 1, cb_blockstats);
-				console.log('CHAIN: ' + 'reset');
 				chaincode.query.read(['_claimindex'], cb_got_index);
 			}
 
-			//got the block's stats, lets send the statistics
+			//got the stats
 			function cb_blockstats(e, stats) {
 				if (e != null) console.log('blockstats error:', e);
 				else {
 					chain_stats.height = chain_stats.height - 1; //its 1 higher than actual height
-					stats.height = chain_stats.height; //copy
-					console.log('CHAIN STATS: ' + JSON.stringify(chain_stats));
-					console.log('BLOCK STATS: ' + JSON.stringify(stats));
+					console.log('CHAIN HEIGHT: ' + chain_stats.height);
 				}
 			}
 
@@ -312,7 +301,7 @@ function cb_deployed(e) {
 					try {
 						var json = JSON.parse(index);
 						for (var i in json) {
-							console.log('!', i, json[i]);
+							console.log('*', i, json[i]);
 							chaincode.query.read([json[i]], cb_got_claim); //iter over each, read their values
 						}
 					} catch (e) {

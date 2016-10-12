@@ -23,14 +23,37 @@
 
 var Resources = (function() {
   var resources;
+  var resourceData;
 
   // Publicly accessible methods defined
   return {
-    getResources: function() {
-      return resources;
+    getResources: getResources,
+
+    getResourcesData: function () {
+      return resourceData;
     },
-    setResources: function(newResources) {
-      resources = newResources;
+
+    setResourcesData: function (data) {
+      resourceData = data;
     }
   };
+
+  function getResources(name, language) {
+    $.ajax({
+      type: "GET",
+      url: "/resources",
+      data: {
+        "resource": name,
+        "language": language
+      },
+      success: function (data) {
+        //Resources.setResources(data);
+        Resources.setResourcesData(data);
+      },
+      error: function (xhr, message) {
+        alert(message);
+      }
+    });
+  }
+
 }());

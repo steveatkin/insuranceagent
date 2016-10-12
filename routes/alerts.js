@@ -24,7 +24,6 @@ var optional = require('optional');
 var appEnv = require('cfenv').getAppEnv();
 var cfEnvUtil = require('./cfenv-credsbylabel');
 var request = require('request');
-
 var serviceRegex = /(weatherinsights).*/;
 
 var options = optional('./weather-credentials.json') || {

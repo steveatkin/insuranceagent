@@ -21,9 +21,9 @@
 
 var BlockChain = (function() {
 
-  var responsePayload;
-
-  var responseHistory;
+  var blockData;
+  var blockHistory;
+  var ownerChanged;
 
   // Publicly accessible methods defined
   return {
@@ -35,20 +35,28 @@ var BlockChain = (function() {
 
     getHistory: getHistory,
 
-    getResponsePayload: function() {
-      return responsePayload;
+    getBlockData: function() {
+      return blockData;
     },
 
-    setResponsePayload: function(newPayloadStr) {
-      responsePayload = newPayloadStr;
+    setBlockData: function(data) {
+      blockData = data;
     },
 
-    getHistoryPayload: function() {
-      return responseHistory;
+    getBlockHistory: function() {
+      return blockHistory;
     },
 
-    setHistoryPayload: function(newPayloadStr) {
-      responseHistory = newPayloadStr;
+    setBlockHistory: function(data) {
+      blockHistory = data;
+    },
+
+    getOwnerState: function() {
+      return ownerData;
+    },
+
+    setOwnerState: function(data) {
+      ownerData = data;
     }
 
   };
@@ -59,7 +67,7 @@ var BlockChain = (function() {
       type: "GET",
       url: "/chain/" + policy,
       success: function(data) {
-          BlockChain.setResponsePayload(data.claim);
+          BlockChain.setBlockData(data.claim);
       },
       error: function(xhr, message) {
           alert(message);
@@ -72,7 +80,7 @@ var BlockChain = (function() {
       type: "GET",
       url: "/dataservices/claim-history/" + policy,
       success: function(data) {
-          BlockChain.setHistoryPayload(data.claim.history);
+          BlockChain.setBlockHistory(data.claim.history);
       },
       error: function(xhr, message) {
           alert(message);
@@ -81,7 +89,7 @@ var BlockChain = (function() {
   }
 
 
-  function setOwner(customer, owner, role, state, cb) {
+  function setOwner(customer, owner, role, state) {
     $.ajax({
       type: "POST",
       url: "/chain/" + customer,
@@ -91,12 +99,12 @@ var BlockChain = (function() {
         "state": state
       },
       success: function(data) {
-        console.log("Updated owner BlockChain: " + JSON.stringify(data));
+        BlockChain.setOwnerState(true);
         updateHistory(customer, owner, role, state, false);
-        cb(null, data);
       },
       error: function(xhr, message) {
-        cb(true, message);
+        BlockChain.setOwnerState(false);
+        alert(message);
       }
     });
   }

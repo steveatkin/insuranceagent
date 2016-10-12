@@ -52,23 +52,23 @@ function disableFormInputs() {
     $("#submit-payee").prop('disabled', true);
 }
 
-function setupTable() {
+function createHistoryTable() {
     $.extend($.fn.bootstrapTable.defaults, {
         formatNoMatches: function () {
-            return Resources.getResources().noHistory;
+            return Resources.getResourcesData().noHistory;
         }
     });
 
     $("#history-table").bootstrapTable({
         columns: [{
             field: "role",
-            title: Resources.getResources().role
+            title: Resources.getResourcesData().role
         }, {
             field: "owner",
-            title: Resources.getResources().owner
+            title: Resources.getResourcesData().owner
         }, {
             field: "date",
-            title: Resources.getResources().date
+            title: Resources.getResourcesData().date
         }]
     });
 
@@ -80,6 +80,9 @@ $(document).ready(function () {
     var claim = null;
     var blockLoaded = false;
 
+    var userLang = (navigator.language ||
+        navigator.userLanguage).substring(0, 2).toLowerCase();
+
     var target = document.getElementById('accordion');
     var spinner = new Spinner();
 
@@ -90,51 +93,39 @@ $(document).ready(function () {
         blockLoaded = false;
     });
 
-    var userLang = (navigator.language ||
-                  navigator.userLanguage).substring(0,2).toLowerCase();
-
     // Get all the UI strings
-  $.ajax({
-    type: "GET",
-    url: "/resources",
-    data: {
-      "resource":  "agent",
-      "language":  userLang
-    },
-    success: function(data) {
-      Resources.setResources(data);
+    // Setup the callback that is invoked when the resources are found.
+    var resourcesDataSetter = Resources.setResourcesData;
 
-      $("#titleAssessor").text(data.titleAssessor);
-      $("#aboutAssessor").text(data.aboutAssessor);
-      $("#policy-label").text(data.policyNumber);
-      $("#claim-reason-label").text(data.reason);
-      $("#claim-amount-label").text(data.amount);
-      $("#vehicle-label").text(data.vehicleMessage);
-      $("#last-action-label").text(data.lastAction);
-      $("#submit-policy").text(data.lookup);
-      $("#claim-tab").text(data.claims);
-      $("#adjustor-tab").text(data.adjustor);
-      $("#adjustor-label").text(data.adjustorLabel);
-      $("#submit-adjustor").text(data.adjustorSelect);
-      $("#payee-tab").text(data.payee);
-      $("#payee-type").text(data.payeeType);
-      $("#payee-label").text(data.payeeLabel);
-      $("#submit-payee").text(data.payeeSelect);
-      $("#optionsBank").after("<label for='optionsBank'>" + data.bank + "</label>");
-      $("#optionsPolicyHolder").after("<label for='optionsPolicyHolder'>" + data.policyHolder + "</label>");
-      $("#optionsRepairFacility").after("<label for='optionsRepairFacility'>" + data.repair + "</label>");
-      $("#history-tab").text(data.history);
+    Resources.setResourcesData = function (data) {
+        resourcesDataSetter.call(Resources, data);
 
-      // Create the history table after we know our resources are loaded
-      setupTable();
-      
-    },
-    error: function(xhr, message) {
-        alert(message);
-    }
-  });
+        $("#titleAssessor").text(data.titleAssessor);
+        $("#aboutAssessor").text(data.aboutAssessor);
+        $("#policy-label").text(data.policyNumber);
+        $("#claim-reason-label").text(data.reason);
+        $("#claim-amount-label").text(data.amount);
+        $("#vehicle-label").text(data.vehicleMessage);
+        $("#last-action-label").text(data.lastAction);
+        $("#submit-policy").text(data.lookup);
+        $("#claim-tab").text(data.claims);
+        $("#adjustor-tab").text(data.adjustor);
+        $("#adjustor-label").text(data.adjustorLabel);
+        $("#submit-adjustor").text(data.adjustorSelect);
+        $("#payee-tab").text(data.payee);
+        $("#payee-type").text(data.payeeType);
+        $("#payee-label").text(data.payeeLabel);
+        $("#submit-payee").text(data.payeeSelect);
+        $("#optionsBank").after("<label for='optionsBank'>" + data.bank + "</label>");
+        $("#optionsPolicyHolder").after("<label for='optionsPolicyHolder'>" + data.policyHolder + "</label>");
+        $("#optionsRepairFacility").after("<label for='optionsRepairFacility'>" + data.repair + "</label>");
+        $("#history-tab").text(data.history);
 
+        // Create the history table after we know our resources are loaded
+        createHistoryTable();
+    };
 
+    Resources.getResources("agent", userLang);
 
     // Listen for accordion events
     $('#accordion').on('show.bs.collapse', function (e) {
@@ -202,25 +193,40 @@ $(document).ready(function () {
                 break;
         };
 
-        spinner.spin(target);
-        BlockChain.setOwner(customer, payee, role, state, function (err, message) {
-            spinner.stop();
-            if(err) {
-                alert(message);
+        // Listen for when the owner change is finished
+        var blockOwnerSetter = BlockChain.setOwnerState;
+
+        BlockChain.setOwnerState = function(data) {
+            blockOwnerSetter.call(BlockChain, data);
+            // Change was completed stop spinner
+            if(data == true) {
+                spinner.stop();
             }
-        });
+        };
+
+        spinner.spin(target);
+        BlockChain.setOwner(customer, payee, role, state);
     });
 
     $("#submit-adjustor").click(function () {
         var customer = $("#policy").val();
         var adjustor = $('#adjustor-select :selected').text();
-        spinner.spin(target);
-        BlockChain.setOwner(customer, adjustor, "Adjustor", "In Process", function(err, message) {
-            spinner.stop();
-            if(err) {
-                alert(message);
+        var state = "In Process";
+        var role = "Adjustor"
+
+        // Listen for when the owner change is finished
+        var blockOwnerSetter = BlockChain.setOwnerState;
+
+        BlockChain.setOwnerState = function(data) {
+            blockOwnerSetter.call(BlockChain, data);
+            // Change is complete stop spinner
+            if(data == true) {
+                spinner.stop();
             }
-        });
+        };
+
+        spinner.spin(target);
+        BlockChain.setOwner(customer, adjustor, role, state);
     });
 
 
@@ -229,10 +235,10 @@ $(document).ready(function () {
         var customer = $("#policy").val();
 
         // Setup the callback that is invoked when a policy is found.
-        var policyResponsePayloadSetter = Policy.setResponsePayload;
+        var policyDataSetter = Policy.setPolicyData;
 
-        Policy.setResponsePayload = function (data) {
-            policyResponsePayloadSetter.call(Policy, data);
+        Policy.setPolicyData = function (data) {
+            policyDataSetter.call(Policy, data);
             claim = data;
 
             $("#reason").val(data.claimReason);
@@ -256,11 +262,10 @@ $(document).ready(function () {
 
 
         // Listen for when the history data for the claim has been loaded
-        var historyBlockChainPayloadSetter = BlockChain.setHistoryPayload;
+        var blockHistorySetter = BlockChain.setBlockHistory;
 
-        BlockChain.setHistoryPayload = function (data) {
-            historyBlockChainPayloadSetter.call(BlockChain, data);
-            console.log("HISTORY: " + JSON.stringify(data));
+        BlockChain.setBlockHistory = function (data) {
+            blockHistorySetter.call(BlockChain, data);
             spinner.stop();
             // reset the history table
             $("#history-table").bootstrapTable('load', []);
@@ -274,14 +279,13 @@ $(document).ready(function () {
             });
         };
 
+        // Listen for when the Block is available for the claim
+        var blockDataSetter = BlockChain.setBlockData;
 
-        // Listen for when the Block Chain is available for the claim
-        var policyBlockChainPayloadSetter = BlockChain.setResponsePayload;
+        BlockChain.setBlockData = function (data) {
+            blockDataSetter.call(BlockChain, data);
 
-        BlockChain.setResponsePayload = function (data) {
-            policyBlockChainPayloadSetter.call(BlockChain, data);
-
-            // There is no block chain entry for this claim so create a new one
+            // There is no block entry for this claim so create a new one
             if ($.isEmptyObject(data)) {
                 console.log("Creating block chain entry for this claim: " + claim.customer);
                 var block = {
@@ -294,7 +298,7 @@ $(document).ready(function () {
                 };
 
                 $("#assignment").val(block.owner);
-                // Store the claim for this policy in the blockchain
+                // Store the claim for this policy in the block
                 BlockChain.setClaim(block);
                 blockLoaded = true;
             } else {
