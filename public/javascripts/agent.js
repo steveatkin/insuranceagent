@@ -141,6 +141,28 @@ $(document).ready(function () {
     }
   });
 
+  // listen for the click of the speech button
+  $('#speech-query-button').click(function () {
+    fetch('/speech/token')
+    .then(function(response) {
+      return response.text();
+    }).then(function (token) {
+
+      var stream = WatsonSpeech.SpeechToText.recognizeMicrophone({
+        token: token,
+        continuous: false, // false = automatically stop transcription the first time a pause is detected
+        outputElement: '#insurance-query' // CSS selector or DOM Element
+      });
+
+      stream.on('error', function(err) {
+        console.log(err);
+      });
+
+    }).catch(function(error) {
+      console.log(error);
+    });
+  });
+
   // listen for the click of the ask question button
   $('#insurance-query-button').click(function () {
     var context = {};

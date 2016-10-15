@@ -9,4 +9,5 @@ cloudant-credentials.json
 twilio-credentials.json
 sso-credentials.json
 redis-credentials.json
+speech-to-text-credentials.json
 npm-debug.log

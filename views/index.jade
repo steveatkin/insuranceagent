@@ -37,6 +37,7 @@ nav.navbar.navbar-default.navbar-inverse.navbar-fixed-top(role='navigation')
   .input-group
     span.input-group-btn
       button#insurance-query-button.btn.btn-default(type='button')
+      button#speech-query-button.btn.btn-default(type='button') Speech
     input#insurance-query.form-control(type='text',autofocus='autofocus')
 .container
   hr
@@ -112,9 +113,12 @@ nav.navbar.navbar-default.navbar-inverse.navbar-fixed-top(role='navigation')
 script(src='javascripts/jquery-3.1.0.min.js')
 // Include all compiled plugins (below), or include individual files as needed
 // Latest compiled and minified JavaScript
+// Add fetch polyfill for older browsers
+script(src='javascripts/fecth.js')
 script(src='javascripts/bootstrap.min.js')
 script(src='javascripts/bootstrap-table.min.js')
 script(src='javascripts/bootstrap-table-locale-all.min.js')
+script(src='javascripts/watson-speech.js')
 script(src='javascripts/spin.min.js')
 script(src='javascripts/policy.js')
 script(src='javascripts/conversation.js')

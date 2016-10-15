@@ -37,6 +37,7 @@ var translate = require('./routes/translate');
 var chain = require('./routes/chain');
 var data = require('./routes/dataservices');
 var twilio = require('./routes/twilio');
+var speech = require('./routes/speech-text');
 
 var app = express();
 
@@ -65,6 +66,7 @@ app.use('/translate', translate);
 app.use('/chain', chain);
 app.use('/dataservices', data);
 app.use('/twilio', twilio);
+app.use('/speech', speech);
 
 
 app.enable('trust proxy');
