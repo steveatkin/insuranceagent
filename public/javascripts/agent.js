@@ -177,7 +177,7 @@ $(document).ready(function () {
         token: token,
         model: model,
         continuous: false,
-        keepMicrophone = true,
+        keepMicrophone: true,
         outputElement: '#insurance-query' 
       });
 
