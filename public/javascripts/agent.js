@@ -154,12 +154,13 @@ $(document).ready(function () {
         outputElement: '#insurance-query' 
       });
 
-      stream.setEncoding('utf8'); // get text instead of Buffers for on data events
+/*
+      stream.setEncoding('utf8'); 
     
       stream.on('data', function(data) {
         console.log(data);
       });
-
+*/
       stream.on('error', function(err) {
         console.log(err);
       });
