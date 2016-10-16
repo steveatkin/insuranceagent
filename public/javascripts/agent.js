@@ -141,7 +141,7 @@ $(document).ready(function () {
     }
   });
 
-  // listen for the click of the speech button
+  // listen for the click of the microphone button
   $('#speech-query-button').click(function () {
     fetch('/speech/token')
     .then(function(response) {
@@ -150,8 +150,15 @@ $(document).ready(function () {
 
       var stream = WatsonSpeech.SpeechToText.recognizeMicrophone({
         token: token,
-        continuous: false, // false = automatically stop transcription the first time a pause is detected
-        outputElement: '#insurance-query' // CSS selector or DOM Element
+        continuous: false, 
+        keepMic: true,
+        outputElement: '#insurance-query' 
+      });
+
+      stream.setEncoding('utf8'); // get text instead of Buffers for on data events
+    
+      stream.on('data', function(data) {
+        console.log(data);
       });
 
       stream.on('error', function(err) {
