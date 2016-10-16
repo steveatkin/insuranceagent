@@ -150,8 +150,7 @@ $(document).ready(function () {
 
       var stream = WatsonSpeech.SpeechToText.recognizeMicrophone({
         token: token,
-        continuous: false, 
-        keepMic: true,
+        continuous: false,
         outputElement: '#insurance-query' 
       });
 
