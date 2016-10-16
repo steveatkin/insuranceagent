@@ -192,15 +192,10 @@ $(document).ready(function () {
 
   // listen for the clik of the speaker button to play audio
   $('#speaker-button').click(function () {
-    fetch('/text/token')
-    .then(function(response) {
-      return response.text();
-    }).then(function (token) {
-      WatsonSpeech.TextToSpeech.synthesize({
-        text: $("#agent-response").text(),
-        token: token
-      });
-    });
+    var controls = $('<audio controls autoplay></audio>');
+    $('#audio').append(controls);
+    controls.attr('src', '/text/speak?text=' + $("#agent-response").text());
+    controls.get(0).play();
   });
 
   // listen for the click of the ask question button

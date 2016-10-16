@@ -58,6 +58,22 @@ var authorization = new watson.AuthorizationV1({
   url: options.credentials.url
 });
 
+router.get('/speak', ensureAuthenticated, function(req, res) {
+  // make the request to Watson to synthesize the audio file from the query text
+  var transcript = authorization.synthesize(req.query.text);
+ 
+  // set content-disposition header if downloading the
+  // file instead of playing directly in the browser
+  transcript.on('response', function(response) {
+    console.log(response.headers);
+    if (req.query.download) {
+      response.headers['content-disposition'] = 'attachment; filename=transcript.ogg';
+    }
+  });
+  // pipe results back to the browser as they come in from Watson
+  transcript.pipe(res);
+});
+
 
 router.get('/token', ensureAuthenticated, function(req, res) {
   authorization.getToken(function(err, token) {
