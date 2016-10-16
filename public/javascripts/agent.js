@@ -154,13 +154,6 @@ $(document).ready(function () {
         outputElement: '#insurance-query' 
       });
 
-/*
-      stream.setEncoding('utf8'); 
-    
-      stream.on('data', function(data) {
-        console.log(data);
-      });
-*/
       stream.on('error', function(err) {
         console.log(err);
       });
