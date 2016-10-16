@@ -121,6 +121,7 @@ $(document).ready(function () {
   var policyInformation = null;
   var userLang = (navigator.language ||
     navigator.userLanguage).substring(0, 2).toLowerCase();
+  var userLocale = navigator.language || navigator.userLanguage;
 
   // Register the enter key to the go button
   $("input").bind("keydown", function (event) {
@@ -148,9 +149,35 @@ $(document).ready(function () {
       return response.text();
     }).then(function (token) {
 
+      var model = 'en-US_BroadbandModel';
+
+      if(userLang === 'ja') {
+        model = 'ja-JP_BroadbandModel';
+      }
+      else if(userLang === 'ar') {
+        model = 'ar-AR_BroadbandModel';
+      }
+      else if(userLang === 'fr') {
+        model = 'fr-FR_BroadbandModel';
+      }
+      else if(userLang === 'es') {
+        model = 'es-ES_BroadbandModel';
+      }
+      else if(userLocale === 'en-UK') {
+        model = 'en-UK_BroadbandModel';
+      }
+      else if(userLocale === 'zh-CN'){
+        model = 'zh-CN_BroadbandModel';
+      }
+      else if(userLocale === 'pt-BR') {
+        model = 'pt-BR_BroadbandModel';
+      }
+
       var stream = WatsonSpeech.SpeechToText.recognizeMicrophone({
         token: token,
+        model: model,
         continuous: false,
+        keepMicrophone = true,
         outputElement: '#insurance-query' 
       });
 
