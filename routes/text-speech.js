@@ -27,9 +27,9 @@ var cfEnvUtil = require('./cfenv-credsbylabel');
 var request = require('request');
 var watson = require('watson-developer-cloud');
 
-var serviceRegex = /(speech_to_text).*/;
+var serviceRegex = /(text_to_speech).*/;
 
-var options = optional('./speech-to-text-credentials.json') || {
+var options = optional('./text-to-speech-credentials.json') || {
     appEnv: appEnv
 };
 

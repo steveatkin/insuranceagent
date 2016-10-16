@@ -190,6 +190,19 @@ $(document).ready(function () {
     });
   });
 
+  // listen for the clik of the speaker button to play audio
+  $('#speaker-button').click(function () {
+    fetch('/text/token')
+    .then(function(response) {
+      return response.text();
+    }).then(function (token) {
+      WatsonSpeech.TextToSpeech.synthesize({
+        text: $("#agent-response").text(),
+        token: token
+      });
+    });
+  });
+
   // listen for the click of the ask question button
   $('#insurance-query-button').click(function () {
     var context = {};
