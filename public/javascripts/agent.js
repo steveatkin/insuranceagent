@@ -204,7 +204,6 @@ $(document).ready(function () {
     $("#effective-message").text(data.effective);
     $("#inception-message").text(data.inception);
     $("#insurance-agent").text(data.insuranceAgent);
-    $("#insurance-query-button").text(data.go);
     $("#claim-reason").text(data.reason);
     $("#claim-amount").text(data.amount);
     $("#policy-tab").text(data.policy);

@@ -37,10 +37,12 @@ nav.navbar.navbar-default.navbar-inverse.navbar-fixed-top(role='navigation')
   #agent-response.well
   .input-group
     span.input-group-btn
-      i.fa.fa-microphone
+      button#speaker-button.btn.btn-default(type='button')
+        i.fa.fa-volume-up
       button#speech-query-button.btn.btn-default(type='button')
         i.fa.fa-microphone
       button#insurance-query-button.btn.btn-default(type='button')
+        i.fa.fa-search
     input#insurance-query.form-control(type='text',autofocus='autofocus')
 .container
   hr
