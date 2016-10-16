@@ -191,11 +191,9 @@ $(document).ready(function () {
   });
 
   // listen for the clik of the speaker button to play audio
+  // This will play the response from Watson conversation
   $('#speaker-button').click(function () {
-    var controls = $('<audio controls autoplay></audio>');
-    $('#audio').append(controls);
-    controls.attr('src', '/text/speak?text=' + $("#agent-response").text());
-    controls.get(0).play();
+    $('#audio').attr('src', '/text/speak?text=' + $("#agent-response").text());
   });
 
   // listen for the click of the ask question button

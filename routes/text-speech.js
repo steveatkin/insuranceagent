@@ -25,7 +25,7 @@ var optional = require('optional');
 var appEnv = require('cfenv').getAppEnv();
 var cfEnvUtil = require('./cfenv-credsbylabel');
 var request = require('request');
-var watson = require('watson-developer-cloud');
+var TextToSpeechV1 = require('watson-developer-cloud/text-to-speech/v1');
 
 var serviceRegex = /(text_to_speech).*/;
 
@@ -51,39 +51,53 @@ function ensureAuthenticated(req, res, next) {
   }
 }
 
-
-var authorization = new watson.AuthorizationV1({
+var textToSpeech = new TextToSpeechV1({
   username: options.credentials.username,
-  password: options.credentials.password,
-  url: options.credentials.url
+  password: options.credentials.password
 });
 
 router.get('/speak', ensureAuthenticated, function(req, res) {
-  // make the request to Watson to synthesize the audio file from the query text
-  var transcript = authorization.synthesize(req.query.text);
- 
-  // set content-disposition header if downloading the
-  // file instead of playing directly in the browser
-  transcript.on('response', function(response) {
-    console.log(response.headers);
-    if (req.query.download) {
-      response.headers['content-disposition'] = 'attachment; filename=transcript.ogg';
-    }
-  });
-  // pipe results back to the browser as they come in from Watson
-  transcript.pipe(res);
-});
+  var userLocale = req.headers["accept-language"];
+  var userLang = userLocale.substring(0, 2).toLowerCase();
+  var voice = 'en-US_AllisonVoice';
 
+  if(userLocale === 'en-UK') {
+    voice = 'en-GB_KateVoice';
+  }
+  else if(userLang === 'fr') {
+    voice = 'fr-FR_ReneeVoice';
+  }
+  else if(userLang === 'de') {
+    voice = 'de-DE_BirgitVoice';
+  }
+  else if (userLocale === 'es-US') {
+    voice = 'es-US_SofiaVoice';
+  }
+  else if(userLang === 'es') {
+    voice = 'es-ES_LauraVoice';
+  }
+  else if(userLang === 'it') {
+    voice = 'it-IT_FrancescaVoice';
+  }
+  else if(userLang === 'ja') {
+    voice = 'ja-JP_EmiVoice';
+  }
+  else if(userLocale === 'pt-BR') {
+    voice = 'pt-BR_IsabelaVoice';
+  }
 
-router.get('/token', ensureAuthenticated, function(req, res) {
-  authorization.getToken(function(err, token) {
-    if (err) {
-      console.log('Error retrieving token: ', err);
-      res.status(500).send('Error retrieving token');
-      return;
-    }
-    res.send(token);
+  var params = {
+    text: req.query.text,
+    voice: voice,
+    accept: 'audio/wav'
+  };
+
+  var transcript = textToSpeech.synthesize(params).pipe(res);
+
+  transcript.on('error', function(error) {
+    next(error);
   });
+
 });
 
 

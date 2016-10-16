@@ -16,3 +16,5 @@ applications:
     - "Twilio-0w"
     - "Single Sign On-n8"
     - "Compose for Redis-6o"
+    - "Speech to Text-ru"
+    - "Text to Speech-i9"
