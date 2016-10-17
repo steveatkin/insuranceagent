@@ -149,8 +149,6 @@ $(document).ready(function () {
       return response.text();
     }).then(function (token) {
 
-      console.log("Client token: " + token);
-
       var model = 'en-US_BroadbandModel';
 
       if(userLang === 'ja') {
