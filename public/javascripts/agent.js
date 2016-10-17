@@ -144,7 +144,7 @@ $(document).ready(function () {
 
   // listen for the click of the microphone button
   $('#speech-query-button').click(function () {
-    fetch('/speech/token')
+    fetch('/speech/token', {credentials: 'include'})
     .then(function(response) {
       return response.text();
     }).then(function (token) {
