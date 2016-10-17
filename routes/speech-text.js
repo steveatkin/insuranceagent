@@ -59,7 +59,7 @@ var authorization = new watson.AuthorizationV1({
 });
 
 
-router.get('/token', ensureAuthenticated, function(req, res) {
+router.get('/token', function(req, res) {
   authorization.getToken(function(err, token) {
     if (err) {
       console.log('Error retrieving token: ', err);
