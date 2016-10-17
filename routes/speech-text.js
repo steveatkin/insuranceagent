@@ -66,6 +66,7 @@ router.get('/token', ensureAuthenticated, function(req, res) {
       res.status(500).send('Error retrieving token');
       return;
     }
+    console.log('Token on server: ' + JSON.stringify(token));
     res.send(token);
   });
 });
