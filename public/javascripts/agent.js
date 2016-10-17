@@ -146,6 +146,7 @@ $(document).ready(function () {
   $('#speech-query-button').click(function () {
     fetch('/speech/token')
     .then(function(response) {
+      console.log('Token: ' + JSON.stringify(response));
       return response.text();
     }).then(function (token) {
 
