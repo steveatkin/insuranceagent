@@ -48,6 +48,20 @@ app.set('view engine', 'jade');
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
+
+app.enable('trust proxy');
+
+app.use(function (req, res, next) {
+
+  if (req.headers['x-forwarded-proto'] && req.headers['x-forwarded-proto'] === "https") {
+    // request was via https, so do no special handling
+    next();
+  } else {
+    // request was via http, so redirect to https
+    res.redirect('https://' + req.headers.host + req.url);
+  }
+});
+
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
@@ -70,19 +84,6 @@ app.use('/twilio', twilio);
 app.use('/speech', speech);
 app.use('/text', text);
 
-
-app.enable('trust proxy');
-
-app.use(function (req, res, next) {
-
-  if (req.headers['x-forwarded-proto'] && req.headers['x-forwarded-proto'] === "https") {
-    // request was via https, so do no special handling
-    next();
-  } else {
-    // request was via http, so redirect to https
-    res.redirect('https://' + req.headers.host + req.url);
-  }
-});
 
 // error handlers
 
