@@ -74,7 +74,8 @@ app.use('/text', text);
 app.enable('trust proxy');
 
 app.use(function (req, res, next) {
-  if (req.secure) {
+
+  if (req.headers['x-forwarded-proto'] && req.headers['x-forwarded-proto'] === "https") {
     // request was via https, so do no special handling
     next();
   } else {
