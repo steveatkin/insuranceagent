@@ -26,7 +26,7 @@ var appEnv = require('cfenv').getAppEnv();
 var cfEnvUtil = require('./cfenv-credsbylabel');
 var LanguageTranslatorV2 = require('watson-developer-cloud/language-translator/v2');
 
-var serviceRegex = /(language_translation).*/;
+var serviceRegex = /(language_translator).*/;
 
 var options = optional('./translation-credentials.json') || {
   appEnv: appEnv
