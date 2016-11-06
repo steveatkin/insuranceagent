@@ -43,7 +43,8 @@ else if (options.appEnv && !options.credentials) {
 
 var language_translator = new LanguageTranslatorV2({
   username: options.credentials.username,
-  password: options.credentials.password
+  password: options.credentials.password,
+  url: options.credentials.url
 });
 
 function ensureAuthenticated(req, res, next) {
