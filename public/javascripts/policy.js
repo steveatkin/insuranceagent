@@ -48,7 +48,7 @@ var Policy = (function () {
       },
       success: function (data) {
         // If there is no Intl object then use non localized forms
-        var effectiveToDate = new Date(data.effectiveToDate);
+        var effectiveToDate = new Date(data.effectiveToDate.replace(/\/(\d\d)$/,"/20$1"));
 
         // localize date
         if (typeof Intl != "undefined") {
