@@ -72,7 +72,7 @@ if (process.env.VCAP_SERVICES) {
 	peers = options.credentials.peers;
 	// For the moment since we are using the REST Blockchain APIs we need to just take type 1 users
 	if(options.credentials.users.length > 6) {
-		users = options.credentials.users.slice(0,6);
+		users = options.credentials.users.slice(0,7);
 	}
 	else {
 		users = options.credentials.users;
