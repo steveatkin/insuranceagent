@@ -63,7 +63,7 @@ if (process.env.VCAP_SERVICES) {
 					users = servicesObject[i][0].credentials.users;
 
 					if(users.length > 6) {
-						users = users.slice(3,7);
+						users = users.slice(4,7);
 					}
 
 				} else {
