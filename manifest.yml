@@ -12,7 +12,7 @@ applications:
     - "Conversation-y0"
     - "Language Translator-s8"
     - "AtkinRed-cloudantNoSQLDB"
-    - "Blockchain-fo"
+    - "Blockchain-bq"
     - "Twilio-0w"
     - "Single Sign On-n8"
     - "Compose for Redis-6o"
