@@ -61,6 +61,11 @@ if (process.env.VCAP_SERVICES) {
 				if (servicesObject[i][0].credentials.users) {
 					console.log('overwritting users, loading from a vcap service: ', i);
 					users = servicesObject[i][0].credentials.users;
+
+					if(users.length > 6) {
+						users = users.slice(3,7);
+					}
+
 				} else {
 					users = null;
 				}
@@ -70,13 +75,7 @@ if (process.env.VCAP_SERVICES) {
 	}
 } else if (options.credentials) {
 	peers = options.credentials.peers;
-	// For the moment since we are using the REST Blockchain APIs we need to just take type 1 users
-	if(options.credentials.users.length > 6) {
-		users = options.credentials.users.slice(3,7);
-	}
-	else {
-		users = options.credentials.users;
-	}
+	users = options.credentials.users;
 }
 
 var options = {
