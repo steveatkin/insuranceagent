@@ -100,7 +100,7 @@ function init() {
     // Create a client blockchin.
     chain = hfc.newChain('insurance');
 
-    chain.setInvokeWaitTime("30");
+    chain.setInvokeWaitTime("90");
 
     //path to copy the certificate
     certPath = path.join(__dirname, '../src/chaincode', 'certificate.pem');
@@ -378,39 +378,32 @@ router.post('/', ensureAuthenticated, function (req, res) {
         // Existing state variables to write
         args: [claim.id, claim.value, claim.vehicle, claim.owner, claim.role, claim.state]
     };
-    try {
-        // Trigger the invocation transaction
-        var invokeTx = userObj.invoke(invokeRequest);
 
-        // Print the invoke results
-        invokeTx.on('submitted', function (results) {
-            // Invoke transaction submitted successfully
-            console.log(util.format("\nSuccessfully submitted chaincode invoke transaction: request=%j, response=%j", invokeRequest, results));
+    // Trigger the invocation transaction
+    var invokeTx = userObj.invoke(invokeRequest);
+
+    // Print the invoke results
+    invokeTx.on('submitted', function (results) {
+        // Invoke transaction submitted successfully
+        console.log(util.format("\nSuccessfully submitted chaincode invoke transaction: request=%j, response=%j", invokeRequest, results));
+    });
+    // Print the invoke results
+    invokeTx.on('complete', function (results) {
+        // Invoke completed successfully
+        console.log(util.format("\nSuccessfully completed chaincode invoke transaction: request=%j, response=%j", invokeRequest, results));
+        res.json({
+            status: 200,
+            message: 'ok'
         });
-        // Print the invoke results
-        invokeTx.on('complete', function (results) {
-            // Invoke completed successfully
-            console.log(util.format("\nSuccessfully completed chaincode invoke transaction: request=%j, response=%j", invokeRequest, results));
-            res.json({
-                status: 200,
-                message: 'ok'
-            });
-        });
-        invokeTx.on('error', function (err) {
-            // Invoke failed
-            console.log(util.format("\nFailed to submit chaincode invoke transaction: request=%j, error=%j", invokeRequest, err));
-            res.status(500).send({
-                status: 500,
-                message: 'BlockChain error creating block'
-            });
-        });
-    } catch (err) {
-        console.log(err);
+    });
+    invokeTx.on('error', function (err) {
+        // Invoke failed
+        console.log(util.format("\nFailed to submit chaincode invoke transaction: request=%j, error=%j", invokeRequest, err));
         res.status(500).send({
             status: 500,
             message: 'BlockChain error creating block'
         });
-    }
+    });
 });
 
 // Update the owner of the claim payment in the block e.g., policy holder, bank, or repair facility
@@ -430,38 +423,31 @@ router.post('/:customer', ensureAuthenticated, function (req, res, next) {
         args: [customer, owner, role, state]
     };
 
-    try {
-        // Trigger the invoke transaction
-        var invokeTx = userObj.invoke(invokeRequest);
 
-        invokeTx.on('submitted', function (results) {
-            // Invoke transaction submitted successfully
-            console.log(util.format("\nSuccessfully submitted chaincode invoke transaction: request=%j, response=%j", invokeRequest, results));
+    // Trigger the invoke transaction
+    var invokeTx = userObj.invoke(invokeRequest);
+
+    invokeTx.on('submitted', function (results) {
+        // Invoke transaction submitted successfully
+        console.log(util.format("\nSuccessfully submitted chaincode invoke transaction: request=%j, response=%j", invokeRequest, results));
+    });
+    // Print the query results
+    invokeTx.on('complete', function (results) {
+        // Invoke completed successfully
+        console.log(util.format("\nSuccessfully completed chaincode invoke transaction: request=%j, response=%j", invokeRequest, results));
+        res.json({
+            status: 200,
+            message: 'ok'
         });
-        // Print the query results
-        invokeTx.on('complete', function (results) {
-            // Invoke completed successfully
-            console.log(util.format("\nSuccessfully completed chaincode invoke transaction: request=%j, response=%j", invokeRequest, results));
-            res.json({
-                status: 200,
-                message: 'ok'
-            });
-        });
-        invokeTx.on('error', function (err) {
-            // Invoke failed
-            console.log(util.format("\nFailed to submit chaincode invoke transaction: request=%j, error=%j", invokeRequest, err));
-            res.status(500).send({
-                status: 500,
-                message: 'BlockChain error updating block'
-            });
-        });
-    } catch (err) {
-        console.log(err);
+    });
+    invokeTx.on('error', function (err) {
+        // Invoke failed
+        console.log(util.format("\nFailed to submit chaincode invoke transaction: request=%j, error=%j", invokeRequest, err));
         res.status(500).send({
             status: 500,
             message: 'BlockChain error updating block'
         });
-    }
+    });
 });
 
 // Get the block for the claim payment

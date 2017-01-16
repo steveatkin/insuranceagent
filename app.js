@@ -42,6 +42,14 @@ var text = require('./routes/text-speech');
 
 var app = express();
 
+// We need to catch all execptions. This is not ideal
+// We are forced to do this because the HFC SDK for Blockchain is not properly handling exceptions
+// The exceptions are due to Bluemix reseting connections that cause failures in GRPC that are
+// not handled in the HFC SDK so we are forced to catch all execptions to preevent crashing
+process.on('uncaughtException', function (err) {
+  console.log(err);
+})
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
