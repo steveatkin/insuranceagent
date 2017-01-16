@@ -1,5 +1,5 @@
-node_modules
 node_red_flows
+node_modules
 watson_bots
 openwhisk_actions
 mocked_data
@@ -9,7 +9,16 @@ g11n-credentials.json
 weather-credentials.json
 conversation-credentials.json
 translation-credentials.json
+cloudant-credentials.json
+twilio-credentials.json
+redis-credentials.json
+speech-to-text-credentials.json
+text-to-speech-credentials.json
+sso-credentials
+chain-credentials.json
 npm-debug.log
 CHANGELOG.md
 License.txt
 README.md
+.dockerignore
+Dockerfile

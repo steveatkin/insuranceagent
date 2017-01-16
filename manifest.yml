@@ -12,9 +12,19 @@ applications:
     - "Conversation-y0"
     - "Language Translator-s8"
     - "AtkinRed-cloudantNoSQLDB"
-    - "Blockchain-bq"
+    - "Blockchain-uy"
     - "Twilio-0w"
-    - "Single Sign On-n8"
     - "Compose for Redis-6o"
     - "Speech to Text-ru"
     - "Text to Speech-i9"
+    - "Single Sign On-n8"
+  env:
+    API_KEY: 520dd2ab-feef-41cb-9831-ce69e653af95
+    CALLBACK_URL: https://insuranceagent.mybluemix.net/auth/sso/callback
+    CHAIN_NAME: c16dfee9ade97803f7e84b33a3652d691ed5221e9057b19363b525b81697ced0
+    NODE_ENV: production
+    POLICY_API: https://api.us.apiconnect.ibmcloud.com/atkinusibmcom-dev/production/v1/policy
+    SESSION_SECRET: 5997051a-36ae-487b-862b-a331f19b8b0b
+    WORKSPACE_ENGLISH: 37a0355f-4ae3-4300-8ee4-b62b31c87226
+    WORKSPACE_FRENCH: 4651f66d-62d8-4fd6-979b-455cd0de8af0
+    WORKSPACE_SPANISH: 9eefa8b5-ccad-4b62-b313-b3fc4809f530
