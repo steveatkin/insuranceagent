@@ -410,10 +410,12 @@ router.post('/', ensureAuthenticated, function (req, res) {
     invokeTx.on('error', function (err) {
         // Invoke failed
         console.log(util.format("\nFailed to submit chaincode invoke transaction: request=%j, error=%j", invokeRequest, err));
-        res.status(500).send({
-            status: 500,
-            message: 'BlockChain error creating block'
-        });
+        if (process.env.WAIT_FOR_INVOKE_COMPLETION === 'true') {
+            res.status(500).send({
+                status: 500,
+                message: 'BlockChain error creating block'
+            });
+        }
     });
 });
 
@@ -465,10 +467,12 @@ router.post('/:customer', ensureAuthenticated, function (req, res, next) {
     invokeTx.on('error', function (err) {
         // Invoke failed
         console.log(util.format("\nFailed to submit chaincode invoke transaction: request=%j, error=%j", invokeRequest, err));
-        res.status(500).send({
-            status: 500,
-            message: 'BlockChain error updating block'
-        });
+        if (process.env.WAIT_FOR_INVOKE_COMPLETION === 'true') {
+            res.status(500).send({
+                status: 500,
+                message: 'BlockChain error updating block'
+            });
+        }
     });
 });
 
