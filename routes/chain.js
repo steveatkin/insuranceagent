@@ -389,7 +389,7 @@ router.post('/', ensureAuthenticated, function (req, res) {
         // If we are not going to wait for the invoke to be completed then immediatley return 
         // the response that we successfully submited the request
         // remove this response when the new SDK comes out
-        if (!process.env.WAIT_FOR_INVOKE_COMPLETION) {
+        if (process.env.WAIT_FOR_INVOKE_COMPLETION === 'false') {
             res.json({
                 status: 200,
                 message: 'ok'
@@ -400,7 +400,7 @@ router.post('/', ensureAuthenticated, function (req, res) {
     invokeTx.on('complete', function (results) {
         // Invoke completed successfully
         console.log(util.format("\nSuccessfully completed chaincode invoke transaction: request=%j, response=%j", invokeRequest, results));
-        if (process.env.WAIT_FOR_INVOKE_COMPLETION) {
+        if (process.env.WAIT_FOR_INVOKE_COMPLETION === 'true') {
             res.json({
                 status: 200,
                 message: 'ok'
@@ -444,7 +444,7 @@ router.post('/:customer', ensureAuthenticated, function (req, res, next) {
         // If we are not going to wait for the invoke to be completed then immediatley return 
         // the response that we successfully submited the request
         // remove this response when the new SDK comes out
-        if (!process.env.WAIT_FOR_INVOKE_COMPLETION) {
+        if (process.env.WAIT_FOR_INVOKE_COMPLETION === 'false') {
             res.json({
                 status: 200,
                 message: 'ok'
@@ -455,7 +455,7 @@ router.post('/:customer', ensureAuthenticated, function (req, res, next) {
     invokeTx.on('complete', function (results) {
         // Invoke completed successfully
         console.log(util.format("\nSuccessfully completed chaincode invoke transaction: request=%j, response=%j", invokeRequest, results));
-        if (process.env.WAIT_FOR_INVOKE_COMPLETION) {
+        if (process.env.WAIT_FOR_INVOKE_COMPLETION === 'true') {
             res.json({
                 status: 200,
                 message: 'ok'
