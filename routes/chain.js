@@ -386,15 +386,26 @@ router.post('/', ensureAuthenticated, function (req, res) {
     invokeTx.on('submitted', function (results) {
         // Invoke transaction submitted successfully
         console.log(util.format("\nSuccessfully submitted chaincode invoke transaction: request=%j, response=%j", invokeRequest, results));
+        // If we are not going to wait for the invoke to be completed then immediatley return 
+        // the response that we successfully submited the request
+        // remove this response when the new SDK comes out
+        if (!process.env.WAIT_FOR_INVOKE_COMPLETION) {
+            res.json({
+                status: 200,
+                message: 'ok'
+            });
+        }
     });
-    // Print the invoke results
+
     invokeTx.on('complete', function (results) {
         // Invoke completed successfully
         console.log(util.format("\nSuccessfully completed chaincode invoke transaction: request=%j, response=%j", invokeRequest, results));
-        res.json({
-            status: 200,
-            message: 'ok'
-        });
+        if (process.env.WAIT_FOR_INVOKE_COMPLETION) {
+            res.json({
+                status: 200,
+                message: 'ok'
+            });
+        }
     });
     invokeTx.on('error', function (err) {
         // Invoke failed
@@ -430,15 +441,26 @@ router.post('/:customer', ensureAuthenticated, function (req, res, next) {
     invokeTx.on('submitted', function (results) {
         // Invoke transaction submitted successfully
         console.log(util.format("\nSuccessfully submitted chaincode invoke transaction: request=%j, response=%j", invokeRequest, results));
+        // If we are not going to wait for the invoke to be completed then immediatley return 
+        // the response that we successfully submited the request
+        // remove this response when the new SDK comes out
+        if (!process.env.WAIT_FOR_INVOKE_COMPLETION) {
+            res.json({
+                status: 200,
+                message: 'ok'
+            });
+        }
     });
-    // Print the query results
+
     invokeTx.on('complete', function (results) {
         // Invoke completed successfully
         console.log(util.format("\nSuccessfully completed chaincode invoke transaction: request=%j, response=%j", invokeRequest, results));
-        res.json({
-            status: 200,
-            message: 'ok'
-        });
+        if (process.env.WAIT_FOR_INVOKE_COMPLETION) {
+            res.json({
+                status: 200,
+                message: 'ok'
+            });
+        }
     });
     invokeTx.on('error', function (err) {
         // Invoke failed
