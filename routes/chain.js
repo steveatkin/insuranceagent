@@ -122,7 +122,7 @@ function init() {
 
     // print out the stats of the chaincode
     if (process.env.NODE_ENV == 'development') {
-        //chainStats();
+        chainStats();
     }
 }
 

@@ -26,6 +26,6 @@ applications:
     POLICY_API: https://api.us.apiconnect.ibmcloud.com/atkinusibmcom-dev/production/v1/policy
     SESSION_SECRET: 5997051a-36ae-487b-862b-a331f19b8b0b
     WORKSPACE_ENGLISH: 37a0355f-4ae3-4300-8ee4-b62b31c87226
-    WORKSPACE_FRENCH: 4651f66d-62d8-4fd6-979b-455cd0de8af0
-    WORKSPACE_SPANISH: 9eefa8b5-ccad-4b62-b313-b3fc4809f530
+    WORKSPACE_FRENCH: 6decde24-5344-43a4-a10e-2353f163a710
+    WORKSPACE_SPANISH: bcb2d3e4-5cd8-45bd-bb1b-aa0919223937
     WAIT_FOR_INVOKE_COMPLETION: false
