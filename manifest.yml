@@ -10,7 +10,7 @@ applications:
     - "Globalization Pipeline GA"
     - "Weather Company Data for IBM Bluemix-n7"
     - "Conversation-y0"
-    - "Language Translator-s8"
+    - "Language Translator-Exp"
     - "AtkinRed-cloudantNoSQLDB"
     - "Blockchain-uy"
     - "Twilio-0w"
@@ -28,4 +28,7 @@ applications:
     WORKSPACE_ENGLISH: 37a0355f-4ae3-4300-8ee4-b62b31c87226
     WORKSPACE_FRENCH: 6decde24-5344-43a4-a10e-2353f163a710
     WORKSPACE_SPANISH: bcb2d3e4-5cd8-45bd-bb1b-aa0919223937
+    NORMALIZED_CONVERSATION: true
+    MODEL_ENGLISH_TO_FRENCH: 3bd9f6ee-1c60-443a-924e-904ab6be269e
+    MODEL_FRENCH_TO_ENGLISH: a08e7d32-6923-4d0c-9922-25679fa5c0ec
     WAIT_FOR_INVOKE_COMPLETION: false

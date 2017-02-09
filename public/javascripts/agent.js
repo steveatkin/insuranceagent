@@ -308,7 +308,8 @@ $(document).ready(function () {
         url: "/translate",
         data: {
           "text": data.message,
-          "language": userLang
+          "source": 'en',
+          "target": userLang
         },
         success: function (data) {
           $("#special-offers").val(data);

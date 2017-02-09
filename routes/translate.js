@@ -56,20 +56,28 @@ function ensureAuthenticated(req, res, next) {
   }
 }
 
-router.get('/', ensureAuthenticated, function (req, res) {
 
-  language_translator.translate({
-      text: req.query.text,
-      source: 'en',
-      target: req.query.language
-    },
-    function (err, data) {
-      if (err) {
-        res.send(err);
-      } else {
-        res.send(data.translations[0].translation);
-      }
-    });
+
+router.get('/', ensureAuthenticated, function (req, res) {
+  var params = {
+    text: req.query.text
+  };
+
+  // If a trained model is supplied use it instead of the news or conversation models
+  if (req.query.model) {
+    params.model_id = req.query.model
+  } else {
+    params.source = req.query.source;
+    params.target = req.query.target;
+  }
+
+  language_translator.translate(params, function (err, data) {
+    if (err) {
+      res.send(err);
+    } else {
+      res.send(data.translations[0].translation);
+    }
+  });
 
 });
 
