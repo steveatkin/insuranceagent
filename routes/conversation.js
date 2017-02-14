@@ -84,7 +84,7 @@ function ensureAuthenticated(req, res, next) {
 }
 
 function translateInput(input, source, target, model, callback) {
-  
+
   if (!input) {
     callback(null, input);
     return;
@@ -114,7 +114,7 @@ function translateInput(input, source, target, model, callback) {
 }
 
 function translateOutput(conversationResponse, source, target, model, callback) {
-  
+
   var params = {
     text: conversationResponse.output.text
   };
@@ -146,11 +146,13 @@ router.post('/', ensureAuthenticated, function (req, res) {
   // Use a normalized English conversation
   if (process.env.NORMALIZED_CONVERSATION === 'true') {
     // see if there are any translation domain models defined that should be used
-    if (req.body.language === 'fr' && process.env.MODEL_ENGLISH_TO_FRENCH) {
+    if (req.body.language === 'fr' && process.env.MODEL_ENGLISH_TO_FRENCH && process.env.MODEL_FRENCH_TO_ENGLISH) {
+      model_in = process.env.MODEL_FRENCH_TO_ENGLISH;
       model_out = process.env.MODEL_ENGLISH_TO_FRENCH;
     }
-    if (req.body.language === 'fr' && process.env.MODEL_FRENCH_TO_ENGLISH) {
-      model_in = process.env.MODEL_FRENCH_TO_ENGLISH;
+    if (req.body.language === 'es' && process.env.MODEL_ENGLISH_TO_SPANISH && process.env.MODEL_SPANISH_TO_ENGLISH) {
+      model_in = process.env.MODEL_SPANISH_TO_ENGLISH;
+      model_out = process.env.MODEL_ENGLISH_TO_SPANISH;
     }
   }
   // Use native language conversations
