@@ -46,7 +46,7 @@ else if (optionsConversation.appEnv && !optionsConversation.credentials) {
 var conversation = new ConversationV1({
   username: optionsConversation.credentials.username,
   password: optionsConversation.credentials.password,
-  version_date: '2016-07-01'
+  version_date: '2017-02-03'
 });
 
 
