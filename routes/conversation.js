@@ -154,6 +154,14 @@ router.post('/', ensureAuthenticated, function (req, res) {
       model_in = process.env.MODEL_SPANISH_TO_ENGLISH;
       model_out = process.env.MODEL_ENGLISH_TO_SPANISH;
     }
+    if (req.body.language === 'ja' && process.env.MODEL_ENGLISH_TO_JAPANESE && process.env.MODEL_JAPANESE_TO_ENGLISH) {
+      model_in = process.env.MODEL_JAPANESE_TO_ENGLISH;
+      model_out = process.env.MODEL_ENGLISH_TO_JAPANESE;
+    }
+    // We cuurently don't support normalized model for Traditional Chinese so use the native bot
+    if (req.body.language === 'zh-TW' || req.body.language === 'zh-HK') {
+      workspace = process.env.WORKSPACE_TRADITIONAL_CHINESE;
+    }
   }
   // Use native language conversations
   else if (process.env.NORMALIZED_CONVERSATION === 'false') {
@@ -161,6 +169,10 @@ router.post('/', ensureAuthenticated, function (req, res) {
       workspace = process.env.WORKSPACE_FRENCH;
     } else if (req.body.language === 'es') {
       workspace = process.env.WORKSPACE_SPANISH;
+    } else if (req.body.language === 'ja') {
+      workspace = process.env.WORKSPACE_JAPANESE;
+    } else if (req.body.language === 'zh-TW' || req.body.language === 'zh-HK') {
+      workspace = process.env.WORKSPACE_TRADITIONAL_CHINESE;
     }
   }
 
