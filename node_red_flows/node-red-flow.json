@@ -1,198 +1,352 @@
-[
-    {
-        "id": "87ee4cd0.7811b",
-        "type": "http in",
-        "z": "eb914b58.146eb8",
-        "name": "claims",
-        "url": "/insurance/claims",
-        "method": "get",
-        "swaggerDoc": "",
-        "x": 82.5,
-        "y": 36.00000762939453,
-        "wires": [
-            [
-                "429601d8.bd6a"
-            ]
-        ]
-    },
-    {
-        "id": "429601d8.bd6a",
-        "type": "node-red-contrib-httpauth",
-        "z": "eb914b58.146eb8",
-        "name": "",
-        "file": "",
-        "cred": "",
-        "authType": "Basic",
-        "realm": "",
-        "username": "admin",
-        "password": "admin",
-        "hashed": false,
-        "x": 237.5,
-        "y": 36.35938262939453,
-        "wires": [
-            [
-                "3a33be58.c5cc42"
-            ]
-        ]
-    },
-    {
-        "id": "3a33be58.c5cc42",
-        "type": "http request",
-        "z": "eb914b58.146eb8",
-        "name": "cloudant",
-        "method": "GET",
-        "ret": "obj",
-        "url": "https://3eebbd56-fe8b-4000-85e8-d292425f4fab-bluemix.cloudant.com/claims/_design/claimsPaid/_view/claim-reason?limit=100&reduce=true&group=true",
-        "x": 398.5,
-        "y": 35.35938262939453,
-        "wires": [
-            [
-                "30e7744d.cf188c"
-            ]
-        ]
-    },
-    {
-        "id": "30e7744d.cf188c",
-        "type": "function",
-        "z": "eb914b58.146eb8",
-        "name": "decorate",
-        "func": "msg.headers = {\"Content-Type\" : \"application/json\"};\n\n    var rows = msg.payload.rows;\n    var index;\n    var claims = [];\n\n\n    for (index = 0; index < rows.length; ++index) {\n        var item = rows[index];\n        var claim = {};\n        claim.claimType = item.key[0];\n        claim.state = item.key[1];\n        claim.coverageType = item.key[2];\n        claim.numberOfClaims = item.value[0];\n        claim.totalClaimsAmount = item.value[1].toFixed(2);\n        claims.push(claim);\n    }\n\n    msg.payload = claims;\n    return msg;",
-        "outputs": 1,
-        "noerr": 0,
-        "x": 557.5155639648438,
-        "y": 34.35938262939453,
-        "wires": [
-            [
-                "17c3df4e.e83c21"
-            ]
-        ]
-    },
-    {
-        "id": "17c3df4e.e83c21",
-        "type": "http response",
-        "z": "eb914b58.146eb8",
-        "name": "",
-        "x": 709.5156402587891,
-        "y": 35.35938262939453,
-        "wires": []
-    },
-    {
-        "id": "346516f.fcb9aea",
-        "type": "http in",
-        "z": "eb914b58.146eb8",
-        "name": "policy",
-        "url": "/insurance/policy",
-        "method": "get",
-        "swaggerDoc": "",
-        "x": 85.5,
-        "y": 106,
-        "wires": [
-            [
-                "82044100.7dfbc"
-            ]
-        ]
-    },
-    {
-        "id": "82044100.7dfbc",
-        "type": "node-red-contrib-httpauth",
-        "z": "eb914b58.146eb8",
-        "name": "",
-        "file": "",
-        "cred": "",
-        "authType": "Basic",
-        "realm": "",
-        "username": "admin",
-        "password": "admin",
-        "hashed": false,
-        "x": 237.5,
-        "y": 107,
-        "wires": [
-            [
-                "f39a00be.0c66"
-            ]
-        ]
-    },
-    {
-        "id": "f39a00be.0c66",
-        "type": "function",
-        "z": "eb914b58.146eb8",
-        "name": "policy id",
-        "func": "var customer = msg.req.query.customer;\nmsg.language = msg.req.query.language;\nmsg.payload = customer;\nreturn msg;\n",
-        "outputs": 1,
-        "noerr": 0,
-        "x": 390.5,
-        "y": 106,
-        "wires": [
-            [
-                "a6f27312.590d9"
-            ]
-        ]
-    },
-    {
-        "id": "a6f27312.590d9",
-        "type": "cloudant in",
-        "z": "eb914b58.146eb8",
-        "name": "policy search",
-        "cloudant": "",
-        "database": "claims",
-        "service": "AtkinRed-cloudantNoSQLDB",
-        "search": "_idx_",
-        "design": "policies",
-        "index": "policySearch",
-        "x": 573.5,
-        "y": 105,
-        "wires": [
-            [
-                "787f1f.ff8780e"
-            ]
-        ]
-    },
-    {
-        "id": "a6db4c3e.5924b",
-        "type": "http response",
-        "z": "eb914b58.146eb8",
-        "name": "",
-        "x": 805.5,
-        "y": 224,
-        "wires": []
-    },
-    {
-        "id": "787f1f.ff8780e",
-        "type": "function",
-        "z": "eb914b58.146eb8",
-        "name": "extract policy",
-        "func": "// extract out the object from the array\nmsg.payload = msg.payload[0];\nreturn msg;",
-        "outputs": "1",
-        "noerr": 0,
-        "x": 754.5,
-        "y": 104,
-        "wires": [
-            [
-                "e40bdbf8.1bf428"
-            ]
-        ]
-    },
-    {
-        "id": "e40bdbf8.1bf428",
-        "type": "openwhisk-action",
-        "z": "eb914b58.146eb8",
-        "name": "offer",
-        "namespace": "atkin@us.ibm.com_dev",
-        "action": "offer",
-        "service": "b68b3eb8.4974c",
-        "x": 908.5,
-        "y": 107,
-        "wires": [
-            [
-                "a6db4c3e.5924b"
-            ]
-        ]
-    },
-    {
-        "id": "b68b3eb8.4974c",
-        "type": "openwhisk-service",
-        "z": "eb914b58.146eb8",
-        "name": "Bluemix",
-        "api": "https://openwhisk.ng.bluemix.net/api/v1"
-    }
-]
+[{
+    "id": "87ee4cd0.7811b",
+    "type": "http in",
+    "z": "eb914b58.146eb8",
+    "name": "GET claims",
+    "url": "/insurance/claims",
+    "method": "get",
+    "swaggerDoc": "",
+    "x": 105.5,
+    "y": 160.00000762939453,
+    "wires": [
+        ["429601d8.bd6a"]
+    ]
+}, {
+    "id": "429601d8.bd6a",
+    "type": "node-red-contrib-httpauth",
+    "z": "eb914b58.146eb8",
+    "name": "",
+    "file": "",
+    "cred": "",
+    "authType": "Basic",
+    "realm": "",
+    "username": "76100e8f-dae9-4e5c-b4a8-3c35234b9932",
+    "password": "d11c7325-caf7-456b-b5b0-f01270c76f16",
+    "hashed": false,
+    "x": 261.5,
+    "y": 158.359375,
+    "wires": [
+        ["3a33be58.c5cc42"]
+    ]
+}, {
+    "id": "3a33be58.c5cc42",
+    "type": "http request",
+    "z": "eb914b58.146eb8",
+    "name": "cloudant",
+    "method": "GET",
+    "ret": "obj",
+    "url": "https://3eebbd56-fe8b-4000-85e8-d292425f4fab-bluemix.cloudant.com/claims/_design/claimsPaid/_view/claim-reason?limit=100&reduce=true&group=true",
+    "x": 401.5,
+    "y": 159.35938262939453,
+    "wires": [
+        ["30e7744d.cf188c"]
+    ]
+}, {
+    "id": "30e7744d.cf188c",
+    "type": "function",
+    "z": "eb914b58.146eb8",
+    "name": "decorate",
+    "func": "msg.headers = {\"Content-Type\" : \"application/json\"};\n\n    var rows = msg.payload.rows;\n    var index;\n    var claims = [];\n\n\n    for (index = 0; index < rows.length; ++index) {\n        var item = rows[index];\n        var claim = {};\n        claim.claimType = item.key[0];\n        claim.state = item.key[1];\n        claim.coverageType = item.key[2];\n        claim.numberOfClaims = item.value[0];\n        claim.totalClaimsAmount = item.value[1].toFixed(2);\n        claims.push(claim);\n    }\n\n    msg.payload = claims;\n    return msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 560.5155639648438,
+    "y": 158.35938262939453,
+    "wires": [
+        ["17c3df4e.e83c21"]
+    ]
+}, {
+    "id": "17c3df4e.e83c21",
+    "type": "http response",
+    "z": "eb914b58.146eb8",
+    "name": "return result",
+    "x": 732.5156402587891,
+    "y": 159.35938262939453,
+    "wires": []
+}, {
+    "id": "346516f.fcb9aea",
+    "type": "http in",
+    "z": "eb914b58.146eb8",
+    "name": "GET policy Cloudant",
+    "url": "/v2/insurance/policy",
+    "method": "get",
+    "swaggerDoc": "",
+    "x": 125.5,
+    "y": 240,
+    "wires": [
+        ["82044100.7dfbc"]
+    ]
+}, {
+    "id": "82044100.7dfbc",
+    "type": "node-red-contrib-httpauth",
+    "z": "eb914b58.146eb8",
+    "name": "",
+    "file": "",
+    "cred": "",
+    "authType": "Basic",
+    "realm": "",
+    "username": "76100e8f-dae9-4e5c-b4a8-3c35234b9932",
+    "password": "d11c7325-caf7-456b-b5b0-f01270c76f16",
+    "hashed": false,
+    "x": 315.5,
+    "y": 240,
+    "wires": [
+        ["f39a00be.0c66"]
+    ]
+}, {
+    "id": "f39a00be.0c66",
+    "type": "function",
+    "z": "eb914b58.146eb8",
+    "name": "get policy id",
+    "func": "var customer = msg.req.query.customer;\nmsg.language = msg.req.query.language;\nmsg.payload = customer;\nreturn msg;\n",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 496.5,
+    "y": 240,
+    "wires": [
+        ["a6f27312.590d9"]
+    ]
+}, {
+    "id": "a6f27312.590d9",
+    "type": "cloudant in",
+    "z": "eb914b58.146eb8",
+    "name": "policy search",
+    "cloudant": "",
+    "database": "claims",
+    "service": "AtkinRed-cloudantNoSQLDB",
+    "search": "_idx_",
+    "design": "policies",
+    "index": "policySearch",
+    "x": 667.5,
+    "y": 239,
+    "wires": [
+        ["787f1f.ff8780e"]
+    ]
+}, {
+    "id": "a6db4c3e.5924b",
+    "type": "http response",
+    "z": "eb914b58.146eb8",
+    "name": "return result",
+    "x": 676.5,
+    "y": 407,
+    "wires": []
+}, {
+    "id": "787f1f.ff8780e",
+    "type": "function",
+    "z": "eb914b58.146eb8",
+    "name": "extract policy",
+    "func": "// extract out the object from the array\nmsg.payload = msg.payload[0];\nreturn msg;",
+    "outputs": "1",
+    "noerr": 0,
+    "x": 683.5,
+    "y": 295,
+    "wires": [
+        ["e40bdbf8.1bf428"]
+    ]
+}, {
+    "id": "e40bdbf8.1bf428",
+    "type": "openwhisk-action",
+    "z": "eb914b58.146eb8",
+    "name": "check for offers",
+    "func": "",
+    "namespace": "atkin@us.ibm.com_dev",
+    "action": "offer",
+    "service": "b68b3eb8.4974c",
+    "edit": false,
+    "x": 608.5,
+    "y": 353,
+    "wires": [
+        ["a6db4c3e.5924b"]
+    ]
+}, {
+    "id": "769cb981.f30958",
+    "type": "http in",
+    "z": "eb914b58.146eb8",
+    "name": "GET policy On-Premise Torolab",
+    "url": "/v3/insurance/policy",
+    "method": "get",
+    "swaggerDoc": "",
+    "x": 152,
+    "y": 498,
+    "wires": [
+        ["d75428da.4fad68"]
+    ]
+}, {
+    "id": "d75428da.4fad68",
+    "type": "node-red-contrib-httpauth",
+    "z": "eb914b58.146eb8",
+    "name": "",
+    "file": "",
+    "cred": "",
+    "authType": "Basic",
+    "realm": "",
+    "username": "76100e8f-dae9-4e5c-b4a8-3c35234b9932",
+    "password": "d11c7325-caf7-456b-b5b0-f01270c76f16",
+    "hashed": false,
+    "x": 388,
+    "y": 496,
+    "wires": [
+        ["1e8753e2.291234"]
+    ]
+}, {
+    "id": "1e8753e2.291234",
+    "type": "function",
+    "z": "eb914b58.146eb8",
+    "name": "get policy id",
+    "func": "var customer = msg.req.query.customer;\nmsg.language = msg.req.query.language;\nmsg.url = 'https://cap-sg-prd-2.integration.ibmcloud.com:15903/claims/enhancedClaimsService2/'+customer;\nreturn msg;\n",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 584,
+    "y": 495,
+    "wires": [
+        ["bfb0c620.366d98"]
+    ]
+}, {
+    "id": "bfb0c620.366d98",
+    "type": "http request",
+    "z": "eb914b58.146eb8",
+    "name": "call z/OS Connect",
+    "method": "GET",
+    "ret": "obj",
+    "url": "",
+    "tls": "",
+    "x": 792.5,
+    "y": 485,
+    "wires": [
+        ["308e2784.aa9198"]
+    ]
+}, {
+    "id": "308e2784.aa9198",
+    "type": "function",
+    "z": "eb914b58.146eb8",
+    "name": "extract policy",
+    "func": "var customer = msg.payload.ZCENCEB2OperationResponse.srv_inp_out_variables.request.customer;\nmsg.payload = msg.payload.ZCENCEB2OperationResponse.srv_inp_out_variables.customerData;\nmsg.payload.customer = customer;\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 609.5,
+    "y": 586,
+    "wires": [
+        ["1210ec61.de552c"]
+    ]
+}, {
+    "id": "1210ec61.de552c",
+    "type": "openwhisk-action",
+    "z": "eb914b58.146eb8",
+    "name": "call OpenWhisk",
+    "func": "",
+    "namespace": "atkin@us.ibm.com_dev",
+    "action": "offer",
+    "service": "b68b3eb8.4974c",
+    "edit": false,
+    "x": 597,
+    "y": 664,
+    "wires": [
+        ["1eeb62ef.2e5fed"]
+    ]
+}, {
+    "id": "1eeb62ef.2e5fed",
+    "type": "http response",
+    "z": "eb914b58.146eb8",
+    "name": "return result",
+    "x": 594.5,
+    "y": 738,
+    "wires": []
+}, {
+    "id": "7c028060.2f932",
+    "type": "http in",
+    "z": "eb914b58.146eb8",
+    "name": "GET policy On-Premise MVS1",
+    "url": "/insurance/policy",
+    "method": "get",
+    "swaggerDoc": "",
+    "x": 149,
+    "y": 939,
+    "wires": [
+        ["b53ce417.e1f9b8"]
+    ]
+}, {
+    "id": "b53ce417.e1f9b8",
+    "type": "node-red-contrib-httpauth",
+    "z": "eb914b58.146eb8",
+    "name": "",
+    "file": "",
+    "cred": "",
+    "authType": "Basic",
+    "realm": "",
+    "username": "76100e8f-dae9-4e5c-b4a8-3c35234b9932",
+    "password": "d11c7325-caf7-456b-b5b0-f01270c76f16",
+    "hashed": false,
+    "x": 395,
+    "y": 937,
+    "wires": [
+        ["ef8c95f1.c4c4b"]
+    ]
+}, {
+    "id": "ef8c95f1.c4c4b",
+    "type": "function",
+    "z": "eb914b58.146eb8",
+    "name": "get policy id",
+    "func": "var customer = msg.req.query.customer;\nmsg.language = msg.req.query.language;\nmsg.url = 'https://cap-sg-prd-4.integration.ibmcloud.com:17293/claimsshare/enhancedClaimsService2/'+customer;\nreturn msg;\n",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 591,
+    "y": 936,
+    "wires": [
+        ["3f883ed4.00a12a"]
+    ]
+}, {
+    "id": "3f883ed4.00a12a",
+    "type": "http request",
+    "z": "eb914b58.146eb8",
+    "name": "call z/OS Connect",
+    "method": "GET",
+    "ret": "obj",
+    "url": "",
+    "tls": "",
+    "x": 781.5,
+    "y": 940,
+    "wires": [
+        ["492bbcb0.45283c"]
+    ]
+}, {
+    "id": "492bbcb0.45283c",
+    "type": "function",
+    "z": "eb914b58.146eb8",
+    "name": "extract policy",
+    "func": "var customer = msg.payload.ZCENCEB2OperationResponse.srv_inp_out_variables.request.customer;\nmsg.payload = msg.payload.ZCENCEB2OperationResponse.srv_inp_out_variables.customerData;\nmsg.payload.customer = customer;\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "x": 616.5,
+    "y": 1027,
+    "wires": [
+        ["e38d813e.079f78"]
+    ]
+}, {
+    "id": "e38d813e.079f78",
+    "type": "openwhisk-action",
+    "z": "eb914b58.146eb8",
+    "name": "call OpenWhisk",
+    "func": "",
+    "namespace": "atkin@us.ibm.com_dev",
+    "action": "offer",
+    "service": "b68b3eb8.4974c",
+    "edit": false,
+    "x": 604,
+    "y": 1105,
+    "wires": [
+        ["7997bcd4.76483c"]
+    ]
+}, {
+    "id": "7997bcd4.76483c",
+    "type": "http response",
+    "z": "eb914b58.146eb8",
+    "name": "return result",
+    "x": 601.5,
+    "y": 1179,
+    "wires": []
+}, {
+    "id": "b68b3eb8.4974c",
+    "type": "openwhisk-service",
+    "z": "eb914b58.146eb8",
+    "name": "Bluemix",
+    "api": "https://openwhisk.ng.bluemix.net/api/v1"
+}]
