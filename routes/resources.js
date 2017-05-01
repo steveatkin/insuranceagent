@@ -30,8 +30,13 @@ var router = express.Router();
 // No need to authenticate getting the resources for the app
 router.get('/', function(req, res, next) {
   var myResources = gpClient.bundle(req.query.resource);
+  var lang = req.query.language;
 
-  myResources.getStrings({ languageId: req.query.language}, function (err, result) {
+  if(req.query.language === "zh-CN") {
+    lang = "zh-Hans";
+  }
+
+  myResources.getStrings({ languageId: lang}, function (err, result) {
         if (err) {
             res.send(err);
         } else {
