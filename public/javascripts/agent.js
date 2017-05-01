@@ -256,7 +256,13 @@ $(document).ready(function () {
     createHistoryTable();
   };
 
-  Resources.getResources("agent", userLang);
+  // If we have Simplified or Traditional Chinese then use the full locale
+  if(userLang === "zh") {
+    Resources.getResources("agent", userLocale);
+  }
+  else {
+    Resources.getResources("agent", userLang);
+  }
 
   // Setup the callback that is invoked when a policy is found.
   var policyDataSetter = Policy.setPolicyData;
