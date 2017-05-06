@@ -204,7 +204,13 @@ $(document).ready(function () {
       context = latestResponse.context;
     }
 
-    Conversation.sendRequest($("#insurance-query").val(), context, userLang);
+    // If we are using Simplified or Traditional Chinese then send the full locale
+    if(userLang === "zh") {
+      Conversation.sendRequest($("#insurance-query").val(), context, userLocale);
+    }
+    else {
+      Conversation.sendRequest($("#insurance-query").val(), context, userLang);
+    }
     // erase the text in the entry field
     $("#insurance-query").val('');
 
@@ -379,8 +385,8 @@ $(document).ready(function () {
   };
 
   // start the interactive dialog
-  // If we are using Chinese then we need to send the full locale
-  if(userLang === 'zh') {
+  // If we are using Simplified or Traditional Chinese then we need to send the full locale
+  if(userLang === "zh") {
     Conversation.sendRequest('', null, userLocale);
   }
   else {
