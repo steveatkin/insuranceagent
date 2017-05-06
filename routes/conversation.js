@@ -150,17 +150,20 @@ router.post('/', ensureAuthenticated, function (req, res) {
       model_in = process.env.MODEL_FRENCH_TO_ENGLISH;
       model_out = process.env.MODEL_ENGLISH_TO_FRENCH;
     }
-    if (req.body.language === 'es' && process.env.MODEL_ENGLISH_TO_SPANISH && process.env.MODEL_SPANISH_TO_ENGLISH) {
+    else if (req.body.language === 'es' && process.env.MODEL_ENGLISH_TO_SPANISH && process.env.MODEL_SPANISH_TO_ENGLISH) {
       model_in = process.env.MODEL_SPANISH_TO_ENGLISH;
       model_out = process.env.MODEL_ENGLISH_TO_SPANISH;
     }
-    if (req.body.language === 'ja' && process.env.MODEL_ENGLISH_TO_JAPANESE && process.env.MODEL_JAPANESE_TO_ENGLISH) {
+    else if (req.body.language === 'ja' && process.env.MODEL_ENGLISH_TO_JAPANESE && process.env.MODEL_JAPANESE_TO_ENGLISH) {
       model_in = process.env.MODEL_JAPANESE_TO_ENGLISH;
       model_out = process.env.MODEL_ENGLISH_TO_JAPANESE;
     }
-    // We cuurently don't support normalized model for Traditional Chinese so use the native bot
-    if (req.body.language === 'zh-TW' || req.body.language === 'zh-HK') {
+    // We cuurently don't support normalized model for Chinese so use the native bots
+    else if (req.body.language === 'zh-TW' || req.body.language === 'zh-HK') {
       workspace = process.env.WORKSPACE_TRADITIONAL_CHINESE;
+    }
+    else if (req.body.language === 'zh-CN' || req.body.language === 'zh-SG') {
+      workspace = process.env.WORKSPACE_SIMPLIFIED_CHINESE;
     }
   }
   // Use native language conversations
@@ -173,6 +176,9 @@ router.post('/', ensureAuthenticated, function (req, res) {
       workspace = process.env.WORKSPACE_JAPANESE;
     } else if (req.body.language === 'zh-TW' || req.body.language === 'zh-HK') {
       workspace = process.env.WORKSPACE_TRADITIONAL_CHINESE;
+    }
+      else if (req.body.language === 'zh-CN' || req.body.language === 'zh-SG') {
+      workspace = process.env.WORKSPACE_SIMPLIFIED_CHINESE;
     }
   }
 

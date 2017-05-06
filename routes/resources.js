@@ -32,8 +32,11 @@ router.get('/', function(req, res, next) {
   var myResources = gpClient.bundle(req.query.resource);
   var lang = req.query.language;
 
-  if(req.query.language === "zh-CN") {
+  if(req.query.language === "zh-CN" || req.query.language === "zh-SG") {
     lang = "zh-Hans";
+  }
+  else if(req.query.language === "zh-TW" || req.query.language === "zh-HK") {
+    lang = "zh-Hant"; 
   }
 
   myResources.getStrings({ languageId: lang}, function (err, result) {
