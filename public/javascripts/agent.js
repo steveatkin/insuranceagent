@@ -144,50 +144,46 @@ $(document).ready(function () {
 
   // listen for the click of the microphone button
   $('#speech-query-button').click(function () {
-    fetch('/speech/token', {credentials: 'include'})
-    .then(function(response) {
-      return response.text();
-    }).then(function (token) {
+    fetch('/speech/token', {
+        credentials: 'include'
+      })
+      .then(function (response) {
+        return response.text();
+      }).then(function (token) {
 
-      var model = 'en-US_BroadbandModel';
+        var model = 'en-US_BroadbandModel';
 
-      if(userLang === 'ja') {
-        model = 'ja-JP_BroadbandModel';
-      }
-      else if(userLang === 'ar') {
-        model = 'ar-AR_BroadbandModel';
-      }
-      else if(userLang === 'fr') {
-        model = 'fr-FR_BroadbandModel';
-      }
-      else if(userLang === 'es') {
-        model = 'es-ES_BroadbandModel';
-      }
-      else if(userLocale === 'en-UK') {
-        model = 'en-UK_BroadbandModel';
-      }
-      else if(userLocale === 'zh-CN'){
-        model = 'zh-CN_BroadbandModel';
-      }
-      else if(userLocale === 'pt-BR') {
-        model = 'pt-BR_BroadbandModel';
-      }
+        if (userLang === 'ja') {
+          model = 'ja-JP_BroadbandModel';
+        } else if (userLang === 'ar') {
+          model = 'ar-AR_BroadbandModel';
+        } else if (userLang === 'fr') {
+          model = 'fr-FR_BroadbandModel';
+        } else if (userLang === 'es') {
+          model = 'es-ES_BroadbandModel';
+        } else if (userLocale === 'en-UK') {
+          model = 'en-UK_BroadbandModel';
+        } else if (userLocale === 'zh-CN') {
+          model = 'zh-CN_BroadbandModel';
+        } else if (userLocale === 'pt-BR') {
+          model = 'pt-BR_BroadbandModel';
+        }
 
-      var stream = WatsonSpeech.SpeechToText.recognizeMicrophone({
-        token: token,
-        model: model,
-        continuous: false,
-        keepMicrophone: true,
-        outputElement: '#insurance-query' 
+        var stream = WatsonSpeech.SpeechToText.recognizeMicrophone({
+          token: token,
+          model: model,
+          continuous: false,
+          keepMicrophone: true,
+          outputElement: '#insurance-query'
+        });
+
+        stream.on('error', function (err) {
+          console.log(err);
+        });
+
+      }).catch(function (error) {
+        console.log(error);
       });
-
-      stream.on('error', function(err) {
-        console.log(err);
-      });
-
-    }).catch(function(error) {
-      console.log(error);
-    });
   });
 
   // listen for the clik of the speaker button to play audio
@@ -205,10 +201,9 @@ $(document).ready(function () {
     }
 
     // If we are using Simplified or Traditional Chinese then send the full locale
-    if(userLang === "zh") {
+    if (userLang === "zh") {
       Conversation.sendRequest($("#insurance-query").val(), context, userLocale);
-    }
-    else {
+    } else {
       Conversation.sendRequest($("#insurance-query").val(), context, userLang);
     }
     // erase the text in the entry field
@@ -263,10 +258,9 @@ $(document).ready(function () {
   };
 
   // If we have Simplified or Traditional Chinese then use the full locale
-  if(userLang === "zh") {
+  if (userLang === "zh") {
     Resources.getResources("agent", userLocale);
-  }
-  else {
+  } else {
     Resources.getResources("agent", userLang);
   }
 
@@ -379,17 +373,21 @@ $(document).ready(function () {
     $("#agent-response").text(data.output.text);
 
     if (data.context.policy && data.context.verified === true) {
-      Policy.getPolicy(data.context.policy, userLang);
+      // If we are using Simplified or Traditional Chinese then send the full locale
+      if (userLang === "zh") {
+        Policy.getPolicy(data.context.policy, userLocale);
+      } else {
+        Policy.getPolicy(data.context.policy, userLang);
+      }
       $("#policy.collapse").collapse('show');
     }
   };
 
   // start the interactive dialog
   // If we are using Simplified or Traditional Chinese then we need to send the full locale
-  if(userLang === "zh") {
+  if (userLang === "zh") {
     Conversation.sendRequest('', null, userLocale);
-  }
-  else {
+  } else {
     Conversation.sendRequest('', null, userLang);
   }
 
