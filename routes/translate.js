@@ -71,9 +71,12 @@ router.get('/', ensureAuthenticated, function (req, res) {
     params.target = req.query.target;
   }
 
+  // Need to add a check if Watson languge translator supports the pair
+  
+
   language_translator.translate(params, function (err, data) {
     if (err) {
-      res.send(err);
+      res.status(500).send(err);
     } else {
       res.send(data.translations[0].translation);
     }

@@ -321,6 +321,7 @@ $(document).ready(function () {
           $("#special-offers").val(data);
         },
         error: function (xhr, message) {
+          // If we get an error then just use English
           $("#special-offers").val(data.message);
         }
       });

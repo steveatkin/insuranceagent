@@ -19,7 +19,7 @@
  */
 
 
-var BlockChain = (function() {
+var BlockChain = (function () {
 
   var blockData;
   var blockHistory;
@@ -35,27 +35,27 @@ var BlockChain = (function() {
 
     getHistory: getHistory,
 
-    getBlockData: function() {
+    getBlockData: function () {
       return blockData;
     },
 
-    setBlockData: function(data) {
+    setBlockData: function (data) {
       blockData = data;
     },
 
-    getBlockHistory: function() {
+    getBlockHistory: function () {
       return blockHistory;
     },
 
-    setBlockHistory: function(data) {
+    setBlockHistory: function (data) {
       blockHistory = data;
     },
 
-    getOwnerState: function() {
+    getOwnerState: function () {
       return ownerData;
     },
 
-    setOwnerState: function(data) {
+    setOwnerState: function (data) {
       ownerData = data;
     }
 
@@ -66,11 +66,11 @@ var BlockChain = (function() {
     $.ajax({
       type: "GET",
       url: "/chain/" + policy,
-      success: function(data) {
-          BlockChain.setBlockData(data.claim);
+      success: function (data) {
+        BlockChain.setBlockData(data.claim);
       },
-      error: function(xhr, message) {
-          alert(message);
+      error: function (xhr, message) {
+        alert(message);
       }
     });
   }
@@ -79,11 +79,11 @@ var BlockChain = (function() {
     $.ajax({
       type: "GET",
       url: "/dataservices/claim-history/" + policy,
-      success: function(data) {
-          BlockChain.setBlockHistory(data.claim.history);
+      success: function (data) {
+        BlockChain.setBlockHistory(data.claim.history);
       },
-      error: function(xhr, message) {
-          alert(message);
+      error: function (xhr, message) {
+        alert(message);
       }
     });
   }
@@ -98,11 +98,11 @@ var BlockChain = (function() {
         "role": role,
         "state": state
       },
-      success: function(data) {
+      success: function (data) {
         BlockChain.setOwnerState(true);
         updateHistory(customer, owner, role, state, false);
       },
-      error: function(xhr, message) {
+      error: function (xhr, message) {
         BlockChain.setOwnerState(false);
         alert(message);
       }
@@ -122,12 +122,12 @@ var BlockChain = (function() {
         "role": claim.role,
         "state": claim.state
       },
-      success: function(data) {
+      success: function (data) {
         console.log("Added to BlockChain: " + JSON.stringify(data));
         updateHistory(claim.customer, claim.owner, claim.role, claim.state, true);
       },
-      error: function(xhr, message) {
-          alert(message);
+      error: function (xhr, message) {
+        alert(message);
       }
     });
   }
@@ -145,14 +145,14 @@ var BlockChain = (function() {
         "state": state,
         "reset": reset
       },
-      success: function(data) {
+      success: function (data) {
         console.log("Added to history: " + JSON.stringify(data));
         // send an SMS message to the customer
         // For demo puproses I have hardcoded the number to my cell
         sendNotification(customer, '+18134104511', owner, role, state);
       },
-      error: function(xhr, message) {
-          alert(message);
+      error: function (xhr, message) {
+        alert(message);
       }
     });
   }
@@ -160,7 +160,12 @@ var BlockChain = (function() {
 
   function sendNotification(customer, phone, owner, role, state) {
     var userLang = (navigator.language ||
-                  navigator.userLanguage).substring(0,2).toLowerCase();
+      navigator.userLanguage).substring(0, 2).toLowerCase();
+
+    // If we are using Simplified or Traditional Chinese then we neeed to use the full locale
+    if (userLang === "zh") {
+      userLang = navigator.language || navigator.userLanguage;
+    }
 
     $.ajax({
       type: "POST",
@@ -172,14 +177,13 @@ var BlockChain = (function() {
         "phone": phone,
         "language": userLang
       },
-      success: function(data) {
+      success: function (data) {
         console.log("Notification sent: " + JSON.stringify(data));
       },
-      error: function(xhr, message) {
-          alert(message);
+      error: function (xhr, message) {
+        alert(message);
       }
     });
   }
 
 }());
-

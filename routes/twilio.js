@@ -62,11 +62,20 @@ router.post('/:customer', ensureAuthenticated, function (req, res) {
     var state = req.body.state;
     var phone = req.body.phone;
     var customer = req.params.customer;
+    var language = req.body.language;
+
+    // If we are using a Chinese locale then use the proper language ID to lookup the bundle
+    if(language === "zh-CN" || language === "zh-SG") {
+        language = "zh-Hans";
+    }
+    else if (language === "zh-TW" || language === "zh-HK") {
+        language = "zh-Hant";
+    }
 
     var myResources = gpClient.bundle('agent');
 
     myResources.getStrings({
-        languageId: req.body.language
+        languageId: language
     }, function (err, result) {
         var textMessage = null;
 
