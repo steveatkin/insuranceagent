@@ -379,5 +379,12 @@ $(document).ready(function () {
   };
 
   // start the interactive dialog
-  Conversation.sendRequest('', null, userLang);
+  // If we are using Chinese then we need to send the full locale
+  if(userLang === 'zh') {
+    Conversation.sendRequest('', null, userLocale);
+  }
+  else {
+    Conversation.sendRequest('', null, userLang);
+  }
+
 });
