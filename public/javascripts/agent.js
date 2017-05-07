@@ -95,10 +95,9 @@ function populateHistoryTable(policy) {
 
       if (data.claim.state) {
         // Use the translations for each state
-        if(data.claim.state === "In Process") {
+        if (data.claim.state === "In Process") {
           data.claim.state = Resources.getResourcesData().inProcess;
-        }
-        else if(data.claim.state === "Paid") {
+        } else if (data.claim.state === "Paid") {
           data.claim.state = Resources.getResourcesData().paid;
         }
 
@@ -110,19 +109,15 @@ function populateHistoryTable(policy) {
       if (data.claim.history) {
         data.claim.history.forEach(function (value) {
           // Use the translations for each role
-          if(value.role === "Claim Recipient") {
+          if (value.role === "Claim Recipient") {
             value.role = Resources.getResourcesData().claimRecipient;
-          }
-          else if(value.role === "Policy Holder") {
+          } else if (value.role === "Policy Holder") {
             value.role = Resources.getResourcesData().policyHolder;
-          }
-          else if(value.role === "Repair Facility") {
+          } else if (value.role === "Repair Facility") {
             value.role = Resources.getResourcesData().repair;
-          }
-          else if(value.role === "Financial Institution") {
+          } else if (value.role === "Financial Institution") {
             value.role = Resources.getResourcesData().financial;
-          }
-          else if(value.role === "Adjustor") {
+          } else if (value.role === "Adjustor") {
             value.role = Resources.getResourcesData().adjustor;
           }
 

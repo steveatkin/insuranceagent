@@ -82,6 +82,7 @@ $(document).ready(function () {
 
     var userLang = (navigator.language ||
         navigator.userLanguage).substring(0, 2).toLowerCase();
+    var userLocale = navigator.language || navigator.userLanguage;
 
     var target = document.getElementById('accordion');
     var spinner = new Spinner();
@@ -125,7 +126,13 @@ $(document).ready(function () {
         createHistoryTable();
     };
 
-    Resources.getResources("agent", userLang);
+    // If we have Simplified or Traditional Chinese then use the full locale
+    if (userLang === "zh") {
+        Resources.getResources("agent", userLocale);
+    } else {
+        Resources.getResources("agent", userLang);
+    }
+
 
     // Listen for accordion events
     $('#accordion').on('show.bs.collapse', function (e) {
@@ -196,10 +203,10 @@ $(document).ready(function () {
         // Listen for when the owner change is finished
         var blockOwnerSetter = BlockChain.setOwnerState;
 
-        BlockChain.setOwnerState = function(data) {
+        BlockChain.setOwnerState = function (data) {
             blockOwnerSetter.call(BlockChain, data);
             // Change was completed stop spinner
-            if(data == true) {
+            if (data == true) {
                 spinner.stop();
             }
         };
@@ -217,10 +224,10 @@ $(document).ready(function () {
         // Listen for when the owner change is finished
         var blockOwnerSetter = BlockChain.setOwnerState;
 
-        BlockChain.setOwnerState = function(data) {
+        BlockChain.setOwnerState = function (data) {
             blockOwnerSetter.call(BlockChain, data);
             // Change is complete stop spinner
-            if(data == true) {
+            if (data == true) {
                 spinner.stop();
             }
         };
@@ -271,6 +278,19 @@ $(document).ready(function () {
             $("#history-table").bootstrapTable('load', []);
 
             data.forEach(function (value) {
+                // Use the translations for each role
+                if (value.role === "Claim Recipient") {
+                    value.role = Resources.getResourcesData().claimRecipient;
+                } else if (value.role === "Policy Holder") {
+                    value.role = Resources.getResourcesData().policyHolder;
+                } else if (value.role === "Repair Facility") {
+                    value.role = Resources.getResourcesData().repair;
+                } else if (value.role === "Financial Institution") {
+                    value.role = Resources.getResourcesData().financial;
+                } else if (value.role === "Adjustor") {
+                    value.role = Resources.getResourcesData().adjustor;
+                }
+
                 $("#history-table").bootstrapTable('append', [{
                     role: value.role,
                     owner: value.owner,
