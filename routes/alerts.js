@@ -40,12 +40,12 @@ else if (options.appEnv && !options.credentials) {
 }
 
 function ensureAuthenticated(req, res, next) {
-  if (!req.isAuthenticated() && process.env.NODE_ENV == 'production') {
-    req.session.originalUrl = req.originalUrl;
-    res.redirect('/login');
-  } else {
-    return next();
-  }
+    if (!req.isAuthenticated() && process.env.NODE_ENV == 'production') {
+        req.session.originalUrl = req.originalUrl;
+        res.redirect('/login');
+    } else {
+        return next();
+    }
 }
 
 router.get('/', ensureAuthenticated, function (req, res, next) {
@@ -60,16 +60,22 @@ router.get('/', ensureAuthenticated, function (req, res, next) {
         url: url
     };
 
-    request(params, function (error, response, body) {
-        if (!error && response.statusCode == 200) {
-            var result = JSON.parse(body);
-            res.json(result);
-        } else if (!error && response.statusCode == 400) {
-            res.json([]);
-        } else {
-            res.status(401).send('Unable to get alerts.');
-        }
-    });
+    // Due to legal restrictions we cannot permit weather to be shown in China, Singapore, Macau, Hong Kong, Taiwan, Korea and Japan
+    if (language === "zh" || language === "ja-JP" || language === "ko-KR") {
+        // Return an empty array
+        res.json([]);
+    } else {
+        request(params, function (error, response, body) {
+            if (!error && response.statusCode == 200) {
+                var result = JSON.parse(body);
+                res.json(result);
+            } else if (!error && response.statusCode == 400) {
+                res.json([]);
+            } else {
+                res.status(401).send('Unable to get alerts.');
+            }
+        });
+    }
 
 });
 
