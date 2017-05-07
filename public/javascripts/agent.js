@@ -94,6 +94,14 @@ function populateHistoryTable(policy) {
       $("#history-table").bootstrapTable('load', []);
 
       if (data.claim.state) {
+        // Use the translations for each state
+        if(data.claim.state === "In Process") {
+          data.claim.state = Resources.getResourcesData().inProcess;
+        }
+        else if(data.claim.state === "Paid") {
+          data.claim.state = Resources.getResourcesData().paid;
+        }
+
         $("#current-state").val(data.claim.state);
       } else {
         $("#current-state").val(Resources.getResourcesData().received);
@@ -101,6 +109,23 @@ function populateHistoryTable(policy) {
 
       if (data.claim.history) {
         data.claim.history.forEach(function (value) {
+          // Use the translations for each role
+          if(value.role === "Claim Recipient") {
+            value.role = Resources.getResourcesData().claimRecipient;
+          }
+          else if(value.role === "Policy Holder") {
+            value.role = Resources.getResourcesData().policyHolder;
+          }
+          else if(value.role === "Repair Facility") {
+            value.role = Resources.getResourcesData().repair;
+          }
+          else if(value.role === "Financial Institution") {
+            value.role = Resources.getResourcesData().financial;
+          }
+          else if(value.role === "Adjustor") {
+            value.role = Resources.getResourcesData().adjustor;
+          }
+
           $("#history-table").bootstrapTable('append', [{
             role: value.role,
             owner: value.owner,
