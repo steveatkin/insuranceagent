@@ -138,7 +138,9 @@ $(document).ready(function () {
     $('#accordion').on('show.bs.collapse', function (e) {
         if (e.target.id === 'history' && blockLoaded) {
             spinner.spin(target);
-            BlockChain.getHistory(claim.customer);
+            // We need to grab the one that is defined, some of our databases used customer while some used customerID
+            var custID = claim.customer || claim.customerID
+            BlockChain.getHistory(custID);
         } else if (e.target.id === 'adjustor' && blockLoaded) {
             // Adjustor form
             $("#adjustor-select").prop('disabled', false);

@@ -123,7 +123,6 @@ var BlockChain = (function () {
         "state": claim.state
       },
       success: function (data) {
-        console.log("Added to BlockChain: " + JSON.stringify(data));
         updateHistory(claim.customer, claim.owner, claim.role, claim.state, true);
       },
       error: function (xhr, message) {
@@ -146,7 +145,6 @@ var BlockChain = (function () {
         "reset": reset
       },
       success: function (data) {
-        console.log("Added to history: " + JSON.stringify(data));
         // send an SMS message to the customer
         // For demo puproses I have hardcoded the number to my cell
         sendNotification(customer, '+18134104511', owner, role, state);

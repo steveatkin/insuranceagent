@@ -158,7 +158,9 @@ $(document).ready(function () {
   // Listen for accordion events
   $('#accordion').on('show.bs.collapse', function (e) {
     if (e.target.id === 'claims' && policyInformation) {
-      populateHistoryTable(policyInformation.customer);
+      // We need to grab the one that is defined, some of our databases used customer while some used customerID
+      var custID = policyInformation.customer || policyInformation.customerID
+      populateHistoryTable(custID);
     }
   });
 
