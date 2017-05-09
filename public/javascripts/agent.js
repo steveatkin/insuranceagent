@@ -82,7 +82,7 @@ function createHistoryTable() {
 }
 
 function populateHistoryTable(policy) {
-
+  var userLocale = navigator.language || navigator.userLanguage;
   var target = document.getElementById('accordion');
   var spinner = new Spinner().spin(target);
 
@@ -121,10 +121,25 @@ function populateHistoryTable(policy) {
             value.role = Resources.getResourcesData().adjustor;
           }
 
+          // Localize the date
+          var dateOptions = {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric',
+            second: 'numeric',
+            timeZone: 'UTC',
+            timeZoneName: 'short'
+          };
+
+          var dateStamp = (new Date(value.date)).toLocaleDateString(userLocale, dateOptions);
+
           $("#history-table").bootstrapTable('append', [{
             role: value.role,
             owner: value.owner,
-            date: (new Date(value.date)).toUTCString()
+            date: dateStamp
           }]);
         });
       }

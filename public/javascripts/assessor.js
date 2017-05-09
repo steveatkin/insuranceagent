@@ -293,10 +293,25 @@ $(document).ready(function () {
                     value.role = Resources.getResourcesData().adjustor;
                 }
 
+                // Localize the date
+                var dateOptions = {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: 'numeric',
+                    minute: 'numeric',
+                    second: 'numeric',
+                    timeZone: 'UTC',
+                    timeZoneName: 'short'
+                };
+
+                var dateStamp = (new Date(value.date)).toLocaleDateString(userLocale, dateOptions);
+
                 $("#history-table").bootstrapTable('append', [{
                     role: value.role,
                     owner: value.owner,
-                    date: (new Date(value.date)).toUTCString()
+                    date: dateStamp
                 }]);
             });
         };
@@ -309,7 +324,6 @@ $(document).ready(function () {
 
             // There is no block entry for this claim so create a new one
             if ($.isEmptyObject(data)) {
-                console.log("Creating block chain entry for this claim: " + claim.customer);
                 var block = {
                     customer: claim.customer,
                     amount: claim.totalClaimAmount,
