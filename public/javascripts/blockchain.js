@@ -146,8 +146,8 @@ var BlockChain = (function () {
       },
       success: function (data) {
         // send an SMS message to the customer
-        // For demo puproses I have hardcoded the number to my cell
-        sendNotification(customer, '+18134104511', owner, role, state);
+        // For demo puproses the server side has an env variable for the phone number
+        sendNotification(customer, owner, role, state);
       },
       error: function (xhr, message) {
         alert(message);
@@ -156,7 +156,7 @@ var BlockChain = (function () {
   }
 
 
-  function sendNotification(customer, phone, owner, role, state) {
+  function sendNotification(customer, owner, role, state) {
     var userLang = (navigator.language ||
       navigator.userLanguage).substring(0, 2).toLowerCase();
 
@@ -172,7 +172,6 @@ var BlockChain = (function () {
         "owner": owner,
         "role": role,
         "state": state,
-        "phone": phone,
         "language": userLang
       },
       success: function (data) {

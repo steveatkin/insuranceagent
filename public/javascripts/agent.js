@@ -157,6 +157,74 @@ $(document).ready(function () {
   var userLang = (navigator.language ||
     navigator.userLanguage).substring(0, 2).toLowerCase();
   var userLocale = navigator.language || navigator.userLanguage;
+  var speechModel = '';
+  var enableSpeaker = false;
+  var enableMicrophone = false;
+
+  // Check to see if speech to text is supported for this locale or language
+  if (userLang === 'ja') {
+    speechModel = 'ja-JP_BroadbandModel';
+    enableMicrophone = true;
+  } else if (userLang === 'ar') {
+    speechModel = 'ar-AR_BroadbandModel';
+    enableMicrophone = true;
+  } else if (userLang === 'fr') {
+    speechModel = 'fr-FR_BroadbandModel';
+    enableMicrophone = true;
+  } else if (userLang === 'es') {
+    speechModel = 'es-ES_BroadbandModel';
+    enableMicrophone = true;
+  } else if (userLocale === 'en-UK') {
+    speechModel = 'en-UK_BroadbandModel';
+    enableMicrophone = true;
+  } else if (userLang === 'en') {
+    speechModel = 'en-US_BroadbandModel';
+    enableMicrophone = true;
+  }
+  // For the moment we are disabling Chinese due to service issues 
+  else if (userLocale === 'zh-CN') {
+    speechModel = 'zh-CN_BroadbandModel';
+    enableMicrophone = false;
+  } else if (userLocale === 'pt-BR') {
+    speechModel = 'pt-BR_BroadbandModel';
+    enableMicrophone = true;
+  }
+
+  // Check to see if text to speech is supported for this locale or language
+  if (userLocale === 'en-UK') {
+    enableSpeaker = true;
+  } else if (userLang === "en") {
+    enableSpeaker = true;
+  } else if (userLang === 'fr') {
+    enableSpeaker = true;
+  } else if (userLang === 'de') {
+    enableSpeaker = true;
+  } else if (userLocale === 'es-US') {
+    enableSpeaker = true;
+  } else if (userLang === 'es') {
+    enableSpeaker = true;
+  } else if (userLang === 'it') {
+    enableSpeaker = true;
+  } else if (userLang === 'ja') {
+    enableSpeaker = true;
+  } else if (userLocale === 'pt-BR') {
+    enableSpeaker = true;
+  }
+
+  // Only enable the microphone for supported locales
+  if (enableMicrophone) {
+    $('#speech-query-button').prop('disabled', false);
+    $('#speech-query-button').data('speechModel', speechModel);
+  } else {
+    $('#speech-query-button').prop('disabled', true);
+  }
+
+  // Only enable the speaker for supported locales
+  if (enableSpeaker) {
+    $('#speaker-button').prop('disabled', false);
+  } else {
+    $('#speaker-button').prop('disabled', true);
+  }
 
   // Register the enter key to the go button
   $("input").bind("keydown", function (event) {
@@ -188,23 +256,8 @@ $(document).ready(function () {
         return response.text();
       }).then(function (token) {
 
-        var model = 'en-US_BroadbandModel';
-
-        if (userLang === 'ja') {
-          model = 'ja-JP_BroadbandModel';
-        } else if (userLang === 'ar') {
-          model = 'ar-AR_BroadbandModel';
-        } else if (userLang === 'fr') {
-          model = 'fr-FR_BroadbandModel';
-        } else if (userLang === 'es') {
-          model = 'es-ES_BroadbandModel';
-        } else if (userLocale === 'en-UK') {
-          model = 'en-UK_BroadbandModel';
-        } else if (userLocale === 'zh-CN') {
-          model = 'zh-CN_BroadbandModel';
-        } else if (userLocale === 'pt-BR') {
-          model = 'pt-BR_BroadbandModel';
-        }
+        // Get the speech model from the speechModel attribute on the button
+        var model = $('#speech-query-button').data('speechModel');
 
         var stream = WatsonSpeech.SpeechToText.recognizeMicrophone({
           token: token,

@@ -60,7 +60,7 @@ router.post('/:customer', ensureAuthenticated, function (req, res) {
     var owner = req.body.owner;
     var role = req.body.role;
     var state = req.body.state;
-    var phone = req.body.phone;
+    var phone = process.env.PHONE_NUMBER;
     var customer = req.params.customer;
     var language = req.body.language;
 
