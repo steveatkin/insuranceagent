@@ -48,12 +48,12 @@ else if (options.appEnv && !options.credentials) {
 var client = new twilio.RestClient(options.credentials.accountSID, options.credentials.authToken);
 
 function ensureAuthenticated(req, res, next) {
-  if (!req.isAuthenticated() && process.env.NODE_ENV == 'production') {
-    req.session.originalUrl = req.originalUrl;
-    res.redirect('/login');
-  } else {
-    return next();
-  }
+    if (!req.isAuthenticated() && process.env.NODE_ENV == 'production') {
+        req.session.originalUrl = req.originalUrl;
+        res.redirect('/login');
+    } else {
+        return next();
+    }
 }
 
 router.post('/:customer', ensureAuthenticated, function (req, res) {
@@ -65,10 +65,9 @@ router.post('/:customer', ensureAuthenticated, function (req, res) {
     var language = req.body.language;
 
     // If we are using a Chinese locale then use the proper language ID to lookup the bundle
-    if(language === "zh-CN" || language === "zh-SG") {
+    if (language === "zh-CN" || language === "zh-SG") {
         language = "zh-Hans";
-    }
-    else if (language === "zh-TW" || language === "zh-HK") {
+    } else if (language === "zh-TW" || language === "zh-HK") {
         language = "zh-Hant";
     }
 
@@ -84,7 +83,17 @@ router.post('/:customer', ensureAuthenticated, function (req, res) {
             textMessage = 'Claim: ' + customer + ' State: ' + state;
         } else {
             var myStrings = result.resourceStrings;
-            textMessage = myStrings.twilio.replace('{}', state);
+            var stateMessage = '';
+
+            if (state === 'Received') {
+                stateMessage = myStrings.received;
+            } else if (state === 'In Process') {
+                stateMessage = myStrings.inProcess;
+            } else if (state === 'Paid') {
+                stateMessage = myStrings.paid;
+            }
+
+            textMessage = myStrings.twilio.replace('{}', stateMessage);
         }
         // send the SMS message
 
