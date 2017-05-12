@@ -346,7 +346,12 @@ $(document).ready(function () {
         };
 
         // Get the policy and claim for this customer
-        Policy.getPolicy(customer, 'en');
+        if(userLang === 'zh') {
+            Policy.getPolicy(customer, userLocale);
+        }
+        else {
+            Policy.getPolicy(customer, userLang);
+        }
     });
 
 });
