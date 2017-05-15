@@ -180,11 +180,9 @@ $(document).ready(function () {
   } else if (userLang === 'en') {
     speechModel = 'en-US_BroadbandModel';
     enableMicrophone = true;
-  }
-  // For the moment we are disabling Chinese due to service issues 
-  else if (userLocale === 'zh-CN') {
+  } else if (userLocale === 'zh-CN') {
     speechModel = 'zh-CN_BroadbandModel';
-    enableMicrophone = false;
+    enableMicrophone = true;
   } else if (userLocale === 'pt-BR') {
     speechModel = 'pt-BR_BroadbandModel';
     enableMicrophone = true;
