@@ -89,7 +89,7 @@ var BlockChain = (function () {
   }
 
 
-  function setOwner(customer, owner, role, state) {
+  function setOwner(customer, owner, role, state, phone) {
     $.ajax({
       type: "POST",
       url: "/chain/" + customer,
@@ -100,7 +100,7 @@ var BlockChain = (function () {
       },
       success: function (data) {
         BlockChain.setOwnerState(true);
-        updateHistory(customer, owner, role, state, false);
+        updateHistory(customer, owner, role, state, phone, false);
       },
       error: function (xhr, message) {
         BlockChain.setOwnerState(false);
@@ -110,7 +110,7 @@ var BlockChain = (function () {
   }
 
 
-  function setClaim(claim) {
+  function setClaim(claim, phone) {
     $.ajax({
       type: "POST",
       url: "/chain",
@@ -123,7 +123,7 @@ var BlockChain = (function () {
         "state": claim.state
       },
       success: function (data) {
-        updateHistory(claim.customer, claim.owner, claim.role, claim.state, true);
+        updateHistory(claim.customer, claim.owner, claim.role, claim.state, phone, true);
       },
       error: function (xhr, message) {
         alert(message);
@@ -131,7 +131,7 @@ var BlockChain = (function () {
     });
   }
 
-  function updateHistory(customer, owner, role, state, reset) {
+  function updateHistory(customer, owner, role, state, phone, reset) {
     // The reset attribute forces the history to be erased in the event
     // that there is a leftover record sitting in the database
     $.ajax({
@@ -147,7 +147,7 @@ var BlockChain = (function () {
       success: function (data) {
         // send an SMS message to the customer
         // For demo puproses the server side has an env variable for the phone number
-        sendNotification(customer, owner, role, state);
+        sendNotification(customer, owner, role, state, phone);
       },
       error: function (xhr, message) {
         alert(message);
@@ -156,7 +156,7 @@ var BlockChain = (function () {
   }
 
 
-  function sendNotification(customer, owner, role, state) {
+  function sendNotification(customer, owner, role, state, phone) {
     var userLang = (navigator.language ||
       navigator.userLanguage).substring(0, 2).toLowerCase();
 
@@ -172,7 +172,8 @@ var BlockChain = (function () {
         "owner": owner,
         "role": role,
         "state": state,
-        "language": userLang
+        "language": userLang,
+        "phone": phone
       },
       success: function (data) {
         console.log("Notification sent: " + JSON.stringify(data));

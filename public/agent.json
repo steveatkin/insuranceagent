@@ -50,5 +50,6 @@
   "history": "History",
   "titleAssessor": "Claim Payment System",
   "twilio": "Great news your claim is now: {}",
+  "phone": "Notification Phone Number",
   "aboutAssessor": "This system let's you quickly authorize insurance claim payments to indvidual policy holders, financial institutions, and automobile repair facilities using IBM BlockChain"
 }

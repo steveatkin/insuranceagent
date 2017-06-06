@@ -121,6 +121,7 @@ $(document).ready(function () {
         $("#optionsPolicyHolder").after("<label for='optionsPolicyHolder'>" + data.policyHolder + "</label>");
         $("#optionsRepairFacility").after("<label for='optionsRepairFacility'>" + data.repair + "</label>");
         $("#history-tab").text(data.history);
+        $("#phone-number-label").text(data.phone);
 
         // Create the history table after we know our resources are loaded
         createHistoryTable();
@@ -214,7 +215,7 @@ $(document).ready(function () {
         };
 
         spinner.spin(target);
-        BlockChain.setOwner(customer, payee, role, state);
+        BlockChain.setOwner(customer, payee, role, state, $("#phone").val());
     });
 
     $("#submit-adjustor").click(function () {
@@ -235,7 +236,7 @@ $(document).ready(function () {
         };
 
         spinner.spin(target);
-        BlockChain.setOwner(customer, adjustor, role, state);
+        BlockChain.setOwner(customer, adjustor, role, state, $("#phone").val());
     });
 
 
@@ -335,7 +336,7 @@ $(document).ready(function () {
 
                 $("#assignment").val(block.owner);
                 // Store the claim for this policy in the block
-                BlockChain.setClaim(block);
+                BlockChain.setClaim(block, $("#phone").val());
                 blockLoaded = true;
             } else {
                 // Display the current owner of the claim
