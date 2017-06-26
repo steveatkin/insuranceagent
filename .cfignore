@@ -14,7 +14,7 @@ twilio-credentials.json
 redis-credentials.json
 speech-to-text-credentials.json
 text-to-speech-credentials.json
-sso-credentials
+sso-credentials.json
 chain-credentials.json
 npm-debug.log
 CHANGELOG.md
