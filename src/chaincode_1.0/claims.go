@@ -17,7 +17,6 @@ limitations under the License.
 package main
 
 import (
-	"errors"
 	"fmt"
     "strconv"
 	"encoding/json"
@@ -87,7 +86,7 @@ func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface) pb.Response {
 }
 
 func (t *SimpleChaincode) Run(stub shim.ChaincodeStubInterface) pb.Response {
-	function, args := stub.GetFunctionAndParameters()
+	function, _  := stub.GetFunctionAndParameters()
 	fmt.Println("run is running " + function)
 	return t.Invoke(stub)
 }
