@@ -12,7 +12,6 @@ applications:
     - "Conversation-y0"
     - "Language Translator-Exp"
     - "AtkinRed-cloudantNoSQLDB"
-    - "Blockchain-cg"
     - "Twilio-0w"
     - "Compose for Redis-6o"
     - "Speech to Text-ru"
@@ -21,7 +20,6 @@ applications:
   env:
     API_KEY: 9f13d8b0-6df1-48b2-ae6d-31b1defb2ce3
     CALLBACK_URL: https://insuranceagent.mybluemix.net/auth/sso/callback
-    CHAIN_NAME: c16dfee9ade97803f7e84b33a3652d691ed5221e9057b19363b525b81697ced0
     NODE_ENV: production
     POLICY_API: https://api.us.apiconnect.ibmcloud.com/aruns-organization-nysubwaydemos/production/v1/policy
     SESSION_SECRET: 5997051a-36ae-487b-862b-a331f19b8b0b

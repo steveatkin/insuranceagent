@@ -12,6 +12,6 @@ redis-credentials.json
 speech-to-text-credentials.json
 text-to-speech-credentials.json
 npm-debug.log
-keyValStore-e2d5caf8
+keyValStore-*
 .dockerignore
 .cfignore
