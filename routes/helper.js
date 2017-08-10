@@ -1,14 +1,14 @@
 //-------------------------------------------------------------------
 // Install + Instantiate + Upgrade Chaincode
 //-------------------------------------------------------------------
-var path = require('path');
-var optional = require('optional');
+const path = require('path');
+const optional = require('optional');
 
 module.exports = function (logger) {
 	var helper = {};
 	var creds = optional('./chain-credentials.json');
 
-    // get the chaincode id on network
+	// get the chaincode id on network
 	helper.getChaincodeId = function () {
 		//return getBlockchainField('chaincode_id');
 		return process.env.CHAINCODE_ID;
@@ -50,7 +50,7 @@ module.exports = function (logger) {
 			return null;
 		}
 	}
-	
+
 	return helper;
 };
 

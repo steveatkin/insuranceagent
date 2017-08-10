@@ -1,14 +1,14 @@
 //-------------------------------------------------------------------
 // Install + Instantiate + Upgrade Chaincode
 //-------------------------------------------------------------------
-var path = require('path');
-var winston = require('winston');
-var logger = new(winston.Logger)({
-    transports: [
-        new(winston.transports.Console)()
-    ]
+const path = require('path');
+const winston = require('winston');
+const logger = new (winston.Logger)({
+	transports: [
+		new (winston.transports.Console)()
+	]
 });
-var helper = require('./helper.js')(logger);
+const helper = require('./helper.js')(logger);
 var use_peer = process.env.USE_PEER;
 
 module.exports = function (logger) {
@@ -16,7 +16,7 @@ module.exports = function (logger) {
 
 	deploy_cc.install_chaincode = function (obj, options, cb) {
 		console.log(' Installing Chaincode');
-		
+
 		// fix GOPATH - does not need to be real!
 		process.env.GOPATH = path.join(__dirname, '../');
 
@@ -24,9 +24,9 @@ module.exports = function (logger) {
 		var request = {
 			targets: [obj.newPeer(options.peer_urls[use_peer].discovery_url, {
 				pem: options.peer_tls_opts.pem,
-				'ssl-target-name-override': options.peer_tls_opts.common_name	
+				'ssl-target-name-override': options.peer_tls_opts.common_name
 			})],
-			chaincodePath: options.path_2_chaincode,							
+			chaincodePath: options.path_2_chaincode,
 			chaincodeId: options.chaincode_id,
 			chaincodeVersion: options.chaincode_version,
 		};
@@ -48,7 +48,7 @@ module.exports = function (logger) {
 		});
 	};
 
-	function format_error_msg (error_message) {
+	function format_error_msg(error_message) {
 		var temp = {
 			parsed: 'could not format error',
 			raw: error_message
@@ -70,7 +70,7 @@ module.exports = function (logger) {
 		return temp;
 	};
 
-	function check_proposal_res (results) {
+	function check_proposal_res(results) {
 		var proposalResponses = results[0];
 		var proposal = results[1];
 		var header = results[2];
@@ -108,28 +108,28 @@ module.exports = function (logger) {
 
 	deploy_cc.instantiate_chaincode = function (obj, options, cb) {
 		console.log('Instantiating Chaincode');
-		
+
 		var channel = obj.getChannel(helper.getChannelId());
 		var eventhub = null;
 
 		// fix GOPATH - does not need to be real!
 		process.env.GOPATH = path.join(__dirname, '../');
 		//var tx_id = null;
-		
+
 		// send proposal to endorser
 		var request = {
 			targets: [obj.newPeer(options.peer_urls[use_peer].discovery_url, {
 				pem: options.peer_tls_opts.pem,
 				'ssl-target-name-override': options.peer_tls_opts.common_name	//can be null if cert matches hostname
 			})],
-			chaincodePath: options.path_2_chaincode,		
+			chaincodePath: options.path_2_chaincode,
 			chaincodeId: options.chaincode_id,
 			chaincodeVersion: options.chaincode_version,
 			fcn: 'init',
 			args: options.cc_args,
 			txId: obj.newTransactionID()
 		};
-		
+
 		console.log('Sending instantiate req');
 
 		//send instantiate proposal
@@ -143,7 +143,7 @@ module.exports = function (logger) {
 					var request = check_proposal_res(results);
 
 					return channel.sendTransaction(request);
-				
+
 				})
 				.then(
 				function (response) {
@@ -153,10 +153,10 @@ module.exports = function (logger) {
 						console.log(' Successfully ordered instantiate endorsement.');
 
 						// Call optional order hook
-					//	if (options.ordered_hook) options.ordered_hook(null, request.txId.toString());
+						//	if (options.ordered_hook) options.ordered_hook(null, request.txId.toString());
 
 						setTimeout(function () {
-							if (cb) return cb(null,response);
+							if (cb) return cb(null, response);
 							else return;
 						}, 130000);
 					}
@@ -175,8 +175,8 @@ module.exports = function (logger) {
 					if (cb) return cb(formatted, null);
 					else return;
 				});
-		
-			});
+
+		});
 
 	};
 	return deploy_cc;
