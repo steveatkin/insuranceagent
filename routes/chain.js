@@ -11,7 +11,7 @@ const https = require('https');
 const optional = require('optional');
 const express = require('express');
 const router = express.Router();
-const options = optional('./chain-credentials.json');
+var options = optional('./chain-credentials.json');
 const winston = require('winston');
 const logger = new (winston.Logger)({
 	transports: [
@@ -33,7 +33,6 @@ var channel;
 
 //Variables for Blockchain Network
 var network_id;
-var network_name;
 var orderers;
 var cas;
 var peers;
@@ -46,10 +45,14 @@ var enrollId;
 var enroll_secret;
 var msp_id;
 var uuid;
-var userObj;
 var use_orderer;
 var use_peer;
 var use_ca;
+
+var admin_cert;
+var signed_cert;
+var ca_name;
+var cert_authority;
 
 process.env.GOPATH = path.join(__dirname, '../');
 
@@ -67,14 +70,7 @@ function ensureAuthenticated(req, res, next) {
 }
 
 function init() {
-	if (options.credentials) {
-		orderers = options.credentials.orderers;
-		cas = options.credentials.cas;
-		peers = options.credentials.peers;
-		tls_cert = options.credentials.tls_certificates;
-		network_id = options.credentials.network_id;
-		network_name = options.credentials.name;
-
+	if (options) {
 		//Fetch Environment Variables 
 		channel_id = process.env.CHANNEL_ID;
 		chaincode_id = process.env.CHAINCODE_ID;
@@ -83,9 +79,43 @@ function init() {
 		use_orderer = process.env.USE_ORDERER;
 		use_peer = process.env.USE_PEER;
 		use_ca = process.env.USE_CA;
-		msp_id = peers[use_peer].msp_id;
-		enrollId = options.credentials.cas[use_ca].orgs.PeerOrg1.users[0].enrollId;
-		enroll_secret = options.credentials.cas[use_ca].orgs.PeerOrg1.users[0].enrollSecret;
+
+		//Fetch from Blockchain Credentials File
+		cert_authority = options.organizations.PeerOrg1.certificateAuthorities[use_ca];
+		msp_id = options.client.organization;
+		network_id = options["x-networkId"];
+		admin_cert = options.organizations.PeerOrg1.adminPrivateKeyPEM;
+		signed_cert = options.organizations.PeerOrg1.signedCertPEM;
+
+		//Switch Orderer, CA or Peer 
+		if (use_ca == 0) {
+			enrollId = options.certificateAuthorities["fabric-ca-16819a"].registrar[0].enrollId;
+			enroll_secret = options.certificateAuthorities["fabric-ca-16819a"].registrar[0].enrollSecret;
+			ca_name = options.certificateAuthorities["fabric-ca-16819a"].caName;
+			cas = options.certificateAuthorities["fabric-ca-16819a"];
+		} else {
+			enrollId = options.certificateAuthorities["fabric-ca-16819c"].registrar[0].enrollId;
+			enroll_secret = options.certificateAuthorities["fabric-ca-16819c"].registrar[0].enrollSecret;
+			ca_name = options.certificateAuthorities["fabric-ca-16819c"].caName;
+			cas = options.certificateAuthorities["fabric-ca-16819c"];
+		}
+
+		if (use_orderer == 0) {
+			tls_cert = options.orderers["fabric-orderer-13001b"].tlsCACerts;
+			orderers = options.orderers["fabric-orderer-13001b"];
+		} else if (use_orderer == 1) {
+			tls_cert = options.orderers["fabric-orderer-13001d"].tlsCACerts;
+			orderers = options.orderers["fabric-orderer-13001d"];
+		} else {
+			tls_cert = options.orderers["fabric-orderer-13001e"].tlsCACerts;
+			orderers = options.orderers["fabric-orderer-13001e"];
+		}
+
+		if (use_peer == 0) {
+			peers = options.peers["fabric-peer-org1-23253a"];
+		} else {
+			peers = options.peers["fabric-peer-org1-23253c"];
+		}
 
 	}
 	else {
@@ -144,25 +174,26 @@ function init() {
 								if (flag === false) {
 									//Install chaincode on peer
 									var opts = {
-										peer_urls: peers,
+										peer_urls: peerUrl,
 										path_2_chaincode: 'chaincode1',
 										chaincode_id: chaincode_id,
 										chaincode_version: chaincode_version,
-										peer_tls_opts: tls_cert.cert_1
+										peer_tls_opts: tls_cert.pem
 									};
 									deploy_cc.install_chaincode(client, opts, function (err, resp) {
 										console.log('Install done. Errors:', (!err) ? 'nope' : err);
 									});
 								}
+
 								console.log('Instantiate chaincode on the channel');
 								var opts = {
-									peer_urls: peers,
+									peer_urls: peerUrl,
 									path_2_chaincode: 'chaincode1',
 									channel_id: channel_id,
 									chaincode_id: chaincode_id,
 									chaincode_version: chaincode_version,
 									cc_args: ['99'],
-									peer_tls_opts: tls_cert.cert_1
+									peer_tls_opts: tls_cert.pem
 								};
 								deploy_cc.instantiate_chaincode(client, opts, function (err, resp) {
 									console.log('Instantiation done. Errors:', (!err) ? 'nope' : err);
@@ -189,47 +220,26 @@ function setup() {
 
 	//uuid for key store
 	uuid = network_id.substring(0, 8);
-
-	// Adding all the peers to blockchain
-	for (var k = 0; k < peers.length; k++) {
-		peerUrl.push(peers[k].discovery_url);
-		eventUrl.push(peers[k].event_url)
-	}
-
-	// Adding all the orderers to blockchain
-	for (var i = 0; i < orderers.length; i++) {
-		ordererUrl.push(orderers[i].discovery_url);
-	}
-
-	// Adding all the cas to blockchain
-	for (var j = 0; j < cas.length; j++) {
-		casUrl.push(cas[j].api_url);
-	}
+	peerUrl = peers.url;
+	eventUrl = peers.eventUrl;
+	ordererUrl = orderers.url;
+	casUrl = cas.url;
 
 }
 
 function printNetworkDetails() {
 	console.log("\n------------- Orderer, ca-server, peers and event URL:PORT information: -------------");
 	console.log("");
-	for (var i = 0; i < ordererUrl.length; i++) {
-		console.log("Orderer Url%d : %s", i, ordererUrl[i]);
-	}
-
+	console.log("Orderer Url : %s", ordererUrl);
 	console.log("");
-	for (var i = 0; i < casUrl.length; i++) {
-		console.log("CAS Url%d : %s", i, casUrl[i]);
-	}
-
+	console.log("CAS Url : %s", casUrl);
 	console.log("");
-	for (var i = 0; i < peerUrl.length; i++) {
-		console.log("Discovery Url on Peer%d : %s", i, peerUrl[i]);
-	}
+	console.log("Discovery Url on Peer : %s", peerUrl);
 	console.log("");
-	for (var i = 0; i < eventUrl.length; i++) {
-		console.log("Event Url on Peer%d : %s", i, eventUrl[i]);
-	}
+	console.log("Event Url on Peer : %s", eventUrl);
 	console.log("");
 	console.log('-----------------------------------------------------------\n');
+
 }
 
 function enrollAdmin() {
@@ -245,21 +255,20 @@ function enrollAdmin() {
 		return getSubmitter(client, options);
 	}).then(function (submitter) {
 
-		channel.addOrderer(new Orderer(ordererUrl[use_orderer], {
-			pem: tls_cert.cert_1.pem,
-			'ssl-target-name-override': tls_cert.cert_1.common_name
+		channel.addOrderer(new Orderer(ordererUrl, {
+			pem: tls_cert.pem,
+			'ssl-target-name-override': null
 		}));
-		console.log('added orderer', ordererUrl[use_orderer]);
+		console.log('added orderer', ordererUrl);
 
-		channel.addPeer(new Peer(peerUrl[use_peer], {
-			pem: tls_cert.cert_1.pem,
-			'ssl-target-name-override': tls_cert.cert_1.common_name
+		channel.addPeer(new Peer(peerUrl, {
+			pem: tls_cert.pem,
+			'ssl-target-name-override': null
 		}));
-		console.log('added peer', peerUrl[use_peer]);
+		console.log('added peer', peerUrl);
 
 		// --- Success --- //
 		console.log('Successfully got enrollment ' + uuid);
-
 
 	}).catch(function (err) {
 
@@ -275,9 +284,9 @@ function query_installed_cc(client, options, cb) {
 	logger.debug('Querying Installed Chaincodes\n');
 
 	// send proposal to peer
-	client.queryInstalledChaincodes(new Peer(peerUrl[use_peer], {
-		pem: tls_cert.cert_1.pem,
-		'ssl-target-name-override': tls_cert.cert_1.common_name
+	client.queryInstalledChaincodes(new Peer(peerUrl, {
+		pem: tls_cert.pem,
+		'ssl-target-name-override': null
 	})).then(function (resp) {
 		if (cb) return cb(null, resp);
 	}).catch(function (err) {
@@ -322,17 +331,17 @@ function enrollWithAdminCert(options, cb) {
 		client.setStateStore(store);
 		return getSubmitterWithAdminCert(client, options);							//admin cert is different
 	}).then(function (submitter) {
-		channel.addOrderer(new Orderer(ordererUrl[use_orderer], {
-			pem: tls_cert.cert_1.pem,
-			'ssl-target-name-override': tls_cert.cert_1.common_name
+		channel.addOrderer(new Orderer(ordererUrl, {
+			pem: tls_cert.pem,
+			'ssl-target-name-override': null
 		}));
-		console.log('added Orderer', ordererUrl[use_orderer]);
+		console.log('added Orderer', ordererUrl);
 
-		channel.addPeer(new Peer(peerUrl[use_peer], {
-			pem: tls_cert.cert_1.pem,
-			'ssl-target-name-override': tls_cert.cert_1.common_name
+		channel.addPeer(new Peer(peerUrl, {
+			pem: tls_cert.pem,
+			'ssl-target-name-override': null
 		}));
-		console.log('added peer', peerUrl[use_peer]);
+		console.log('added peer', peerUrl);
 
 		// --- Success --- //
 		console.log('Successfully got enrollment ' + uuid);
@@ -353,21 +362,14 @@ function enrollWithAdminCert(options, cb) {
 }
 
 function getSubmitterWithAdminCert(client, options) {
-	//userObj =  client.getUserContext(enrollId, true);
-
 	return Promise.resolve(client.createUser({
 		username: msp_id,
 		mspid: msp_id,
 		cryptoContent: {
-			privateKeyPEM: decodeb64(options.credentials.cas[use_ca].orgs.PeerOrg1.privateKeyPEM),
-			signedCertPEM: decodeb64(options.credentials.cas[use_ca].orgs.PeerOrg1.signedCertPEM)
+			privateKeyPEM: admin_cert,
+			signedCertPEM: signed_cert
 		}
 	}));
-}
-
-function decodeb64(b64string) {
-	if (!b64string) throw Error('cannot decode something that isn\'t there');
-	return (Buffer.from(b64string, 'base64')).toString();
 }
 
 function getSubmitter(client, options) {
@@ -375,21 +377,20 @@ function getSubmitter(client, options) {
 	return client.getUserContext(enrollId, true).then((user) => {
 		if (user && user.isEnrolled()) {
 			console.log('Successfully loaded enrollment from persistence');
-			userObj = user;
 			return user;
 		} else {
 
 			// Need to enroll it with the CA
 			var tlsOptions = {
-				trustedRoots: [tls_cert.cert_1.pem],                                    //pem cert required
+				trustedRoots: [tls_cert.pem],                                    //pem cert required
 				verify: false
 			};
-			var ca_name = options.credentials.cas[use_ca].orgs.PeerOrg1.ca_name;
+			var caName = ca_name
 
-			var ca_client = new CaService(casUrl[use_ca], tlsOptions, ca_name);     //ca_name is important for the bluemix service
+			var ca_client = new CaService(casUrl, tlsOptions, caName);     //ca_name is important for the bluemix service
 			member = new User(enrollId);
 
-			console.log('enroll id: "' + enrollId + '", secret: "' + enroll_secret + '"');
+			console.log('enroll id: "' + enrollId + '" secret: "' + enroll_secret + '"');
 			console.log('msp_id: ', msp_id, 'ca_name:', ca_name);
 
 			// --- Lets Do It --- //
@@ -582,11 +583,11 @@ router.post('/', ensureAuthenticated, function (req, res) {
 	// Setup EventHub
 	if (eventUrl) {
 
-		console.log('listening to event url', eventUrl[use_peer]);
+		console.log('listening to event url', eventUrl);
 		eventhub = client.newEventHub();
-		eventhub.setPeerAddr(eventUrl[use_peer], {
-			pem: tls_cert.cert_1.pem,
-			'ssl-target-name-override': tls_cert.cert_1.common_name,		//can be null if cert matches hostname
+		eventhub.setPeerAddr(eventUrl, {
+			pem: tls_cert.pem,
+			'ssl-target-name-override': null,		//can be null if cert matches hostname
 			'grpc.http2.keepalive_time': 15
 		});
 		eventhub.connect();
@@ -660,11 +661,11 @@ router.post('/:customer', ensureAuthenticated, function (req, res, next) {
 	// Setup EventHub
 	if (eventUrl) {
 
-		logger.debug('listening to event url', eventUrl[use_peer]);
+		logger.debug('listening to event url', eventUrl);
 		eventhub = client.newEventHub();
-		eventhub.setPeerAddr(eventUrl[use_peer], {
-			pem: tls_cert.cert_1.pem,
-			'ssl-target-name-override': tls_cert.cert_1.common_name,		//can be null if cert matches hostname
+		eventhub.setPeerAddr(eventUrl, {
+			pem: tls_cert.pem,
+			'ssl-target-name-override': null,		//can be null if cert matches hostname
 			'grpc.http2.keepalive_time': 15
 		});
 		eventhub.connect();
@@ -780,11 +781,11 @@ router.delete('/:customer', ensureAuthenticated, function (req, res) {
 	// Setup EventHub
 	if (eventUrl) {
 
-		console.log('listening to event url', eventUrl[use_peer]);
+		console.log('listening to event url', eventUrl);
 		eventhub = client.newEventHub();
-		eventhub.setPeerAddr(eventUrl[use_peer], {
-			pem: tls_cert.cert_1.pem,
-			'ssl-target-name-override': tls_cert.cert_1.common_name,		//can be null if cert matches hostname
+		eventhub.setPeerAddr(eventUrl, {
+			pem: tls_cert.pem,
+			'ssl-target-name-override': null,		//can be null if cert matches hostname
 			'grpc.http2.keepalive_time': 15
 		});
 		eventhub.connect();

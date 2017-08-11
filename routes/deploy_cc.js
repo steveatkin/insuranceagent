@@ -22,9 +22,9 @@ module.exports = function (logger) {
 
 		// send proposal to endorser
 		var request = {
-			targets: [obj.newPeer(options.peer_urls[use_peer].discovery_url, {
-				pem: options.peer_tls_opts.pem,
-				'ssl-target-name-override': options.peer_tls_opts.common_name
+			targets: [obj.newPeer(options.peer_urls, {
+				pem: options.peer_tls_opts,
+				'ssl-target-name-override': null
 			})],
 			chaincodePath: options.path_2_chaincode,
 			chaincodeId: options.chaincode_id,
@@ -114,15 +114,14 @@ module.exports = function (logger) {
 
 		// fix GOPATH - does not need to be real!
 		process.env.GOPATH = path.join(__dirname, '../');
-		//var tx_id = null;
 
 		// send proposal to endorser
 		var request = {
-			targets: [obj.newPeer(options.peer_urls[use_peer].discovery_url, {
-				pem: options.peer_tls_opts.pem,
-				'ssl-target-name-override': options.peer_tls_opts.common_name	//can be null if cert matches hostname
+			targets: [obj.newPeer(options.peer_urls, {
+				pem: options.peer_tls_opts,
+				'ssl-target-name-override': null	//can be null if cert matches hostname
 			})],
-			chaincodePath: options.path_2_chaincode,
+			//chaincodePath: options.path_2_chaincode,
 			chaincodeId: options.chaincode_id,
 			chaincodeVersion: options.chaincode_version,
 			fcn: 'init',
