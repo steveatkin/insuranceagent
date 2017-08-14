@@ -28,8 +28,8 @@
     "connect-redis" : "3.1.x",
     "redis" : "2.6.x",
     "async": "^2.1.2",
-    "fabric-client": "1.0.0",
-    "fabric-ca-client": "1.0.0"
+    "fabric-client": "^1.0.0",
+    "fabric-ca-client": "^1.0.0"
   },
   "repository": {},
 	"engines": {
