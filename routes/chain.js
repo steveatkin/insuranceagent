@@ -52,7 +52,9 @@ var use_ca;
 var admin_cert;
 var signed_cert;
 var ca_name;
-var cert_authority;
+var peer_name;
+var orderer_name;
+var cas_name;
 
 process.env.GOPATH = path.join(__dirname, '../');
 
@@ -81,42 +83,28 @@ function init() {
 		use_ca = process.env.USE_CA;
 
 		//Fetch from Blockchain Credentials File
-		cert_authority = options.organizations.PeerOrg1.certificateAuthorities[use_ca];
-		msp_id = options.client.organization;
+		msp_id = helper.getMSPid(options);
 		network_id = options["x-networkId"];
 		admin_cert = options.organizations.PeerOrg1.adminPrivateKeyPEM;
 		signed_cert = options.organizations.PeerOrg1.signedCertPEM;
 
-		//Switch Orderer, CA or Peer 
-		if (use_ca == 0) {
-			enrollId = options.certificateAuthorities["fabric-ca-16819a"].registrar[0].enrollId;
-			enroll_secret = options.certificateAuthorities["fabric-ca-16819a"].registrar[0].enrollSecret;
-			ca_name = options.certificateAuthorities["fabric-ca-16819a"].caName;
-			cas = options.certificateAuthorities["fabric-ca-16819a"];
-		} else {
-			enrollId = options.certificateAuthorities["fabric-ca-16819c"].registrar[0].enrollId;
-			enroll_secret = options.certificateAuthorities["fabric-ca-16819c"].registrar[0].enrollSecret;
-			ca_name = options.certificateAuthorities["fabric-ca-16819c"].caName;
-			cas = options.certificateAuthorities["fabric-ca-16819c"];
-		}
+		//Get Peer, Orderer and CA Name
+		peer_name = helper.getPeername(options, channel_id, use_peer);
+		cas_name = helper.getCAname(options, msp_id, use_ca);
+		orderer_name = helper.getOrderername(options, channel_id, use_orderer);
 
-		if (use_orderer == 0) {
-			tls_cert = options.orderers["fabric-orderer-13001b"].tlsCACerts;
-			orderers = options.orderers["fabric-orderer-13001b"];
-		} else if (use_orderer == 1) {
-			tls_cert = options.orderers["fabric-orderer-13001d"].tlsCACerts;
-			orderers = options.orderers["fabric-orderer-13001d"];
-		} else {
-			tls_cert = options.orderers["fabric-orderer-13001e"].tlsCACerts;
-			orderers = options.orderers["fabric-orderer-13001e"];
-		}
+		//Get Peer, Orderer and CA object
+		cas = helper.getCA(options, cas_name);
+		peers = helper.getPeer(options, peer_name);
+		orderers = helper.getOrderer(options, orderer_name);
 
-		if (use_peer == 0) {
-			peers = options.peers["fabric-peer-org1-23253a"];
-		} else {
-			peers = options.peers["fabric-peer-org1-23253c"];
-		}
+		//Get Enrollment User and Secret
+		enrollId = cas.registrar[0].enrollId
+		enroll_secret = cas.registrar[0].enrollSecret;
 
+		//Get TLS certificate
+		tls_cert = options.orderers[orderer_name].tlsCACerts;
+		ca_name = options.certificateAuthorities[cas_name].caName;
 	}
 	else {
 		console.log('Missing Blockchain Credentials File');
