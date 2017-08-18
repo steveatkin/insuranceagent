@@ -12,6 +12,13 @@ const optional = require('optional');
 const express = require('express');
 const router = express.Router();
 var options = optional('./chain-credentials.json');
+var admin_config_filename = 'privateKey.pem';
+var signed_config_filename = 'cert.pem';
+var path2cert = path.join(__dirname, '../' + admin_config_filename);
+var admin_cert = fs.readFileSync(path2cert, 'utf8') + '\r\n'; 
+var path2sign = path.join(__dirname, '../' + signed_config_filename);
+var signed_cert = fs.readFileSync(path2sign, 'utf8') + '\r\n'; 
+
 const winston = require('winston');
 const logger = new (winston.Logger)({
 	transports: [
@@ -85,9 +92,7 @@ function init() {
 		//Fetch from Blockchain Credentials File
 		msp_id = helper.getMSPid(options);
 		network_id = options["x-networkId"];
-		admin_cert = options.organizations.PeerOrg1.adminPrivateKeyPEM;
-		signed_cert = options.organizations.PeerOrg1.signedCertPEM;
-
+		
 		//Get Peer, Orderer and CA Name
 		peer_name = helper.getPeername(options, channel_id, use_peer);
 		cas_name = helper.getCAname(options, msp_id, use_ca);
@@ -144,6 +149,7 @@ function init() {
 					} else {
 						console.log('First verify if chaincode is installed on peer');
 						//if it's installed then don't install it otherwise install it   
+						client.setUserContext(enrollResp.submitter);
 						query_installed_cc(client, options, function (err, resp) {
 							var flag = false;
 							if (err != null) {
@@ -269,7 +275,7 @@ function enrollAdmin() {
 }
 
 function query_installed_cc(client, options, cb) {
-	logger.debug('Querying Installed Chaincodes\n');
+	console.log('Querying Installed Chaincodes\n');
 
 	// send proposal to peer
 	client.queryInstalledChaincodes(new Peer(peerUrl, {

@@ -15,3 +15,6 @@ npm-debug.log
 keyValStore-*
 .dockerignore
 .cfignore
+privateKey.pem
+cert.pem
+3.secure.blockchain.ibm.com.rootcert
