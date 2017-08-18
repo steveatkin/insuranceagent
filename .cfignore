@@ -21,3 +21,4 @@ License.txt
 README.md
 .dockerignore
 Dockerfile
+keyValStore-*
