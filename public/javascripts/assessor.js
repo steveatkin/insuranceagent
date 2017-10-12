@@ -123,6 +123,44 @@ $(document).ready(function () {
         $("#history-tab").text(data.history);
         $("#phone-number-label").text(data.phone);
 
+        $("#claim-label").text(data.claimLabel);
+        $("#latitude-label").text(data.latitudeLabel);
+        $("#longitude-label").text(data.longitudeLabel);
+        $("#address-label").text(data.addressLabel);
+        $("#monthsSinceLastClaim-label").text(data.monthsSinceLastClaimLabel);
+        $("#numberOfOpenComplaints-label").text(data.numberOfOpenComplaintsLabel);
+        $("#totalClaimAmount-label").text(data.totalClaimAmountLabel);
+        $("#currentClaimAmount-label").text(data.currentClaimAmountLabel);
+        $("#submit-payment").text(data.submitPaymentLabel);
+        
+        $("#salesChannel-label").text(data.salesChannelLabel);
+        $("#policyType-label").text(data.policyTypeLabel);
+        $("#coverage-label").text(data.coverageLabel);
+        $("#vehicleClass-label").text(data.vehicleClassLabel);
+        $("#effectiveToDate-label").text(data.effectiveToDateLabel);
+        $("#vehicleSize-label").text(data.vehicleSizeLabel);
+        $("#monthlyPremiumAuto-label").text(data.monthlyPremiumAutoLabel);
+        $("#monthsSincePolicyInception-label").text(data.monthsSincePolicyInceptionLabel);
+        $("#numberOfPolicies-label").text(data.numberOfPoliciesLabel);
+        
+        $("#dialog-message-continue").text(data.dialogMessageContinue);
+        $("#dialog-close").text(data.dialogCloseLabel);
+        $("#dialog-ok").text(data.dialogOkLabel);
+        $("#dialog-title").text(data.dialogTitleLabel);
+        $("#submit-payment-done").text(data.dialogMessageSubmitted);
+        
+        $("#customer-label").text(data.customerLabel);
+        $("#stateCode-label").text(data.stateCodeLabel);
+        $("#surname-label").text(data.surnameLabel);
+        $("#state-label").text(data.stateLabel);
+        $("#givenName-label").text(data.givenNameLabel);
+        $("#city-label").text(data.cityLabel);
+        $("#email-label").text(data.emailLabel);
+        $("#streetAddress-label").text(data.streetAddressLabel);
+        $("#gender-label").text(data.genderLabel);
+
+        $("#submit-payment").prop('disabled', false);
+        
         // Create the history table after we know our resources are loaded
         createHistoryTable();
     };
@@ -353,6 +391,12 @@ $(document).ready(function () {
         else {
             Policy.getPolicy(customer, userLang);
         }
+    });
+
+    $("#dialog-ok").click(function () {
+        $("#submit-payment").prop('disabled', true);
+        $("#submit-payment-done").removeClass('hidden');
+        $('#modal-confirm').modal('toggle');
     });
 
 });

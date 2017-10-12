@@ -97,33 +97,33 @@ function init() {
         networkCertPath = options.credentials.cert_path;
     }
 
-    // Create a client blockchin.
-    chain = hfc.newChain('insurance');
+    // // Create a client blockchin.
+    // chain = hfc.newChain('insurance');
 
-    chain.setInvokeWaitTime("90");
+    // chain.setInvokeWaitTime("90");
 
-    //path to copy the certificate
-    certPath = path.join(__dirname, '../src/chaincode', 'certificate.pem');
+    // //path to copy the certificate
+    // certPath = path.join(__dirname, '../src/chaincode', 'certificate.pem');
 
-    setup();
+    // setup();
 
-    printNetworkDetails();
-    //Check if chaincode is already deployed
-    //TODO: Deploy failures aswell returns chaincodeID, How to address such issue?
-    if (process.env.CHAIN_NAME) {
-        chaincodeID = process.env.CHAIN_NAME;
-        chain.getUser(newUserName, function (err, user) {
-            if (err) throw Error(" Failed to register and enroll " + newUserName + ": " + err);
-            userObj = user;
-        });
-    } else {
-        enrollAndRegisterUsers();
-    }
+    // printNetworkDetails();
+    // //Check if chaincode is already deployed
+    // //TODO: Deploy failures aswell returns chaincodeID, How to address such issue?
+    // if (process.env.CHAIN_NAME) {
+    //     chaincodeID = process.env.CHAIN_NAME;
+    //     chain.getUser(newUserName, function (err, user) {
+    //         if (err) throw Error(" Failed to register and enroll " + newUserName + ": " + err);
+    //         userObj = user;
+    //     });
+    // } else {
+    //     enrollAndRegisterUsers();
+    // }
 
-    // print out the stats of the chaincode
-    if (process.env.NODE_ENV == 'development') {
-        //chainStats();
-    }
+    // // print out the stats of the chaincode
+    // if (process.env.NODE_ENV == 'development') {
+    //     //chainStats();
+    // }
 }
 
 function setup() {

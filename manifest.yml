@@ -4,25 +4,21 @@ applications:
   instances: 1
   domain: mybluemix.net
   name: insuranceagent
-  host: insuranceagent
+  host: insurance-demo-ja-bot
   disk_quota: 1024M
   services:
-    - "Globalization Pipeline GA"
-    - "Weather Company Data for IBM Bluemix-n7"
-    - "Conversation-y0"
-    - "Language Translator-Exp"
-    - "AtkinRed-cloudantNoSQLDB"
-    - "Blockchain-cg"
-    - "Twilio-0w"
-    - "Compose for Redis-6o"
-    - "Speech to Text-ru"
-    - "Text to Speech-i9"
-    - "Single Sign On-n8"
+    - "Blockchain-tf"
+    - "Conversation-af"
+    - "GP-insurancedemo"
+    - "Language Translator-zo"
+    - "Speech to Text-h7"
+    - "Text to Speech-ir"
+    - "Twilio-tn"
   env:
     API_KEY: 9f13d8b0-6df1-48b2-ae6d-31b1defb2ce3
     CALLBACK_URL: https://insuranceagent.mybluemix.net/auth/sso/callback
     CHAIN_NAME: c16dfee9ade97803f7e84b33a3652d691ed5221e9057b19363b525b81697ced0
-    NODE_ENV: production
+    NODE_ENV: development
     POLICY_API: https://api.us.apiconnect.ibmcloud.com/aruns-organization-nysubwaydemos/production/v1/policy
     SESSION_SECRET: 5997051a-36ae-487b-862b-a331f19b8b0b
     WORKSPACE_ENGLISH: 37a0355f-4ae3-4300-8ee4-b62b31c87226
@@ -30,7 +26,7 @@ applications:
     WORKSPACE_SPANISH: bcb2d3e4-5cd8-45bd-bb1b-aa0919223937
     WORKSPACE_TRADITIONAL_CHINESE: 4561bd05-65c8-43f9-a55f-570d6e409164
     WORKSPACE_SIMPLIFIED_CHINESE: a4515555-fca8-455c-b0d1-1451dc4ba41e
-    WORKSPACE_JAPANESE: 57534599-1a3a-497a-b728-d49ffa2fd969
+    WORKSPACE_JAPANESE: 1a422e3f-05d5-4604-8f0b-cfb424e066b1
     NORMALIZED_CONVERSATION: false
     MODEL_ENGLISH_TO_FRENCH: 3bd9f6ee-1c60-443a-924e-904ab6be269e
     MODEL_FRENCH_TO_ENGLISH: a08e7d32-6923-4d0c-9922-25679fa5c0ec
@@ -39,3 +35,9 @@ applications:
     MODEL_JAPANESE_TO_ENGLISH: 095e604a-beef-4879-b168-b1327ce81a6b
     MODEL_ENGLISH_TO_JAPANESE: 95493c46-d2de-4a01-9e3a-ff91c8f32702
     WAIT_FOR_INVOKE_COMPLETION: false
+    LINE_CHANNEL_ACCESS_TOKEN: YJ8d2CDOgnTj1tfMqSIV35nASAhmXUlIpFa1zmu8YSB1EYx9kt4WQoFO5MFd521g0q8s+qWhCiWVM1sXlOUxFTrhwO6NXUe5u9HoLgwfZKgQLDtvPSBNv1b3rOxEaevZYLo9bPSN02vySEgKspvBUwdB04t89/1O/w1cDnyilFU=
+    LINE_CHANNEL_SECRET: 44aad9d78b1b8b5e3c99f2fdc9b3426f
+    CONVERSATION_USERNAME: f1c125d0-b7f1-4c32-a9d5-d07d58d66267
+    CONVERSATION_PASSWORD: bwTvZN1uIe72
+    CLOUDANT_URL: "https://b149ed2f-8789-4178-bd02-8144c4e60adf-bluemix:4c7db8e4567ee09b505ad366647cd558866adecdb4466f1198739e426536872e@b149ed2f-8789-4178-bd02-8144c4e60adf-bluemix.cloudant.com"
+  
