@@ -14,10 +14,13 @@ applications:
     - "Speech to Text-h7"
     - "Text to Speech-ir"
     - "Twilio-tn"
+    - "Weather Company Data for IBM Bluemix-n7"
+    - "AtkinRed-cloudantNoSQLDB"
+    - "Compose for Redis-6o"
+    - "Single Sign On-n8"
   env:
     API_KEY: 9f13d8b0-6df1-48b2-ae6d-31b1defb2ce3
     CALLBACK_URL: https://insuranceagent.mybluemix.net/auth/sso/callback
-    CHAIN_NAME: c16dfee9ade97803f7e84b33a3652d691ed5221e9057b19363b525b81697ced0
     NODE_ENV: development
     POLICY_API: https://api.us.apiconnect.ibmcloud.com/aruns-organization-nysubwaydemos/production/v1/policy
     SESSION_SECRET: 5997051a-36ae-487b-862b-a331f19b8b0b
@@ -34,10 +37,16 @@ applications:
     MODEL_SPANISH_TO_ENGLISH: b36668c5-65e1-4279-81ac-a53dda765c27
     MODEL_JAPANESE_TO_ENGLISH: 095e604a-beef-4879-b168-b1327ce81a6b
     MODEL_ENGLISH_TO_JAPANESE: 95493c46-d2de-4a01-9e3a-ff91c8f32702
+    CHANNEL_ID: insuranceclaim
+    CHAINCODE_ID: insurancechaincode
+    CHAINCODE_VERSION: v1
+    BLOCK_DELAY: 1000
+    USE_ORDERER: 1
+    USE_PEER: 1
+    USE_CA: 1
     WAIT_FOR_INVOKE_COMPLETION: false
     LINE_CHANNEL_ACCESS_TOKEN: YJ8d2CDOgnTj1tfMqSIV35nASAhmXUlIpFa1zmu8YSB1EYx9kt4WQoFO5MFd521g0q8s+qWhCiWVM1sXlOUxFTrhwO6NXUe5u9HoLgwfZKgQLDtvPSBNv1b3rOxEaevZYLo9bPSN02vySEgKspvBUwdB04t89/1O/w1cDnyilFU=
     LINE_CHANNEL_SECRET: 44aad9d78b1b8b5e3c99f2fdc9b3426f
     CONVERSATION_USERNAME: f1c125d0-b7f1-4c32-a9d5-d07d58d66267
     CONVERSATION_PASSWORD: bwTvZN1uIe72
     CLOUDANT_URL: "https://b149ed2f-8789-4178-bd02-8144c4e60adf-bluemix:4c7db8e4567ee09b505ad366647cd558866adecdb4466f1198739e426536872e@b149ed2f-8789-4178-bd02-8144c4e60adf-bluemix.cloudant.com"
-  

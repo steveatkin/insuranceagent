@@ -15,10 +15,10 @@ redis-credentials.json
 speech-to-text-credentials.json
 text-to-speech-credentials.json
 sso-credentials.json
-chain-credentials.json
 npm-debug.log
 CHANGELOG.md
 License.txt
 README.md
 .dockerignore
 Dockerfile
+keyValStore-*

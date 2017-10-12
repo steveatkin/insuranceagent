@@ -1,37 +1,67 @@
-var hfc = require('hfc');
-var util = require('util');
-var fs = require('fs');
-var path = require("path");
-var async = require('async');
+const FabricClient = require('fabric-client');
+const User = require('fabric-client/lib/User.js');
+const CaService = require('fabric-ca-client/lib/FabricCAClientImpl.js');
+const Orderer = require('fabric-client/lib/Orderer.js');
+const Peer = require('fabric-client/lib/Peer.js');
+const utils = require('fabric-client/lib/utils.js');
+const fs = require('fs');
+const path = require("path");
+const async = require('async');
 const https = require('https');
-var optional = require('optional');
-var express = require('express');
-var router = express.Router();
-
-
-var chain;
-var network;
-var certPath;
-var peers;
-var users;
-var ca;
-var networkCertPath;
-var userObj;
-var newUserName;
-var chaincodeID;
-var certFile = 'us.blockchain.ibm.com.cert';
+const optional = require('optional');
+const express = require('express');
+const router = express.Router();
 var options = optional('./chain-credentials.json');
+var admin_config_filename = 'privateKey.pem';
+var signed_config_filename = 'cert.pem';
+var path2cert = path.join(__dirname, '../' + admin_config_filename);
+var admin_cert = fs.readFileSync(path2cert, 'utf8') + '\r\n'; 
+var path2sign = path.join(__dirname, '../' + signed_config_filename);
+var signed_cert = fs.readFileSync(path2sign, 'utf8') + '\r\n'; 
 
-var winston = require('winston');
-var logger = new(winston.Logger)({
-    transports: [
-        new(winston.transports.Console)()
-    ]
+const winston = require('winston');
+const logger = new (winston.Logger)({
+	transports: [
+		new (winston.transports.Console)()
+	]
 });
+const deploy_cc = require('./deploy_cc.js')(logger);
+const helper = require('./helper.js')(logger);
 
-var caUrl;
-var peerUrls = [];
-var EventUrls = [];
+//Array to store Orderers, CAS and Peers Discovery URL's
+var casUrl = [];
+var peerUrl = [];
+var eventUrl = [];
+var ordererUrl = [];
+
+//Holder for Fabric Client and Channel
+var client;
+var channel;
+
+//Variables for Blockchain Network
+var network_id;
+var orderers;
+var cas;
+var peers;
+var channel_id;
+var chaincode_id;
+var chaincode_version;
+var block_delay;
+var tls_cert;
+var enrollId;
+var enroll_secret;
+var msp_id;
+var uuid;
+var use_orderer;
+var use_peer;
+var use_ca;
+
+var admin_cert;
+var signed_cert;
+var ca_name;
+var peer_name;
+var orderer_name;
+var cas_name;
 
 process.env.GOPATH = path.join(__dirname, '../');
 
@@ -40,522 +70,767 @@ init();
 
 
 function ensureAuthenticated(req, res, next) {
-    if (!req.isAuthenticated() && process.env.NODE_ENV == 'production') {
-        req.session.originalUrl = req.originalUrl;
-        res.redirect('/login');
-    } else {
-        return next();
-    }
-}
-
-function fileExists(filePath) {
-    try {
-        return fs.statSync(filePath).isFile();
-    } catch (err) {
-        return false;
-    }
+	if (!req.isAuthenticated() && process.env.NODE_ENV == 'production') {
+		req.session.originalUrl = req.originalUrl;
+		res.redirect('/login');
+	} else {
+		return next();
+	}
 }
 
 function init() {
-    if (process.env.VCAP_SERVICES) {
-        var servicesObject = JSON.parse(process.env.VCAP_SERVICES);
-        for (var i in servicesObject) {
-            if (i.indexOf('ibm-blockchain') >= 0) {
-                if (servicesObject[i][0].credentials.error) {
-                    console.log('!\n!\n! Error from Bluemix: \n', servicesObject[i][0].credentials.error, '!\n!\n');
-                    peers = null;
-                    users = null;
-                    ca = null;
-                    networkCertPath = null;
-                }
-                if (servicesObject[i][0].credentials && servicesObject[i][0].credentials.peers) {
-                    console.log('overwritting peers, loading from a vcap service: ', i);
-                    peers = servicesObject[i][0].credentials.peers;
+	if (options) {
+		//Fetch Environment Variables 
+		channel_id = process.env.CHANNEL_ID;
+		chaincode_id = process.env.CHAINCODE_ID;
+		chaincode_version = process.env.CHAINCODE_VERSION;
+		block_delay = process.env.BLOCK_DELAY;
+		use_orderer = process.env.USE_ORDERER;
+		use_peer = process.env.USE_PEER;
+		use_ca = process.env.USE_CA;
 
-                    if (servicesObject[i][0].credentials.users) {
-                        console.log('overwritting users, loading from a vcap service: ', i);
-                        users = servicesObject[i][0].credentials.users;
+		//Fetch from Blockchain Credentials File
+		msp_id = helper.getMSPid(options);
+		network_id = options["x-networkId"];
+		
+		//Get Peer, Orderer and CA Name
+		peer_name = helper.getPeername(options, channel_id, use_peer);
+		cas_name = helper.getCAname(options, msp_id, use_ca);
+		orderer_name = helper.getOrderername(options, channel_id, use_orderer);
 
-                        if (servicesObject[i][0].credentials.ca) {
-                            console.log('overwritting ca, loading from a vcap service: ', i);
-                            ca = servicesObject[i][0].credentials.ca;
+		//Get Peer, Orderer and CA object
+		cas = helper.getCA(options, cas_name);
+		peers = helper.getPeer(options, peer_name);
+		orderers = helper.getOrderer(options, orderer_name);
 
-                            console.log('overwritting network cert path, loading from a vcap service: ', i);
-                            if (servicesObject[i][0].credentials.cert_path) {
-                                networkCertPath = servicesObject[i][0].credentials.cert_path;
-                            }
-                        }
-                    }
-                    break;
-                }
-            }
-        }
-    } else if (options.credentials) {
-        peers = options.credentials.peers;
-        users = options.credentials.users;
-        ca = options.credentials.ca;
-        networkCertPath = options.credentials.cert_path;
-    }
+		//Get Enrollment User and Secret
+		enrollId = cas.registrar[0].enrollId
+		enroll_secret = cas.registrar[0].enrollSecret;
 
-    // // Create a client blockchin.
-    // chain = hfc.newChain('insurance');
+		//Get TLS certificate
+		tls_cert = options.orderers[orderer_name].tlsCACerts;
+		ca_name = options.certificateAuthorities[cas_name].caName;
+	}
+	else {
+		console.log('Missing Blockchain Credentials File');
+		process.exit();
+	}
 
-    // chain.setInvokeWaitTime("90");
+	// Create Fabric client and link it to the Blockchain Channel
+	try {
+		client = new FabricClient();
+		channel = client.newChannel(channel_id);
+	}
+	catch (e) {
+		//it might error about 1 chain per network, but that's not a problem just continue
+	}
 
-    // //path to copy the certificate
-    // certPath = path.join(__dirname, '../src/chaincode', 'certificate.pem');
+	//set up the network & URL's
+	setup();
 
-    // setup();
+	//Print network details
+	printNetworkDetails();
 
-    // printNetworkDetails();
-    // //Check if chaincode is already deployed
-    // //TODO: Deploy failures aswell returns chaincodeID, How to address such issue?
-    // if (process.env.CHAIN_NAME) {
-    //     chaincodeID = process.env.CHAIN_NAME;
-    //     chain.getUser(newUserName, function (err, user) {
-    //         if (err) throw Error(" Failed to register and enroll " + newUserName + ": " + err);
-    //         userObj = user;
-    //     });
-    // } else {
-    //     enrollAndRegisterUsers();
-    // }
+	//Check if admin is enrolled or not. If not, enroll the admin
+	enrollAdmin().then(function (next) {
 
-    // // print out the stats of the chaincode
-    // if (process.env.NODE_ENV == 'development') {
-    //     //chainStats();
-    // }
+		//Check if chaincode is already instantiated on the channel or not
+		check_if_already_instantiated(client, options, function (resp, err) {
+
+			if (err != undefined) {
+				console.log('');
+				console.log('Chaincode was not detected');
+
+				//Install and instantiate chaincode
+				console.log('First we enroll');
+				enrollWithAdminCert(options, function (enrollErr, enrollResp) {
+					if (enrollErr != null) {
+						logger.error('error enrolling', enrollErr, enrollResp);
+					} else {
+						console.log('First verify if chaincode is installed on peer');
+						//if it's installed then don't install it otherwise install it   
+						client.setUserContext(enrollResp.submitter);
+						query_installed_cc(client, options, function (err, resp) {
+							var flag = false;
+							if (err != null) {
+								console.log('error: ', err);
+							}
+							if (resp != null) {
+								for (var i = 0; i < resp.chaincodes.length; i++) {
+									if (resp.chaincodes[i].name === chaincode_id) {
+										//chaincode is already installed on the peer
+										//don't install it...proceed further
+										console.log('Chaincode is already installed on peer');
+										flag = true;
+									}
+								}
+								//Chaincode is not installed, install it on the peer.
+								if (flag === false) {
+									//Install chaincode on peer
+									var opts = {
+										peer_urls: peerUrl,
+										path_2_chaincode: 'chaincode1',
+										chaincode_id: chaincode_id,
+										chaincode_version: chaincode_version,
+										peer_tls_opts: tls_cert.pem
+									};
+									deploy_cc.install_chaincode(client, opts, function (err, resp) {
+										console.log('Install done. Errors:', (!err) ? 'nope' : err);
+									});
+								}
+
+								console.log('Instantiate chaincode on the channel');
+								var opts = {
+									peer_urls: peerUrl,
+									path_2_chaincode: 'chaincode1',
+									channel_id: channel_id,
+									chaincode_id: chaincode_id,
+									chaincode_version: chaincode_version,
+									cc_args: ['99'],
+									peer_tls_opts: tls_cert.pem
+								};
+								deploy_cc.instantiate_chaincode(client, opts, function (err, resp) {
+									console.log('Instantiation done. Errors:', (!err) ? 'nope' : err);
+								});
+							}
+						});
+					}
+				});
+
+
+			} else {
+				console.log('Chaincode found on channel ' + channel_id);
+				//Nothing else to do..... Just wait for user to take some action on UI
+				//Based upon action, route will be called
+				return;
+			}
+		});
+	});
+
 }
 
+
 function setup() {
-    // Determining if we are running on a startup or HSBN network based on the url
-    // of the discovery host name.  The HSBN will contain the string zone.
-    var isHSBN = peers[0].discovery_host.indexOf('secure') >= 0 ? true : false;
-    var network_id = Object.keys(ca);
-    caUrl = "grpcs://" + ca[network_id].discovery_host + ":" + ca[network_id].discovery_port;
 
-    // Configure the KeyValStore which is used to store sensitive keys.
-    // This data needs to be located or accessible any time the users enrollmentID
-    // perform any functions on the blockchain.  The users are not usable without
-    // This data.
-    var uuid = network_id[0].substring(0, 8);
+	//uuid for key store
+	uuid = network_id.substring(0, 8);
+	peerUrl = peers.url;
+	eventUrl = peers.eventUrl;
+	ordererUrl = orderers.url;
+	casUrl = cas.url;
 
-    chain.setKeyValStore(hfc.newFileKeyValStore(path.join(__dirname, '../', 'keyValStore-' + uuid)));
-
-    if (isHSBN) {
-        certFile = '0.secure.blockchain.ibm.com.cert';
-    }
-    fs.createReadStream(certFile).pipe(fs.createWriteStream(certPath));
-    var cert = fs.readFileSync(certFile);
-
-    chain.setMemberServicesUrl(caUrl, {
-        pem: cert
-    });
-
-    peerUrls = [];
-    eventUrls = [];
-    // Adding all the peers to blockchain
-    // this adds high availability for the client
-    for (var i = 0; i < peers.length; i++) {
-        // Peers on Bluemix require secured connections, hence 'grpcs://'
-        peerUrls.push("grpcs://" + peers[i].discovery_host + ":" + peers[i].discovery_port);
-        chain.addPeer(peerUrls[i], {
-            pem: cert
-        });
-        eventUrls.push("grpcs://" + peers[i].event_host + ":" + peers[i].event_port);
-        chain.eventHubConnect(eventUrls[0], {
-            pem: cert
-        });
-    }
-    newUserName = "InsuranceAdmin";
-    // Make sure disconnect the eventhub on exit
-    process.on('exit', function () {
-        chain.eventHubDisconnect();
-    });
 }
 
 function printNetworkDetails() {
-    console.log("\n------------- ca-server, peers and event URL:PORT information: -------------");
-    console.log("\nCA server Url : %s\n", caUrl);
-    for (var i = 0; i < peerUrls.length; i++) {
-        console.log("Validating Peer%d : %s", i, peerUrls[i]);
-    }
-    console.log("");
-    for (var i = 0; i < eventUrls.length; i++) {
-        console.log("Event Url on Peer%d : %s", i, eventUrls[i]);
-    }
-    console.log("");
-    console.log('-----------------------------------------------------------\n');
+	console.log("\n------------- Orderer, ca-server, peers and event URL:PORT information: -------------");
+	console.log("");
+	console.log("Orderer Url : %s", ordererUrl);
+	console.log("");
+	console.log("CAS Url : %s", casUrl);
+	console.log("");
+	console.log("Discovery Url on Peer : %s", peerUrl);
+	console.log("");
+	console.log("Event Url on Peer : %s", eventUrl);
+	console.log("");
+	console.log('-----------------------------------------------------------\n');
+
 }
 
-function enrollAndRegisterUsers() {
+function enrollAdmin() {
+	//Configure the KeyValStore which is used to store sensitive keys.
+	// This data needs to be located or accessible any time the users enrollmentID
+	// perform any functions on the blockchain.  The users are not usable without
+	// This data.
+	return FabricClient.newDefaultKeyValueStore({
+		path: path.join(__dirname, '../', 'keyValStore-' + uuid)
+	}).then(function (store) {
+		client.setStateStore(store);
+		//check if enrollId is enrolled or not
+		return getSubmitter(client, options);
+	}).then(function (submitter) {
 
-    // Enroll a 'admin' who is already registered because it is
-    // listed in fabric/membersrvc/membersrvc.yaml with it's one time password.
-    chain.enroll(users[0].enrollId, users[0].enrollSecret, function (err, admin) {
-        if (err) throw Error("\nERROR: failed to enroll admin : " + err);
+		channel.addOrderer(new Orderer(ordererUrl, {
+			pem: tls_cert.pem,
+			'ssl-target-name-override': null
+		}));
+		console.log('added orderer', ordererUrl);
 
-        console.log("\nEnrolled admin sucecssfully");
+		channel.addPeer(new Peer(peerUrl, {
+			pem: tls_cert.pem,
+			'ssl-target-name-override': null
+		}));
+		console.log('added peer', peerUrl);
 
-        // Set this user as the chain's registrar which is authorized to register other users.
-        chain.setRegistrar(admin);
+		// --- Success --- //
+		console.log('Successfully got enrollment ' + uuid);
 
-        //creating a new user
-        var registrationRequest = {
-            enrollmentID: newUserName,
-            affiliation: "group1"
-        };
-        chain.registerAndEnroll(registrationRequest, function (err, user) {
-            if (err) throw Error(" Failed to register and enroll " + newUserName + ": " + err);
+	}).catch(function (err) {
 
-            console.log("\nEnrolled and registered " + newUserName + " successfully");
-            userObj = user;
-            //setting timers for fabric waits
-            chain.setDeployWaitTime("120");
-            console.log("\nDeploying chaincode ...");
-            deployChaincode();
-        });
-    });
+		// --- Failure --- //
+		console.log('Failed to get enrollment ' + uuid, err.stack ? err.stack : err);
+		var formatted = format_error_msg(err);
+
+		return;
+	});
 }
 
-function deployChaincode() {
+function query_installed_cc(client, options, cb) {
+	console.log('Querying Installed Chaincodes\n');
 
-    // Construct the deploy request
-    var deployRequest = {
-        // Function to trigger
-        fcn: "init",
-        // Arguments to the initializing function
-        args: ["99"],
-        chaincodePath: "chaincode",
-        // the location where the startup and HSBN store the certificates
-        certificatePath: networkCertPath
-    };
+	// send proposal to peer
+	client.queryInstalledChaincodes(new Peer(peerUrl, {
+		pem: tls_cert.pem,
+		'ssl-target-name-override': null
+	})).then(function (resp) {
+		if (cb) return cb(null, resp);
+	}).catch(function (err) {
+		logger.error(' Error in query installed chaincode', typeof err, err);
+		var formatted = format_error_msg(err);
 
-    // Trigger the deploy transaction
-    var deployTx = userObj.deploy(deployRequest);
-
-    // Print the deploy results
-    deployTx.on('complete', function (results) {
-        // Deploy request completed successfully
-        chaincodeID = results.chaincodeID;
-        console.log("\nChaincode ID : " + chaincodeID);
-        console.log(util.format("\nSuccessfully deployed chaincode: request=%j, response=%j", deployRequest, results));
-    });
-
-    deployTx.on('error', function (err) {
-        // Deploy request failed
-        console.log(util.format("\nFailed to deploy chaincode: request=%j, error=%j", deployRequest, err));
-        process.exit(1);
-    });
+		if (cb) return cb(formatted, null);
+		else return;
+	});
 }
 
+function format_error_msg(error_message) {
+	var temp = {
+		parsed: 'could not format error',
+		raw: error_message
+	};
+	var pos;
+	try {
+		if (typeof error_message === 'object') {
+			temp.parsed = error_message[0].toString();
+		} else {
+			temp.parsed = error_message.toString();
+		}
+		pos = temp.parsed.lastIndexOf(':');
+		if (pos >= 0) temp.parsed = temp.parsed.substring(pos + 2);
+	}
+	catch (e) {
+		logger.error('could not format error');
+	}
+	temp.parsed = 'Blockchain network error - ' + temp.parsed;
+	return temp;
+};
 
-function chainStats() {
-    var options = {
-        host: peers[0].api_host,
-        port: peers[0].api_port,
-        path: '/chain',
-        method: 'GET'
-    };
 
-    console.log('Requesting chain stats from:', options.host + ':' + options.port);
+function enrollWithAdminCert(options, cb) {
+	var client = new FabricClient();
+	var channel = client.newChannel(channel_id);
 
-    var request = https.request(options, function (resp) {
-        var str = '',
-            chunks = 0;
+	FabricClient.newDefaultKeyValueStore({
+		path: path.join(__dirname, '../', 'keyValStore-' + uuid)
+	}).then(function (store) {
+		client.setStateStore(store);
+		return getSubmitterWithAdminCert(client, options);							//admin cert is different
+	}).then(function (submitter) {
+		channel.addOrderer(new Orderer(ordererUrl, {
+			pem: tls_cert.pem,
+			'ssl-target-name-override': null
+		}));
+		console.log('added Orderer', ordererUrl);
 
-        resp.setEncoding('utf8');
-        resp.on('data', function (chunk) { //merge chunks of request
-            str += chunk;
-            chunks++;
-        });
+		channel.addPeer(new Peer(peerUrl, {
+			pem: tls_cert.pem,
+			'ssl-target-name-override': null
+		}));
+		console.log('added peer', peerUrl);
 
-        resp.on('end', function () { //wait for end before decision
-            if (resp.statusCode == 204 || resp.statusCode >= 200 && resp.statusCode <= 399) {
-                str = JSON.parse(str);
-                console.log('Chainstats API returned:', str);
-                cb_chainstats(null, str);
-            } else {
-                console.error('status code: ' + resp.statusCode, ', headers:', resp.headers, ', message:', str);
-            }
-        });
-    });
+		// --- Success --- //
+		console.log('Successfully got enrollment ' + uuid);
+		if (cb) cb(null, { client: client, channel: channel, submitter: submitter });
+		return;
 
-    request.on('error', function (e) { //handle error event
-        console.error('status code: ', 500, ', message:', e);
-    });
+	}).catch(function (err) {
+		// --- Failure --- //
+		console.log('Failed to get enrollment ' + uuid, err.stack ? err.stack : err);
 
-    request.setTimeout(20000);
-    request.on('timeout', function () { //handle time out event
-        console.error('status code: ', 408, ', message: Request timed out');
-    });
+		var formatted = format_error_msg(err);
 
-    request.end();
+		if (cb) cb(formatted);
+		return;
+
+	});
+
 }
 
-//call back for getting the blockchain stats, lets get the block height now
-function cb_chainstats(e, stats) {
-    var chain_stats = stats;
-    if (stats && stats.height) {
-        var list = [];
-        for (var i = stats.height - 1; i >= 1; i--) { //create a list of heights we need
-            list.push(i);
-            if (list.length >= 8) break;
-        }
-
-        list.reverse();
-        async.eachLimit(list, 1, function (key, cb) { //iter through each one, and send it
-            //get chainstats through REST API
-            var options = {
-                host: peers[0].api_host,
-                port: peers[0].api_port,
-                path: '/chain/blocks/' + key,
-                method: 'GET'
-            };
-
-            function success(statusCode, headers, stats) {
-                stats = JSON.parse(stats);
-                stats.height = key;
-                console.log({
-                    msg: 'chainstats',
-                    e: e,
-                    chainstats: JSON.stringify(chain_stats),
-                    blockstats: JSON.stringify(stats)
-                });
-                cb(null);
-            }
-
-            function failure(statusCode, headers, msg) {
-                console.log('chainstats block ' + key);
-                console.log('status code: ' + statusCode);
-                console.log('headers: ' + headers);
-                console.log('message: ' + msg);
-                cb(null);
-            }
-
-            var request = https.request(options, function (resp) {
-                var str = '',
-                    chunks = 0;
-                resp.setEncoding('utf8');
-                resp.on('data', function (chunk) { //merge chunks of request
-                    str += chunk;
-                    chunks++;
-                });
-                resp.on('end', function () {
-                    if (resp.statusCode == 204 || resp.statusCode >= 200 && resp.statusCode <= 399) {
-                        success(resp.statusCode, resp.headers, str);
-                    } else {
-                        failure(resp.statusCode, resp.headers, str);
-                    }
-                });
-            });
-
-            request.on('error', function (e) { //handle error event
-                failure(500, null, e);
-            });
-
-            request.setTimeout(20000);
-            request.on('timeout', function () { //handle time out event
-                failure(408, null, 'Request timed out');
-            });
-
-            request.end();
-        }, function () {});
-    }
+function getSubmitterWithAdminCert(client, options) {
+	return Promise.resolve(client.createUser({
+		username: msp_id,
+		mspid: msp_id,
+		cryptoContent: {
+			privateKeyPEM: admin_cert,
+			signedCertPEM: signed_cert
+		}
+	}));
 }
 
+function getSubmitter(client, options) {
+	var member;
+	return client.getUserContext(enrollId, true).then((user) => {
+		if (user && user.isEnrolled()) {
+			console.log('Successfully loaded enrollment from persistence');
+			return user;
+		} else {
 
+			// Need to enroll it with the CA
+			var tlsOptions = {
+				trustedRoots: [tls_cert.pem],                                    //pem cert required
+				verify: false
+			};
+			var caName = ca_name
+
+			var ca_client = new CaService(casUrl, tlsOptions, caName);     //ca_name is important for the bluemix service
+			member = new User(enrollId);
+
+			console.log('enroll id: "' + enrollId + '" secret: "' + enroll_secret + '"');
+			console.log('msp_id: ', msp_id, 'ca_name:', ca_name);
+
+			// --- Lets Do It --- //
+			return ca_client.enroll({
+				enrollmentID: enrollId,
+				enrollmentSecret: enroll_secret,
+
+			}).then((enrollment) => {
+
+				// Store Certs
+				console.log(' Successfully enrolled user \'' + enrollId + '\'');
+				return member.setEnrollment(enrollment.key, enrollment.certificate, msp_id);
+			}).then(() => {
+				// Save Submitter Enrollment
+				return client.setUserContext(member);
+			}).then(() => {
+
+				// Return Submitter Enrollment
+				return member;
+			}).catch((err) => {
+
+				// Send Errors
+				console.log('Failed to enroll and persist user. Error: ' + err.stack ? err.stack : err);
+				throw new Error('Failed to obtain an enrolled user');
+			});
+		}
+	});
+}
+function check_if_already_instantiated(client, options, cb) {
+
+	var opts = {
+		channel_id: channel_id,
+		chaincode_id: chaincode_id,
+		chaincode_version: chaincode_version,
+		fcn: 'read',
+		args: ['test']
+	};
+
+	query_chaincode(client, opts, function (err, resp) {
+		if (err != null) {
+			if (cb) return cb(err, resp);
+		}
+		else {
+			if (resp.parsed == null || isNaN(resp.parsed)) {	 //if nothing is here, no chaincode
+				if (cb) return cb({ error: 'chaincode not found' }, resp);
+			}
+			else {
+				if (cb) return cb((null, resp));
+			}
+		}
+	});
+
+}
+
+function query_chaincode(client, options, cb) {
+	console.log(' Querying Chaincode: ' + options.fcn + '()');
+	var channel = client.getChannel(helper.getChannelId());
+	// send proposal to peer
+	var request = {
+		chainId: options.channel_id,
+		chaincodeId: options.chaincode_id,
+		fcn: options.fcn,
+		args: options.args,
+		txId: null
+	};
+
+	channel.queryByChaincode(request).then(
+		function (response_payloads) {
+			var formatted = format_query_resp(response_payloads);
+			// --- response looks bad -- //
+			if (formatted.parsed == null) {
+				console.log('Query response is empty', formatted.raw);
+			}
+
+			// --- response looks good --- //
+			else {
+				console.log('Successful query transaction.');
+			}
+			if (cb) return cb(null, formatted);
+		}).catch(
+		function (err) {
+			console.log(' Error in query catch block', typeof err, err);
+
+			if (cb) return cb(err, null);
+			else return;
+		});
+}
+
+function format_query_resp(peer_responses) {
+	var ret = {
+		parsed: null,
+		peers_agree: true,
+		raw_peer_payloads: [],
+	};
+	var last = null;
+
+	// -- iter on each peer's response -- //
+	for (var i in peer_responses) {
+		var as_string = peer_responses[i].toString('utf8');
+		var as_obj = {};
+
+		//logger.debug('[fcw] Peer ' + i, 'payload as str:', as_string, 'len', as_string.length);
+		logger.debug(' Peer ' + i, 'len', as_string.length);
+		ret.raw_peer_payloads.push(as_string);
+
+		// -- compare peer responses -- //
+		if (last != null) {								//check if all peers agree
+			if (last !== as_string) {
+				logger.warn('warning - some peers do not agree on query', last, as_string);
+				ret.peers_agree = false;
+			}
+			last = as_string;
+		}
+
+		try {
+			if (as_string === '') {							//if its empty, thats okay... well its not great 
+				as_obj = '';
+			} else {
+				as_obj = JSON.parse(as_string);				//if we can parse it, its great
+			}
+			logger.debug('Peer ' + i, 'type', typeof as_obj);
+			if (ret.parsed === null) ret.parsed = as_obj;	//store the first one here
+		}
+		catch (e) {
+			if (as_string.indexOf('Error: failed to obtain') >= 0) {
+				logger.error(' query resp looks like an error', typeof as_string, as_string);
+				ret.parsed = null;
+			} else {
+				logger.warn(' warning - query resp is not json, might be okay.', typeof as_string, as_string);
+				ret.parsed = as_string;
+			}
+		}
+	}
+	return ret;
+}
+
+function check_res(results) {
+	var proposalResponses = results[0];
+	var proposal = results[1];
+	var header = results[2];
+
+	var all_good = true;
+	for (var i in proposalResponses) {
+		let one_good = false;
+		if (proposalResponses && proposalResponses[0].response &&
+			proposalResponses[0].response.status === 200) {
+			one_good = true;
+			console.log('install proposal was good');
+		} else {
+			console.log('install proposal was bad');
+		}
+		all_good = all_good & one_good;
+	}
+	if (all_good) {
+		console.log(
+			'Successfully sent install Proposal and received ProposalResponse: Status - %s',
+			proposalResponses[0].response.status);
+		console.log('\nSuccessfully Installed chaincode');
+		var request = {
+			proposalResponses: proposalResponses,
+			proposal: proposal,
+			header: header
+		};
+		return request;
+	} else {
+		console.log(
+			'Failed to send install Proposal or receive valid response. Response null or status is not 200. exiting...'
+		);
+		throw proposalResponses;
+	}
+};
 
 // Create a new block for this claim payment
 router.post('/', ensureAuthenticated, function (req, res) {
-    var claim = req.body;
+	var claim = req.body;
+	var eventhub;
+	var channel_id = helper.getChannelId();
+	var chaincode_id = helper.getChaincodeId();
+	var startTime = Date.now();
 
-    // Construct the invoke request
-    var invokeRequest = {
-        // Name (hash) required for query
-        chaincodeID: chaincodeID,
-        // Function to trigger
-        fcn: "init_claim_payment",
-        // Existing state variables to write
-        args: [claim.id, claim.value, claim.vehicle, claim.owner, claim.role, claim.state]
-    };
+	// send proposal to endorser
+	var request = {
+		chainId: channel_id,
+		chaincodeId: chaincode_id,
+		fcn: "init_claim_payment",
+		args: [claim.id, claim.value, claim.vehicle, claim.owner, claim.role, claim.state],
+		txId: client.newTransactionID(),
+	};
 
-    // Trigger the invocation transaction
-    var invokeTx = userObj.invoke(invokeRequest);
+	// Setup EventHub
+	if (eventUrl) {
 
-    // Print the invoke results
-    invokeTx.on('submitted', function (results) {
-        // Invoke transaction submitted successfully
-        console.log(util.format("\nSuccessfully submitted chaincode invoke transaction: request=%j, response=%j", invokeRequest, results));
-        // If we are not going to wait for the invoke to be completed then immediatley return 
-        // the response that we successfully submited the request
-        // remove this response when the new SDK comes out
-        if (process.env.WAIT_FOR_INVOKE_COMPLETION === 'false') {
-            res.json({
-                status: 200,
-                message: 'ok'
-            });
-        }
-    });
+		console.log('listening to event url', eventUrl);
+		eventhub = client.newEventHub();
+		eventhub.setPeerAddr(eventUrl, {
+			pem: tls_cert.pem,
+			'ssl-target-name-override': null,		//can be null if cert matches hostname
+			'grpc.http2.keepalive_time': 15
+		});
+		eventhub.connect();
 
-    invokeTx.on('complete', function (results) {
-        // Invoke completed successfully
-        console.log(util.format("\nSuccessfully completed chaincode invoke transaction: request=%j, response=%j", invokeRequest, results));
-        if (process.env.WAIT_FOR_INVOKE_COMPLETION === 'true') {
-            res.json({
-                status: 200,
-                message: 'ok'
-            });
-        }
-    });
-    invokeTx.on('error', function (err) {
-        // Invoke failed
-        console.log(util.format("\nFailed to submit chaincode invoke transaction: request=%j, error=%j", invokeRequest, err));
-        if (process.env.WAIT_FOR_INVOKE_COMPLETION === 'true') {
-            res.status(500).send({
-                status: 500,
-                message: 'BlockChain error creating block'
-            });
-        }
-    });
+	} else {
+		console.log(' will not use tx event');
+	}
+
+	// Send Proposal
+	channel.sendTransactionProposal(request).then(function (results) {
+
+		// Check Response
+		var request = check_res(results);
+		return channel.sendTransaction(request);
+	}).then(function (response) {
+		// All good
+		console.log(response);
+		if (response.status === 'SUCCESS') {
+			console.log(' Successfully endorsed.');
+
+			setTimeout(function () {
+				res.json({
+					status: 200,
+					message: 'ok'
+				});
+				eventhub.disconnect();
+			}, 500);
+		}
+
+		// No good
+		else {
+			console.log('Failed to order.');
+			res.status(500).send({
+				status: 500,
+				message: 'BlockChain error updating block'
+			});
+			throw response;
+		}
+	}).catch(
+		function (err) {
+			console.log(' Error in instantiate catch block', typeof err, err);
+			var formatted = format_error_msg(err);
+
+			res.status(500).send({
+				status: 500,
+				message: 'instantiate Error'
+			});
+		});
+
 });
 
 // Update the owner of the claim payment in the block e.g., policy holder, bank, or repair facility
 router.post('/:customer', ensureAuthenticated, function (req, res, next) {
-    var owner = req.body.owner;
-    var role = req.body.role;
-    var state = req.body.state;
-    var customer = req.params.customer;
+	var owner = req.body.owner;
+	var role = req.body.role;
+	var state = req.body.state;
+	var customer = req.params.customer;
 
-    // Construct the invoke request
-    var invokeRequest = {
-        // Name (hash) required for query
-        chaincodeID: chaincodeID,
-        // Function to trigger
-        fcn: "set_owner",
-        // Existing state variables to write
-        args: [customer, owner, role, state]
-    };
+	var channel_id = helper.getChannelId();
+	var chaincode_id = helper.getChaincodeId();
+	var startTime = Date.now();
 
+	// send proposal to endorser
+	var request = {
+		chainId: channel_id,
+		chaincodeId: chaincode_id,
+		fcn: "set_owner",
+		args: [customer, owner, role, state],
+		txId: client.newTransactionID(),
+	};
+	// Setup EventHub
+	if (eventUrl) {
 
-    // Trigger the invoke transaction
-    var invokeTx = userObj.invoke(invokeRequest);
+		logger.debug('listening to event url', eventUrl);
+		eventhub = client.newEventHub();
+		eventhub.setPeerAddr(eventUrl, {
+			pem: tls_cert.pem,
+			'ssl-target-name-override': null,		//can be null if cert matches hostname
+			'grpc.http2.keepalive_time': 15
+		});
+		eventhub.connect();
+	} else {
+		logger.debug(' will not use tx event');
+	}
 
-    invokeTx.on('submitted', function (results) {
-        // Invoke transaction submitted successfully
-        console.log(util.format("\nSuccessfully submitted chaincode invoke transaction: request=%j, response=%j", invokeRequest, results));
-        // If we are not going to wait for the invoke to be completed then immediatley return 
-        // the response that we successfully submited the request
-        // remove this response when the new SDK comes out
-        if (process.env.WAIT_FOR_INVOKE_COMPLETION === 'false') {
-            res.json({
-                status: 200,
-                message: 'ok'
-            });
-        }
-    });
+	// Send Proposal
+	channel.sendTransactionProposal(request).then(function (results) {
 
-    invokeTx.on('complete', function (results) {
-        // Invoke completed successfully
-        console.log(util.format("\nSuccessfully completed chaincode invoke transaction: request=%j, response=%j", invokeRequest, results));
-        if (process.env.WAIT_FOR_INVOKE_COMPLETION === 'true') {
-            res.json({
-                status: 200,
-                message: 'ok'
-            });
-        }
-    });
-    invokeTx.on('error', function (err) {
-        // Invoke failed
-        console.log(util.format("\nFailed to submit chaincode invoke transaction: request=%j, error=%j", invokeRequest, err));
-        if (process.env.WAIT_FOR_INVOKE_COMPLETION === 'true') {
-            res.status(500).send({
-                status: 500,
-                message: 'BlockChain error updating block'
-            });
-        }
-    });
+		// Check Response
+		var request = check_res(results);
+		return channel.sendTransaction(request);
+	}).then(function (response) {
+		// All good
+		if (response.status === 'SUCCESS') {
+			console.log(' Successfully endorsed.');
+
+			setTimeout(function () {
+				res.json({
+					status: 200,
+					message: 'ok'
+				});
+				eventhub.disconnect();
+			}, 500);
+		}
+
+		// No good
+		else {
+			console.log('Failed to order.');
+			res.status(500).send({
+				status: 500,
+				message: 'BlockChain error updating block'
+			});
+			throw response;
+		}
+	}).catch(
+		function (err) {
+			console.log(' Error in instantiate catch block', typeof err, err);
+			var formatted = format_error_msg(err);
+
+			res.status(500).send({
+				status: 500,
+				message: 'instantiate Error'
+			});
+		});
 });
+
 
 // Get the block for the claim payment
 router.get('/:customer', ensureAuthenticated, function (req, res, next) {
-    var customer = req.params.customer;
+	var customer = req.params.customer;
+	var channel = client.getChannel(helper.getChannelId());
 
-    // Construct the query request
-    var queryRequest = {
-        // Name (hash) required for query
-        chaincodeID: chaincodeID,
-        // Function to trigger
-        fcn: "read",
-        // Existing state variable to retrieve
-        args: [customer]
-    };
+	// send proposal to peer
+	var request = {
+		chainId: channel_id,
+		chaincodeId: chaincode_id,
+		fcn: "read",
+		args: [customer],
+		txId: null,
+	};
 
-    // Trigger the query transaction
-    var queryTx = userObj.query(queryRequest);
+	channel.queryByChaincode(request
+		//nothing
+	).then(
+		function (response_payloads) {
+			var formatted = format_query_resp(response_payloads);
 
-    // Print the query results
-    queryTx.on('complete', function (results) {
-        // Query completed successfully
-        console.log(util.format("\nSuccessfully queried chaincode function: request=%j, value=%s", queryRequest, results.result.toString()));
+			// --- response looks bad -- //
+			if (formatted.parsed == null) {
+				logger.debug('Query response is empty', formatted.raw);
+				res.json({});
+			}
 
-        if (results.result.toString() !== "") {
-            var claim = JSON.parse(results.result.toString());
-            res.json({
-                status: 200,
-                message: 'ok',
-                claim: claim
-            });
-        } else {
-            res.json({});
-        }
-    });
-    queryTx.on('error', function (err) {
-        // Query failed
-        console.log(util.format("\nFailed to query chaincode, function: request=%j, error=%j", queryRequest, err));
-        res.json({});
-    });
+			// --- response looks good --- //
+			else {
+				logger.debug('Successful query transaction.'); //, formatted.parsed);
+				res.json({
+					status: 200,
+					message: 'ok',
+					claim: formatted.parsed
+				});
+			}
+
+		}
+		).catch(
+		function (err) {
+			logger.error('Error in query catch block', typeof err, err);
+			res.json({});
+		}
+		);
+
 });
-
 
 // Delete this claim payment
 router.delete('/:customer', ensureAuthenticated, function (req, res) {
-    var customer = req.params.customer;
+	var customer = req.params.customer;
+	var eventhub;
+	var channel_id = helper.getChannelId();
+	var chaincode_id = helper.getChaincodeId();
+	var startTime = Date.now();
 
-    // Construct the invoke request
-    var invokeRequest = {
-        // Name (hash) required for query
-        chaincodeID: chaincodeID,
-        // Function to trigger
-        fcn: "delete",
-        // Existing state variable to delete
-        args: [customer]
-    };
+	// send proposal to endorser
+	var request = {
+		chainId: channel_id,
+		chaincodeId: chaincode_id,
+		fcn: "delete",
+		args: [customer],
+		txId: client.newTransactionID(),
+	};
 
-    // Trigger the invoke transaction
-    var invokeTx = userObj.invoke(invokeRequest);
+	// Setup EventHub
+	if (eventUrl) {
 
-    invokeTx.on('submitted', function (results) {
-        // Invoke transaction submitted successfully
-        console.log(util.format("\nSuccessfully submitted chaincode invoke transaction: request=%j, response=%j", invokeRequest, results));
-    });
-    // Print the invoke results
-    invokeTx.on('complete', function (results) {
-        // Invoke completed successfully
-        console.log(util.format("\nSuccessfully completed chaincode invoke transaction: request=%j, response=%j", invokeRequest, results));
-        res.json({
-            status: 200,
-            message: 'ok'
-        });
-    });
-    invokeTx.on('error', function (err) {
-        // Invoke failed
-        console.log(util.format("\nFailed to submit chaincode invoke transaction: request=%j, error=%j", invokeRequest, err));
-        res.status(500).send({
-            status: 500,
-            message: 'BlockChain error creating block'
-        });
-    });
+		console.log('listening to event url', eventUrl);
+		eventhub = client.newEventHub();
+		eventhub.setPeerAddr(eventUrl, {
+			pem: tls_cert.pem,
+			'ssl-target-name-override': null,		//can be null if cert matches hostname
+			'grpc.http2.keepalive_time': 15
+		});
+		eventhub.connect();
+
+	} else {
+		console.log(' will not use tx event');
+	}
+
+	// Send Proposal
+	channel.sendTransactionProposal(request).then(function (results) {
+
+		// Check Response
+		var request = check_res(results);
+		return channel.sendTransaction(request);
+	}).then(function (response) {
+		// All good
+		console.log(response);
+		if (response.status === 'SUCCESS') {
+			console.log(' Successfully endorsed.');
+
+			setTimeout(function () {
+				res.json({
+					status: 200,
+					message: 'ok'
+				});
+				eventhub.disconnect();
+			}, 500);
+		}
+
+		// No good
+		else {
+			console.log('Failed to order.');
+			res.status(500).send({
+				status: 500,
+				message: 'BlockChain error updating block'
+			});
+			throw response;
+		}
+	}).catch(
+		function (err) {
+			console.log(' Error in instantiate catch block', typeof err, err);
+			var formatted = format_error_msg(err);
+
+			res.status(500).send({
+				status: 500,
+				message: 'instantiate Error'
+			});
+		});
+
+
+
 });
-
 
 module.exports = router;
