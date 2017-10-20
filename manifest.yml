@@ -8,16 +8,13 @@ applications:
   disk_quota: 1024M
   services:
     - "Blockchain-tf"
-    - "Conversation-af"
+    - "Cloudant NoSQL DB-h0"
+    - "Conversation-jp-demo"
     - "GP-insurancedemo"
     - "Language Translator-zo"
     - "Speech to Text-h7"
     - "Text to Speech-ir"
     - "Twilio-tn"
-    - "Weather Company Data for IBM Bluemix-n7"
-    - "AtkinRed-cloudantNoSQLDB"
-    - "Compose for Redis-6o"
-    - "Single Sign On-n8"
   env:
     API_KEY: 9f13d8b0-6df1-48b2-ae6d-31b1defb2ce3
     CALLBACK_URL: https://insuranceagent.mybluemix.net/auth/sso/callback
