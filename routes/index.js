@@ -70,29 +70,29 @@ var redis_url = optionsRedis.credentials.uri;
 var redisClient = redis.createClient(redis_url);
 
 redisClient.on('error', function (err) {
-  console.log('Error ' + err);
+    console.log('Error ' + err);
 });
 
 redisClient.on('connect', function() {
-  console.log('Connected to Redis');
+    console.log('Connected to Redis');
 });
 
 router.use(expressSession({
-secret: process.env.SESSION_SECRET,
-resave: 'true',
-saveUninitialized: 'true',
-store: new RedisStore({ client: redisClient })
+  secret: process.env.SESSION_SECRET,
+  resave: 'true',
+  saveUninitialized: 'true',
+  store: new RedisStore({ client: redisClient })
 }))
 
 router.use(passport.initialize());
 router.use(passport.session());
 
 passport.serializeUser(function (user, done) {
-done(null, user);
+  done(null, user);
 });
 
 passport.deserializeUser(function (obj, done) {
-done(null, obj);
+  done(null, obj);
 });
 
 
