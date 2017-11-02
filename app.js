@@ -25,6 +25,7 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 require('dotenv').config();
+var linesdk = require('@line/bot-sdk');
 
 var routes = require('./routes/index');
 var assessor = require('./routes/assessor');
@@ -39,6 +40,7 @@ var data = require('./routes/dataservices');
 var twilio = require('./routes/twilio');
 var speech = require('./routes/speech-text');
 var text = require('./routes/text-speech');
+var line = require('./routes/line');
 
 var app = express();
 
@@ -77,6 +79,13 @@ app.use(function (req, res, next) {
 });
 
 app.use(logger('dev'));
+
+// For LINE
+app.use(linesdk.middleware({
+  channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN,
+  channelSecret: process.env.LINE_CHANNEL_SECRET
+}));
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
   extended: false
@@ -97,6 +106,7 @@ app.use('/dataservices', data);
 app.use('/twilio', twilio);
 app.use('/speech', speech);
 app.use('/text', text);
+app.use('/webhook', line);
 
 
 // error handlers
