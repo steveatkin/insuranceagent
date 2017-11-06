@@ -30,265 +30,69 @@ nav.navbar.navbar-default.navbar-inverse.navbar-fixed-top(role='navigation')
 .container
   .row
     .col-sm-12
-      ul.nav.nav-tabs(role='tablist')
-        li.active(role='presentation')
-          a#claim-tab(href='#claiminfo' aria-controls='claiminfo' role='tab' data-toggle='tab')
-        li(role='presentation')
-          a#adjustor-tab(href='#adjustor' aria-controls='adjustor' role='tab' data-toggle='tab')
-        li(role='presentation')
-          a#payee-tab(href='#payee' aria-controls='payee' role='tab' data-toggle='tab')
-
-      .tab-content
-        #claiminfo.tab-pane.active(role='tabpanel')
+      #accordion.panel-group
+        .panel.panel-default
+          .panel-heading
+            h4.panel-title
+              a#claim-tab(data-toggle='collapse', data-parent='#accordion', href='#claim')
+          #claim.panel-collapse.collapse.in
+            .panel-body
               form
                 .form-group
-                table.table
-                  tr
-                    td.cleantable
-                      label#claim-label(for='claim')
-                    td.cleantable
-                      input#claim.form-control(type='text' disabled='' value='ABC123')
-                    td.cleantable
-                      label#monthsSinceLastClaim-label(for='monthsSinceLastClaim')
-                    td.cleantable
-                      input#monthsSinceLastClaim.form-control(type='text', value='35' disabled='')
-                  tr
-                    td.cleantable
-                      label#latitude-label(for='latitude')
-                    td.cleantable
-                      input#latitude.form-control(type='text', value='35.31149' disabled='')
-                    td.cleantable
-                      label#claim-amount-label(for='amount')
-                    td.cleantable
-                      input#amount.form-control(type='text', value='790.1744238' disabled='')
-                  tr
-                    td.cleantable
-                      label#longitude-label(for='longitude')
-                    td.cleantable
-                      input#longitude.form-control(type='text', value='-80.834429' disabled='')
-                    td.cleantable
-                      label#numberOfOpenComplaints-label(for='numberOfOpenComplaints')
-                    td.cleantable
-                      input#numberOfOpenComplaints.form-control(type='text', value='0' disabled='')
-                  tr
-                    td.cleantable
-                      label#address-label(for='address')
-                    td.cleantable
-                      input#address.form-control(type='text', value='XYZ' disabled='')
-                    td.cleantable
-                      label#totalClaimAmount-label(for='totalClaimAmount')
-                    td.cleantable
-                      input#totalClaimAmount.form-control(type='text', value='1258.328' disabled='')
-                  tr
-                    td.cleantable
-                      label#payee-label(for='payee')
-                    td.cleantable
-                      input#payee.form-control(type='text', value='△△カーリペア' disabled='')
-                    td.cleantable
-                      label#currentClaimAmount-label(for='currentClaimAmount')
-                    td.cleantable
-                      input#currentClaimAmount.form-control(type='text', value='220,000')
-
-                  //-tr
-                  //-  td.cleantable
-                  //-    span google map?
-                  //-  td.cleantable
-                  //-  //- <iframe width="100%" height="450" frameborder="0" style="border:0" src="https://www.google.com/maps/embed/v1/place?q=35.31149,-80.834429&amp;key=AIzaSyB94THYrJPk1dU0kn23Pg6YienYnLEEgRM"></iframe>                    
-                  //-  td.cleantable
-                  //-  td.cleantable
-
-
-        #adjustor.tab-pane(role='tabpanel')
+                  label#policy-label(for='policy')
+                  input#policy.form-control(type='text')
+                  label#phone-number-label(for='notification-number')
+                  input#phone.form-control(type='text')
+                  label#claim-reason-label(for='reason')
+                  input#reason.form-control(type='text', disabled='')
+                  label#claim-amount-label(for='amount')
+                  input#amount.form-control(type='text', disabled='')
+                  label#vehicle-label(for='vehicle')
+                  input#vehicle.form-control(type='text', disabled='')
+                  label#last-action-label(for='assignment')
+                  input#assignment.form-control(type='text', disabled='')
+                button#submit-policy.btn.btn-default(type='button')
+        .panel.panel-default
+          .panel-heading
+            h4.panel-title
+              a#adjustor-tab(data-toggle='collapse', data-parent='#accordion', href='#adjustor')
+           #adjustor.panel-collapse.collapse
+            .panel-body
               form
                 .form-group
-                table.table
-                  tr
-                    td.cleantable
-                      label#policy-label(for='policy')
-                    td.cleantable
-                      input#policy.form-control(type='text', value='Personal L3' disabled='')
-                    td.cleantable
-                      label#salesChannel-label(for='salesChannel')
-                    td.cleantable
-                      input#salesChannel.form-control(type='text', value='コールセンター' disabled='')
-                  tr
-                    td.cleantable
-                      label#policyType-label(for='policyType')
-                    td.cleantable
-                      input#policyType.form-control(type='text', value='個人用自動車保険' disabled='')
-                    td.cleantable
-                      label#coverage-label(for='coverage')
-                    td.cleantable
-                      input#coverage.form-control(type='text', value='ベーシック' disabled='')
-                  tr
-                    td.cleantable
-                      label#vehicleClass-label(for='vehicleClass')
-                    td.cleantable
-                      input#vehicleClass.form-control(type='text', value='SUV' disabled='')
-                    td.cleantable
-                      label#effectiveToDate-label(for='effectiveToDate')
-                    td.cleantable
-                      input#effectiveToDate.form-control(type='text', value='10/14/16' disabled='')
-                  tr
-                    td.cleantable
-                      label#vehicleSize-label(for='vehicleSize')
-                    td.cleantable
-                      input#vehicleSize.form-control(type='text', value='中型' disabled='')
-                    td.cleantable
-                      label#monthlyPremiumAuto-label(for='monthlyPremiumAuto')
-                    td.cleantable
-                      input#monthlyPremiumAuto.form-control(type='text', value='113' disabled='')
-                  tr
-                    td.cleantable
-                      label#vehicle-label(for='vehicle')
-                    td.cleantable
-                      input#vehicle.form-control(type='text', value='ホンダZ' disabled='')
-                    td.cleantable
-                      label#monthsSincePolicyInception-label(for='monthsSincePolicyInception')
-                    td.cleantable
-                      input#monthsSincePolicyInception.form-control(type='text', value='83' disabled='')
-                  tr
-                    td.cleantable
-                      label#numberOfPolicies-label(for='numberOfPolicies')
-                    td.cleantable
-                      input#numberOfPolicies.form-control(type='text', value='5' disabled='')
-                    td.cleantable
-                    td.cleantable
-
-        #payee.tab-pane(role='tabpanel')
+                  label#adjustor-label(for='adjustor-select')
+                  select#adjustor-select.form-control(disabled)
+                button#submit-adjustor.btn.btn-default(type='button', disabled)
+        .panel.panel-default
+          .panel-heading
+            h4.panel-title
+              a#payee-tab(data-toggle='collapse', data-parent='#accordion', href='#payee')
+           #payee.panel-collapse.collapse
+            .panel-body
               form
                 .form-group
-                table.table
-                  tr
-                    td.cleantable
-                      label#customer-label(for='customer')
-                    td.cleantable
-                      input#customer.form-control(type='text', value='BA10041' disabled='')
-                    td.cleantable
-                      label#stateCode-label(for='stateCode')
-                    td.cleantable
-                      input#stateCode.form-control(type='text', value='NC' disabled='')
-                  tr
-                    td.cleantable
-                      label#surname-label(for='surname')
-                    td.cleantable
-                      input#surname.form-control(type='text', value='中森' disabled='')
-                    td.cleantable
-                      label#state-label(for='state')
-                    td.cleantable
-                      input#state.form-control(type='text', value='栃木県' disabled='')
-                  tr
-                    td.cleantable
-                      label#givenName-label(for='givenName')
-                    td.cleantable
-                      input#givenName.form-control(type='text', value='俊夫' disabled='')
-                    td.cleantable
-                      label#city-label(for='city')
-                    td.cleantable
-                      input#city.form-control(type='text', value='那須郡那珂川町' disabled='')
-                  tr
-                    td.cleantable
-                      label#email-label(for='email')
-                    td.cleantable
-                      input#email.form-control(type='text', value='toshio12297@jzxwujhxvw.tur' disabled='')
-                    td.cleantable
-                      label#streetAddress-label(for='streetAddress')
-                    td.cleantable
-                      input#streetAddress.form-control(type='text', value='小口4-20' disabled='')
-                  tr
-                    td.cleantable
-                      label#gender-label(for='gender')
-                    td.cleantable
-                      input#gender.form-control(type='text', value='M' disabled='')
-                    td.cleantable
-                    td.cleantable
-
-  .row
-    .col-sm-12
-        button#submit-policy.btn(type='button')
-        button#submit-payee.btn.btn-default(type='button')
-        &nbsp;&nbsp;
-        button#submit-payment.btn.btn-default(type='button' data-toggle='modal' data-target='#modal-confirm')
-        &nbsp;&nbsp;
-        label#submit-payment-done.hidden
-
-
-.modal#modal-confirm
-  .modal-dialog.modal-lg
-    .modal-content
-      .modal-header
-        h4.modal-title#dialog-title
-
-      .modal-body
-        p#dialog-message-continue
-
-      .modal-footer
-        button#dialog-close.btn.btn-default(type='button' data-dismiss='modal')
-        button#dialog-ok.btn.btn-primary(type='button')
-
-      //- #accordion.panel-group
-      //-   .panel.panel-default
-      //-     .panel-heading
-      //-       h4.panel-title
-      //-         a#claim-tab(data-toggle='collapse', data-parent='#accordion', href='#claim')
-      //-     #claim.panel-collapse.collapse.in
-      //-       .panel-body
-      //-         form
-      //-           .form-group
-      //-             label#policy-label(for='policy')
-      //-             input#policy.form-control(type='text')
-      //-             label#phone-number-label(for='notification-number')
-      //-             input#phone.form-control(type='text')
-      //-             label#claim-reason-label(for='reason')
-      //-             input#reason.form-control(type='text', disabled='')
-      //-             label#claim-amount-label(for='amount')
-      //-             input#amount.form-control(type='text', disabled='')
-      //-             label#vehicle-label(for='vehicle')
-      //-             input#vehicle.form-control(type='text', disabled='')
-      //-             label#last-action-label(for='assignment')
-      //-             input#assignment.form-control(type='text', disabled='')
-      //-           button#submit-policy.btn.btn-default(type='button')
-      //-   .panel.panel-default
-      //-     .panel-heading
-      //-       h4.panel-title
-      //-         a#adjustor-tab(data-toggle='collapse', data-parent='#accordion', href='#adjustor')
-      //-      #adjustor.panel-collapse.collapse
-      //-       .panel-body
-      //-         form
-      //-           .form-group
-      //-             label#adjustor-label(for='adjustor-select')
-      //-             select#adjustor-select.form-control(disabled)
-      //-           button#submit-adjustor.btn.btn-default(type='button', disabled)
-      //-   .panel.panel-default
-      //-     .panel-heading
-      //-       h4.panel-title
-      //-         a#payee-tab(data-toggle='collapse', data-parent='#accordion', href='#payee')
-      //-      #payee.panel-collapse.collapse
-      //-       .panel-body
-      //-         form
-      //-           .form-group
-      //-             div.form.group
-      //-               label#payee-type Payee Type
-      //-               .radio
-      //-                 label
-      //-                   input#optionsBank(type="radio", name="optionsRadios", value="bank", disabled)
-      //-               .radio
-      //-                 label
-      //-                   input#optionsPolicyHolder(type="radio", name="optionsRadios", value="policy-holder", disabled)
-      //-               .radio
-      //-                 label
-      //-                   input#optionsRepairFacility(type="radio", name="optionsRadios", value="repair-facility", disabled)
-      //-             div.form.group
-      //-               label#payee-label(for='payee-select') 
-      //-               select#payee-select.form-control(disabled)
-      //-           button#submit-payee.btn.btn-default(type='button', disabled)
-      //-   .panel.panel-default
-      //-     .panel-heading
-      //-       h4.panel-title
-      //-         a#history-tab(data-toggle='collapse', data-parent='#accordion', href='#history')
-      //-      #history.panel-collapse.collapse
-      //-       .panel-body
-      //-         table#history-table
+                  div.form.group
+                    label#payee-type Payee Type
+                    .radio
+                      label
+                        input#optionsBank(type="radio", name="optionsRadios", value="bank", disabled)
+                    .radio
+                      label
+                        input#optionsPolicyHolder(type="radio", name="optionsRadios", value="policy-holder", disabled)
+                    .radio
+                      label
+                        input#optionsRepairFacility(type="radio", name="optionsRadios", value="repair-facility", disabled)
+                  div.form.group
+                    label#payee-label(for='payee-select') 
+                    select#payee-select.form-control(disabled)
+                button#submit-payee.btn.btn-default(type='button', disabled)
+        .panel.panel-default
+          .panel-heading
+            h4.panel-title
+              a#history-tab(data-toggle='collapse', data-parent='#accordion', href='#history')
+           #history.panel-collapse.collapse
+            .panel-body
+              table#history-table
 
 
 // jQuery (necessary for Bootstrap's JavaScript plugins)
