@@ -1,0 +1,45 @@
+applications:
+- path: .
+  memory: 512M
+  instances: 1
+  domain: mybluemix.net
+  name: insuranceagent
+  host: insuranceagent
+  disk_quota: 1024M
+  services:
+    - "Globalization Pipeline"
+    - "Weather Company Data"
+    - "Watson Conversation"
+    - "Watson Language Translator"
+    - "Cloudant"
+    - "Twilio"
+    - "Speech to Text"
+    - "Text to Speech"
+    - "Single Sign On"
+    - "Blockchain"
+  env:
+    API_KEY: <API_KEY>
+    CALLBACK_URL: <CALLBACK_URL>
+    NODE_ENV: <production/development>
+    POLICY_API: <POLICY_API>
+    SESSION_SECRET: <SESSION_SECRET>
+    WORKSPACE_ENGLISH: <WORKSPACE_ENGLISH>
+    WORKSPACE_FRENCH: <WORKSPACE_FRENCH>
+    WORKSPACE_SPANISH: <WORKSPACE_SPANISH>
+    WORKSPACE_TRADITIONAL_CHINESE: <WORKSPACE_TRADITIONAL_CHINESE>
+    WORKSPACE_SIMPLIFIED_CHINESE: <WORKSPACE_SIMPLIFIED_CHINESE:>
+    WORKSPACE_JAPANESE: <WORKSPACE_JAPANESE>
+    NORMALIZED_CONVERSATION: <false/true>
+    MODEL_ENGLISH_TO_FRENCH: <MODEL_ENGLISH_TO_FRENCH>
+    MODEL_FRENCH_TO_ENGLISH: <MODEL_FRENCH_TO_ENGLISH>
+    MODEL_ENGLISH_TO_SPANISH: <MODEL_ENGLISH_TO_SPANISH>
+    MODEL_SPANISH_TO_ENGLISH: <MODEL_SPANISH_TO_ENGLISH>
+    MODEL_JAPANESE_TO_ENGLISH: <MODEL_JAPANESE_TO_ENGLISH>
+    MODEL_ENGLISH_TO_JAPANESE: <MODEL_ENGLISH_TO_JAPANESE>
+    CHANNEL_ID: <CHANNEL_ID>
+    CHAINCODE_ID: <CHAINCODE_ID>
+    CHAINCODE_VERSION: <CHAINCODE_VERSION>
+    BLOCK_DELAY: <BLOCK_DELAY>
+    USE_ORDERER: <USE_ORDERER>
+    USE_PEER: <USE_PEER>
+    USE_CA: <USE_CA>

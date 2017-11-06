@@ -13,7 +13,6 @@ applications:
     - "Language Translator-Exp"
     - "AtkinRed-cloudantNoSQLDB"
     - "Twilio-0w"
-    - "Compose for Redis-6o"
     - "Speech to Text-ru"
     - "Text to Speech-i9"
     - "Single Sign On-n8"

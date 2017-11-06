@@ -6,33 +6,32 @@
     "start": "node ./bin/www"
   },
   "dependencies": {
+    "async": "^2.1.2",
     "body-parser": "~1.15.1",
+    "cfenv": "^1.0.3",
+    "cloudant": "^1.5.0",
+    "connect-cloudant-store": "^0.1.1",
     "cookie-parser": "~1.4.3",
     "debug": "~2.2.0",
+    "dotenv": "~4.0.0",
     "express": "~4.13.4",
     "express-session": "1.14.1",
+    "fabric-ca-client": "^1.0.0",
+    "fabric-client": "^1.0.0",
+    "g11n-pipeline": "^1.3.0",
     "jade": "~1.11.0",
     "morgan": "~1.7.0",
-    "serve-favicon": "~2.3.0",
-    "dotenv": "~4.0.0",
-    "cfenv": "^1.0.3",
     "optional": "^0.1.3",
-    "g11n-pipeline": "^1.3.0",
-    "watson-developer-cloud": "^2.31.1",
-    "request": "2.73.0",
-    "winston": "^2.2.0",
-    "cloudant": "^1.5.0",
-    "twilio": "^2.11.0",
     "passport": "0.3.2",
-		"passport-idaas-openidconnect": "2.0.0",
-    "connect-redis" : "3.1.x",
-    "redis" : "2.6.x",
-    "async": "^2.1.2",
-    "fabric-client": "^1.0.0",
-    "fabric-ca-client": "^1.0.0"
+    "passport-idaas-openidconnect": "2.0.0",
+    "request": "2.73.0",
+    "serve-favicon": "~2.3.0",
+    "twilio": "^2.11.0",
+    "watson-developer-cloud": "^2.31.1",
+    "winston": "^2.2.0"
   },
   "repository": {},
-	"engines": {
-		"node": "6.x"
-	}
+  "engines": {
+    "node": "6.x"
+  }
 }
