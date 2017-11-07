@@ -16,6 +16,7 @@
 
 /**
  * @author Steven Atkin
+ * @contributor Harpreet Kaur Chawla
  */
 
 
@@ -27,18 +28,17 @@ var appEnv = require('cfenv').getAppEnv();
 var cfEnvUtil = require('./cfenv-credsbylabel');
 var OpenIDConnectStrategy = require('passport-idaas-openidconnect').IDaaSOIDCStrategy;
 var expressSession = require('express-session');
-var redis = require('redis');
-var RedisStore = require('connect-redis')(expressSession);
+var CloudantStore = require('connect-cloudant-store')(expressSession);
 
 
 var serviceSSORegex = /(SingleSignOn).*/;
-var serviceRedisRegex = /(compose-for-redis).*/;
+var serviceCloudantRegex = /(cloudantNoSQLDB).*/;
 
 var optionsSSO = optional('./sso-credentials.json') || {
   appEnv: appEnv
 };
 
-var optionsRedis = optional('./redis-credentials.json') || {
+var optionsCloudant = optional('./cloudant-credentials.json') || {
   appEnv: appEnv
 };
 
@@ -52,36 +52,47 @@ else if (optionsSSO.appEnv && !optionsSSO.credentials) {
 }
 
 // parse vcap using cfenv if available
-if (optionsRedis.appEnv && !optionsRedis.credentials) {
-  optionsRedis.credentials = cfEnvUtil.getServiceCredsByLabel(optionsRedis.appEnv, serviceRedisRegex);
+if (optionsCloudant.appEnv && !optionsCloudant.credentials) {
+  optionsCloudant.credentials = cfEnvUtil.getServiceCredsByLabel(optionsCloudant.appEnv, serviceCloudantRegex);
 }
 // try again with name
-else if (optionsRedis.appEnv && !optionsRedis.credentials) {
-  optionsRedis.credentials = optionsRedis.appEnv.getServiceCreds(serviceRedisRegex);
+else if (optionsCloudant.appEnv && !optionsCloudant.credentials) {
+  optionsCloudant.credentials = optionsCloudant.appEnv.getServiceCreds(serviceCloudantRegex);
 }
+
 
 var client_id = optionsSSO.credentials.clientId;
 var client_secret = optionsSSO.credentials.secret;
 var authorization_url = optionsSSO.credentials.authorizationEndpointUrl;
 var token_url = optionsSSO.credentials.tokenEndpointUrl;
 var issuer_id = optionsSSO.credentials.issuerIdentifier;
-var redis_url = optionsRedis.credentials.uri;
+var cloudant_url = optionsCloudant.credentials.url;
 
-var redisClient = redis.createClient(redis_url);
+var store = new CloudantStore(
+    {
+        url: cloudant_url,
+        database: 'sessions',
+    }
+);
 
-redisClient.on('error', function (err) {
-    console.log('Error ' + err);
+store.on('connect', function() {
+  console.log('Connected to Cloudant');
 });
 
-redisClient.on('connect', function() {
-    console.log('Connected to Redis');
+store.on('disconnect', function() {
+    // failed to connect to cloudant db - by default falls back to MemoryStore
+    console.log('DisConnected from Cloudant');
+});
+
+store.on('error', function(err) {
+    console.log('Error ' + err);
 });
 
 router.use(expressSession({
   secret: process.env.SESSION_SECRET,
   resave: 'true',
   saveUninitialized: 'true',
-  store: new RedisStore({ client: redisClient })
+  store: store
 }))
 
 router.use(passport.initialize());
