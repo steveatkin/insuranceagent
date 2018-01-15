@@ -24,6 +24,8 @@ var gpClient = require('g11n-pipeline').getClient(
   optional('./g11n-credentials.json')   // if it exists, use local-credentials.json
     || {appEnv: appEnv}                  // otherwise, the appEnv
 );
+//Read Hebrew strings locally since Hebrew is not supported in Globalization Pipeline
+var stringsHeb = optional('./public/agentHeb.json');
 var express = require('express');
 var router = express.Router();
 
@@ -38,15 +40,23 @@ router.get('/', function(req, res, next) {
   else if(req.query.language === "zh-TW" || req.query.language === "zh-HK") {
     lang = "zh-Hant"; 
   }
-
-  myResources.getStrings({ languageId: lang}, function (err, result) {
-        if (err) {
-            res.send(err);
-        } else {
-            var myStrings = result.resourceStrings;
-            res.json(myStrings);
-        }
-    });
+  else if(req.query.language === "ar") {
+	lang = "ar"; 
+  }  
+	  
+  if (req.query.language === "he") {
+	res.json(stringsHeb);
+  }
+  else {
+	myResources.getStrings({ languageId: lang}, function (err, result) {
+	  if (err) {
+        res.send(err);
+      } else {
+        var myStrings = result.resourceStrings;
+        res.json(myStrings);
+      }
+	});
+  }
 });
 
 module.exports = router;

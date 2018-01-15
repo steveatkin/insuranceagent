@@ -157,6 +157,11 @@ $(document).ready(function () {
   var userLang = (navigator.language ||
     navigator.userLanguage).substring(0, 2).toLowerCase();
   var userLocale = navigator.language || navigator.userLanguage;
+  //set direction attribute
+  if (userLang === 'he' || userLang === 'ar'){
+  	var htmlTag = document.getElementsByTagName("html")[0];
+  	htmlTag.setAttribute('dir','rtl');
+  }  
   var speechModel = '';
   var enableSpeaker = false;
   var enableMicrophone = false;

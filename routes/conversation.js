@@ -26,6 +26,9 @@ var appEnv = require('cfenv').getAppEnv();
 var cfEnvUtil = require('./cfenv-credsbylabel');
 var ConversationV1 = require('watson-developer-cloud/conversation/v1');
 var LanguageTranslatorV2 = require('watson-developer-cloud/language-translator/v2');
+var googleApiKey = '************************************';
+var googleTranslate = require('google-translate')(googleApiKey);
+var https = require('https');
 var async = require('async');
 
 var serviceRegexConversation = /(conversation).*/;
@@ -102,15 +105,27 @@ function translateInput(input, source, target, model, callback) {
     params.source = source;
     params.target = target;
   }
-
-  language_translator.translate(params, function (err, data) {
-    if (err) {
-      callback(err, null);
-    } else {
-      input.text = data.translations[0].translation;
-      callback(null, input);
-    }
-  });
+  
+  if (source === 'he') {
+	  googleTranslate.translate(params.text, 'en', function(err, translation) {
+		  if (err) {
+		      callback(err, null);
+		  } else {
+			  input.text = translation.translatedText;
+			  callback(null, input);
+		  }
+	  });
+  }
+  else {
+	  language_translator.translate(params, function (err, data) {
+	    if (err) {
+	      callback(err, null);
+	    } else {
+	      input.text = data.translations[0].translation;
+	      callback(null, input);
+	    }
+	  });
+  }
 }
 
 function translateOutput(conversationResponse, source, target, model, callback) {
@@ -127,14 +142,28 @@ function translateOutput(conversationResponse, source, target, model, callback) 
     params.target = target;
   }
 
-  language_translator.translate(params, function (err, data) {
-    if (err) {
-      callback(err, null);
-    } else {
-      conversationResponse.output.text = data.translations[0].translation;
-      callback(null, conversationResponse);
-    }
-  });
+  if (target === 'he') {
+	  //translate Watson response from source language (English) to Hebrew
+	  googleTranslate.translate(params.text, 'he', function(err, translation) {
+		  if (err) {
+			  callback(err, null);
+		  } else {
+			  conversationResponse.output.text = translation.translatedText;
+			  callback(null, conversationResponse);
+		  }
+	  });
+  }
+  else {
+
+	  language_translator.translate(params, function (err, data) {
+		  if (err) {
+			  callback(err, null);
+		  } else {
+			  conversationResponse.output.text = data.translations[0].translation;
+			  callback(null, conversationResponse);
+		  }
+	  });
+  }
 }
 
 router.post('/', ensureAuthenticated, function (req, res) {
@@ -165,6 +194,10 @@ router.post('/', ensureAuthenticated, function (req, res) {
     else if (req.body.language === 'zh-CN' || req.body.language === 'zh-SG') {
       workspace = process.env.WORKSPACE_SIMPLIFIED_CHINESE;
     }
+    else if (req.body.language === 'ar') {
+        model_in = process.env.MODEL_ARABIC_TO_ENGLISH;
+        model_out = process.env.MODEL_ENGLISH_TO_ARABIC;
+    }    
   }
   // Use native language conversations
   else if (process.env.NORMALIZED_CONVERSATION === 'false') {
@@ -180,6 +213,9 @@ router.post('/', ensureAuthenticated, function (req, res) {
       else if (req.body.language === 'zh-CN' || req.body.language === 'zh-SG') {
       workspace = process.env.WORKSPACE_SIMPLIFIED_CHINESE;
     }
+      else if (req.body.language === 'ar') {
+      workspace = process.env.WORKSPACE_ARABIC;
+      }
   }
 
   async.waterfall([
