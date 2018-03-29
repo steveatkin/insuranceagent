@@ -16,6 +16,7 @@
 
 /**
  * @author Steven Atkin
+ * @contributor Harpreet Kaur Chawla
  */
                      
 var express = require('express');
@@ -30,7 +31,7 @@ var routes = require('./routes/index');
 var assessor = require('./routes/assessor');
 var policy = require('./routes/policy');
 var resources = require('./routes/resources');
-var conversation = require('./routes/conversation');
+//var conversation = require('./routes/conversation');
 var alerts = require('./routes/alerts');
 var details = require('./routes/details');
 var translate = require('./routes/translate');
@@ -41,6 +42,22 @@ var speech = require('./routes/speech-text');
 var text = require('./routes/text-speech');
 
 var app = express();
+
+var use_bot = process.env.USE_BOT;
+
+//Use either Watson Conversation Service or Watson Virtual Agent
+if(use_bot === 'WCS' || use_bot === 'WVA' ){
+  if(use_bot === 'WCS'){
+    var conversation = require('./routes/conversation');
+  }
+  if(use_bot === 'WVA'){
+    var wva = require('./routes/wva');
+  }
+}else{
+   console.log('Only WVA or WCS bot supported');
+   process.exit();
+}
+
 
 // We need to catch all execptions. This is not ideal
 // We are forced to do this because the HFC SDK for Blockchain is not properly handling exceptions
@@ -88,7 +105,20 @@ app.use('/', routes);
 app.use('/assessor', assessor);
 app.use('/policy', policy);
 app.use('/resources', resources);
-app.use('/conversation', conversation);
+//app.use('/conversation', conversation);
+if(use_bot === 'WCS'){
+  app.use('/conversation', conversation);
+}
+if(use_bot === 'WVA'){
+  app.use('/wva', wva);
+}
+
+//USE_BOT variable is needed on Client side
+app.use('/config.js', function(req, res){
+  res.set('content-type', 'text/javascript');
+  res.send(`var use_bot='${process.env.USE_BOT}';`);
+});
+
 app.use('/alerts', alerts);
 app.use('/details', details);
 app.use('/translate', translate);

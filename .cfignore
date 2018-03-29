@@ -23,3 +23,4 @@ Dockerfile
 keyValStore-*
 sample-manifest.yml
 CONTRIBUTING.md
+wva-credentials.json

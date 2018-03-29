@@ -158,7 +158,14 @@ router.get('/auth/sso/callback', function (req, res, next) {
 
 /* GET home page. */
 router.get('/', ensureAuthenticated, function (req, res, next) {
-  res.render('index');
+  //res.render('index');
+  var use_bot = process.env.USE_BOT;
+  if(use_bot === 'WCS'){
+    res.render('index', { use_bot: 'conversation'});
+  }
+  if(use_bot === 'WVA'){
+    res.render('index', { use_bot: 'wva'});
+  }
 });
 
 

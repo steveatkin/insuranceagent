@@ -16,6 +16,7 @@
 
 /**
  * @author Steven Atkin
+ * @contributor Harpreet Kaur Chawla
  */
 
 
@@ -283,25 +284,49 @@ $(document).ready(function () {
   // listen for the click of the ask question button
   $('#insurance-query-button').click(function () {
     var context = {};
-    var latestResponse = Conversation.getConversationData();
-    if (latestResponse) {
-      context = latestResponse.context;
+    if (use_bot === 'WCS') {
+      var latestResponse = Conversation.getConversationData();
+      if (latestResponse) {
+        context = latestResponse.context;
+      }
+
+      // If we are using Simplified or Traditional Chinese then send the full locale
+      if (userLang === "zh") {
+        Conversation.sendRequest($("#insurance-query").val(), context, userLocale);
+      } else {
+        Conversation.sendRequest($("#insurance-query").val(), context, userLang);
+      }
+      // erase the text in the entry field
+      $("#insurance-query").val('');
+
+      // Collapse the panels
+      $('.collapse').collapse("hide");
+
+      // reset policy information
+      policyInformation = null;
     }
 
-    // If we are using Simplified or Traditional Chinese then send the full locale
-    if (userLang === "zh") {
-      Conversation.sendRequest($("#insurance-query").val(), context, userLocale);
-    } else {
-      Conversation.sendRequest($("#insurance-query").val(), context, userLang);
+    if (use_bot === 'WVA') {
+      var latestResponse = wva.getConversationData();
+      if (latestResponse) {
+        context = latestResponse.message.context;
+      }
+
+      // If we are using Simplified or Traditional Chinese then send the full locale
+      if (userLang === "zh") {
+        wva.sendRequest($("#insurance-query").val(), context, userLocale);
+      } else {
+        wva.sendRequest($("#insurance-query").val(), context, userLang);
+      }
+      // erase the text in the entry field
+      $("#insurance-query").val('');
+
+      // Collapse the panels
+      $('.collapse').collapse("hide");
+
+      // reset policy information
+      policyInformation = null;
     }
-    // erase the text in the entry field
-    $("#insurance-query").val('');
-
-    // Collapse the panels
-    $('.collapse').collapse("hide");
-
-    // reset policy information
-    policyInformation = null;
   });
 
   // Start with the accordion in the eclapsed state
@@ -453,6 +478,7 @@ $(document).ready(function () {
 
   };
 
+if (use_bot === 'WCS') {
   // Setup the conversation callback that gets invoked when a response is received.
   var conversationDataSetter = Conversation.setConversationData;
 
@@ -478,6 +504,38 @@ $(document).ready(function () {
     Conversation.sendRequest('', null, userLocale);
   } else {
     Conversation.sendRequest('', null, userLang);
+  }
+}
+
+if (use_bot === 'WVA') {
+    // Setup the conversation callback that gets invoked when a response is received.
+    var conversationDataSetter = wva.setConversationData;
+
+    wva.setConversationData = function (newPayloadStr) {
+      conversationDataSetter.call(wva, newPayloadStr);
+      var data = JSON.parse(newPayloadStr);
+
+      console.log(JSON.stringify(data));
+      $("#agent-response").text(data.message.text);
+
+      if (data.message.context.policy && data.message.context.verified === true) {
+        // If we are using Simplified or Traditional Chinese then send the full locale
+        if (userLang === "zh") {
+          Policy.getPolicy(data.message.context.policy, userLocale);
+        } else {
+          Policy.getPolicy(data.message.context.policy, userLang);
+        }
+        $("#policy.collapse").collapse('show');
+      }
+    };
+
+    // start the interactive dialog
+    // If we are using Simplified or Traditional Chinese then we need to send the full locale
+    if (userLang === "zh") {
+      wva.sendRequest('', null, userLocale);
+    } else {
+      wva.sendRequest('', null, userLang);
+    }
   }
 
 });

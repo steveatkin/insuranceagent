@@ -18,3 +18,4 @@ privateKey.pem
 cert.pem
 3.secure.blockchain.ibm.com.rootcert
 manifest.yml
+wva-credentials.json

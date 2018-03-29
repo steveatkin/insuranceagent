@@ -16,6 +16,7 @@
 
 /**
  * @author Steven Atkin
+ * @Contributor Harpreet Kaur Chawla
  */
 
 
@@ -69,6 +70,7 @@ var language_translator = new LanguageTranslatorV2({
   username: optionsTranslator.credentials.username,
   password: optionsTranslator.credentials.password,
   url: optionsTranslator.credentials.url
+  //headers: { 'X-Watson-Technology-Preview': '2017-07-01' }
 });
 
 
@@ -144,7 +146,7 @@ router.post('/', ensureAuthenticated, function (req, res) {
   var model_out = null;
 
   // Use a normalized English conversation
-  if (process.env.NORMALIZED_CONVERSATION === 'true') {
+  if (process.env.NORMALIZED_CONVERSATION === 'true'  && process.env.USE_BOT === 'WCS' ) {
     // see if there are any translation domain models defined that should be used
     if (req.body.language === 'fr' && process.env.MODEL_ENGLISH_TO_FRENCH && process.env.MODEL_FRENCH_TO_ENGLISH) {
       model_in = process.env.MODEL_FRENCH_TO_ENGLISH;
@@ -167,7 +169,7 @@ router.post('/', ensureAuthenticated, function (req, res) {
     }
   }
   // Use native language conversations
-  else if (process.env.NORMALIZED_CONVERSATION === 'false') {
+  else if (process.env.NORMALIZED_CONVERSATION === 'false' && process.env.USE_BOT === 'WCS') {
     if (req.body.language === 'fr') {
       workspace = process.env.WORKSPACE_FRENCH;
     } else if (req.body.language === 'es') {
@@ -185,7 +187,7 @@ router.post('/', ensureAuthenticated, function (req, res) {
   async.waterfall([
       function (callback) {
         // Translate the user input text into English
-        if (process.env.NORMALIZED_CONVERSATION === 'true' && req.body.language != 'en') {
+        if (process.env.NORMALIZED_CONVERSATION === 'true' && req.body.language != 'en' && process.env.USE_BOT === 'WCS') {
           translateInput(req.body.input, req.body.language, 'en', model_in, callback);
         }
         // don't translate the user input text
